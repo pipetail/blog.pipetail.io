@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>PipeTail Blog</title>
+    <title>pipetail Blog</title>
     <link>https://blog.pipetail.io/</link>
-    <description>Recent content on PipeTail Blog</description>
+    <description>Recent content on pipetail Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <copyright>Copyright © 2020 | TAIL. All rights reserved.</copyright>
+    <copyright>Copyright © 2020 pipetail. All rights reserved.</copyright>
     <lastBuildDate>Wed, 12 Feb 2020 08:00:00 +0100</lastBuildDate>
     
 	<atom:link href="https://blog.pipetail.io/index.xml" rel="self" type="application/rss+xml" />

@@ -3,7 +3,7 @@ title: "DAPR: introduction to Distributed Application Runtime"
 date: 2020-01-29T20:00:00+01:00
 draft: false
 images:
-  - 2020-01-29-dapr-introduction-title.png
+  - images/2020-01-29-dapr-introduction-title.png
 authors:
   - stepan-vrany
 tags:

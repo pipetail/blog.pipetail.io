@@ -3,7 +3,7 @@ title: "Applications are not easy, tracing is: a brief introduction to OpenTelem
 date: 2020-02-09T10:00:00+01:00
 draft: false
 images:
-  - 2020-02-09-opentelemetry-introduction-title.png
+  - images/2020-02-09-opentelemetry-introduction-title.png
 authors:
   - stepan-vrany
 tags:

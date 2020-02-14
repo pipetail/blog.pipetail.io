@@ -3,7 +3,7 @@ title: "More complicated EKS scenarios: EKS managed worker nodes without interne
 date: 2020-02-12T08:00:00+01:00
 draft: false
 images:
-  - 2020-02-12-EKS-private-cluster-title.png
+  - images/2020-02-12-EKS-private-cluster-title.png
 authors:
   - stepan-vrany
 tags:
