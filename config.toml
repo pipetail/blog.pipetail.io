@@ -1,4 +1,4 @@
-baseURL = "https://pipetail.github.io/blog.pipetail.io"
+baseURL = "https://blog.pipetail.io"
 title = "PipeTail Blog"
 copyright = "Copyright © 2020 | TAIL. All rights reserved."
 paginate = 2

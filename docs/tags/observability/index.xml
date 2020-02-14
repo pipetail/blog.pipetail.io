@@ -2,22 +2,22 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>observability on PipeTail Blog</title>
-    <link>https://pipetail.github.io/blog.pipetail.io/tags/observability/</link>
+    <link>https://blog.pipetail.io/tags/observability/</link>
     <description>Recent content in observability on PipeTail Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>Copyright © 2020 | TAIL. All rights reserved.</copyright>
     <lastBuildDate>Sun, 09 Feb 2020 10:00:00 +0100</lastBuildDate>
     
-	<atom:link href="https://pipetail.github.io/blog.pipetail.io/tags/observability/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://blog.pipetail.io/tags/observability/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Applications are not easy, tracing is: a brief introduction to OpenTelemetry</title>
-      <link>https://pipetail.github.io/blog.pipetail.io/posts/2020-02-09-opentelemetry-introduction/</link>
+      <link>https://blog.pipetail.io/posts/2020-02-09-opentelemetry-introduction/</link>
       <pubDate>Sun, 09 Feb 2020 10:00:00 +0100</pubDate>
       
-      <guid>https://pipetail.github.io/blog.pipetail.io/posts/2020-02-09-opentelemetry-introduction/</guid>
+      <guid>https://blog.pipetail.io/posts/2020-02-09-opentelemetry-introduction/</guid>
       <description>I have great news! OpenTelemetry will be in beta soon! What does it mean? Well, we can start instrumenting applications directly with OpenTelemetry and we can skip its ancestors.
  Ehmm. Instrumenting? Ancestors? C&amp;rsquo;mon Stepan. What does it mean?
  My bad, let me step back and make it right. OpenTelemetry is pretty new project which merges OpenCensus and OpenTracing projects together. Both projects had the same vision: make the observability of applications better with tracing.</description>

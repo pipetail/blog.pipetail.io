@@ -13,18 +13,18 @@
 
     
         
-            <link rel="stylesheet" href="/blog.pipetail.io/dist/main.37ab3f61b95417873748.min.css">
+            <link rel="stylesheet" href="/dist/main.37ab3f61b95417873748.min.css">
         
     
 
 
-<link rel="canonical" href="https://pipetail.github.io/blog.pipetail.io/posts/2020-02-09-opentelemetry-introduction/"><meta property="og:title" content="Applications are not easy, tracing is: a brief introduction to OpenTelemetry" />
+<link rel="canonical" href="https://blog.pipetail.io/posts/2020-02-09-opentelemetry-introduction/"><meta property="og:title" content="Applications are not easy, tracing is: a brief introduction to OpenTelemetry" />
 <meta property="og:description" content="I have great news! OpenTelemetry will be in beta soon! What does it mean? Well, we can start instrumenting applications directly with OpenTelemetry and we can skip its ancestors.
  Ehmm. Instrumenting? Ancestors? C&rsquo;mon Stepan. What does it mean?
  My bad, let me step back and make it right. OpenTelemetry is pretty new project which merges OpenCensus and OpenTracing projects together. Both projects had the same vision: make the observability of applications better with tracing." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://pipetail.github.io/blog.pipetail.io/posts/2020-02-09-opentelemetry-introduction/" />
-<meta property="og:image" content="https://pipetail.github.io/blog.pipetail.io/2020-02-09-opentelemetry-introduction-title.png" />
+<meta property="og:url" content="https://blog.pipetail.io/posts/2020-02-09-opentelemetry-introduction/" />
+<meta property="og:image" content="https://blog.pipetail.io/2020-02-09-opentelemetry-introduction-title.png" />
 <meta property="article:published_time" content="2020-02-09T10:00:00+01:00" />
 <meta property="article:modified_time" content="2020-02-09T10:00:00+01:00" />
 <meta itemprop="name" content="Applications are not easy, tracing is: a brief introduction to OpenTelemetry">
@@ -34,12 +34,12 @@
 <meta itemprop="datePublished" content="2020-02-09T10:00:00&#43;01:00" />
 <meta itemprop="dateModified" content="2020-02-09T10:00:00&#43;01:00" />
 <meta itemprop="wordCount" content="801">
-<meta itemprop="image" content="https://pipetail.github.io/blog.pipetail.io/2020-02-09-opentelemetry-introduction-title.png">
+<meta itemprop="image" content="https://blog.pipetail.io/2020-02-09-opentelemetry-introduction-title.png">
 
 
 
 <meta itemprop="keywords" content="microservices,kubernetes,observability,tracing," /><meta name="twitter:card" content="summary_large_image"/>
-<meta name="twitter:image" content="https://pipetail.github.io/blog.pipetail.io/2020-02-09-opentelemetry-introduction-title.png"/>
+<meta name="twitter:image" content="https://blog.pipetail.io/2020-02-09-opentelemetry-introduction-title.png"/>
 
 <meta name="twitter:title" content="Applications are not easy, tracing is: a brief introduction to OpenTelemetry"/>
 <meta name="twitter:description" content="I have great news! OpenTelemetry will be in beta soon! What does it mean? Well, we can start instrumenting applications directly with OpenTelemetry and we can skip its ancestors.
@@ -51,14 +51,14 @@
     
 <nav class="navbar navbar-expand-md navbar-light bg-light fixed-top shadow-sm" id="navbar-main-menu">
     <div class="container">
-        <a class="navbar-brand font-weight-bold" href="https://pipetail.github.io/blog.pipetail.io">PipeTail Blog</a>
+        <a class="navbar-brand font-weight-bold" href="https://blog.pipetail.io">PipeTail Blog</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#main-menu" aria-controls="main-menu" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="main-menu">
             <ul class="navbar-nav ml-auto">
                 
-                    <li class="nav-item"><a class="nav-link" href="/blog.pipetail.io/blog.pipetail.io/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
                 
                     <li class="nav-item"><a class="nav-link" href="https://pipetail.io">PipeTail</a></li>
                 
@@ -264,25 +264,25 @@ Especially the propagation is really exciting topic, looking forward to sharing 
 If you&rsquo;re attending this event, feel free to reach me and let&rsquo;s discuss this topic.</p>
 
                             <ul class="authors list-inline"><li class="list-inline-item mr-3">
-                    <div class="media author"><a href="/blog.pipetail.io/authors/stepan-vrany/" class="mr-3">
+                    <div class="media author"><a href="/authors/stepan-vrany/" class="mr-3">
                                     <picture>
-                                        <source srcset="/blog.pipetail.io/authors/stepan-vrany/author_hue776a334b902d7828bf5c7a8aa11ccb3_313320_64x0_resize_q75_box.jpg 1x, /blog.pipetail.io/authors/stepan-vrany/author_hue776a334b902d7828bf5c7a8aa11ccb3_313320_128x0_resize_q100_box.jpg 2x, /blog.pipetail.io/authors/stepan-vrany/author_hue776a334b902d7828bf5c7a8aa11ccb3_313320_192x0_resize_q100_box.jpg 3x">
-                                        <img src="/blog.pipetail.io/authors/stepan-vrany/author_hue776a334b902d7828bf5c7a8aa11ccb3_313320_64x0_resize_q75_box.jpg" class="rounded-circle" alt="Stepan Vrany">
+                                        <source srcset="/authors/stepan-vrany/author_hue776a334b902d7828bf5c7a8aa11ccb3_313320_64x0_resize_q75_box.jpg 1x, /authors/stepan-vrany/author_hue776a334b902d7828bf5c7a8aa11ccb3_313320_128x0_resize_q100_box.jpg 2x, /authors/stepan-vrany/author_hue776a334b902d7828bf5c7a8aa11ccb3_313320_192x0_resize_q100_box.jpg 3x">
+                                        <img src="/authors/stepan-vrany/author_hue776a334b902d7828bf5c7a8aa11ccb3_313320_64x0_resize_q75_box.jpg" class="rounded-circle" alt="Stepan Vrany">
                                     </picture>
                                 </a><div class="media-body">
-                            <h5 class="name my-0"><a href="/blog.pipetail.io/authors/stepan-vrany/" class="small">Stepan Vrany</a>
+                            <h5 class="name my-0"><a href="/authors/stepan-vrany/" class="small">Stepan Vrany</a>
                             </h5><p class="social small text-muted">
                                     <a href="https://twitter.com/@mstrsobserver">@MstrsObserver</a>
                                 </p></div>
                     </div>
                 </li></ul>
-                        </div><div class="tags my-3"><a class="badge badge-pill badge-light border mr-2" href="/blog.pipetail.io/tags/microservices">
+                        </div><div class="tags my-3"><a class="badge badge-pill badge-light border mr-2" href="/tags/microservices">
                                     <i class="fas fa-tag mr-2"></i>microservices
-                                </a><a class="badge badge-pill badge-light border mr-2" href="/blog.pipetail.io/tags/kubernetes">
+                                </a><a class="badge badge-pill badge-light border mr-2" href="/tags/kubernetes">
                                     <i class="fas fa-tag mr-2"></i>kubernetes
-                                </a><a class="badge badge-pill badge-light border mr-2" href="/blog.pipetail.io/tags/observability">
+                                </a><a class="badge badge-pill badge-light border mr-2" href="/tags/observability">
                                     <i class="fas fa-tag mr-2"></i>observability
-                                </a><a class="badge badge-pill badge-light border mr-2" href="/blog.pipetail.io/tags/tracing">
+                                </a><a class="badge badge-pill badge-light border mr-2" href="/tags/tracing">
                                     <i class="fas fa-tag mr-2"></i>tracing
                                 </a></div></div>
                 </div>
@@ -297,7 +297,7 @@ If you&rsquo;re attending this event, feel free to reach me and let&rsquo;s disc
         <div class="row">
             <div class="col">
                 <ul class="list-inline">
-                    <li class="list-inline-item"><a href="https://pipetail.github.io/blog.pipetail.io/index.xml" rel="alternate" type="application/rss+xml" class="icons d-block">
+                    <li class="list-inline-item"><a href="https://blog.pipetail.io/index.xml" rel="alternate" type="application/rss+xml" class="icons d-block">
                                     <span class="fa-stack fa-lg">
                                         <i class="fa fa-circle fa-stack-2x"></i>
                                         <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
@@ -343,7 +343,7 @@ If you&rsquo;re attending this event, feel free to reach me and let&rsquo;s disc
     
     
         
-            <script src="/blog.pipetail.io/dist/main.2ed44664366c9940537d.min.js"></script>
+            <script src="/dist/main.2ed44664366c9940537d.min.js"></script>
         
     
 
