@@ -38,7 +38,7 @@
                 <h2><a href="{{ $page.RelPermalink }}">{{ $page.Title }}</a></h2>
 
                 <div class="content">
-                    {{ $page.Summary }}
+                    {{ $page.Summary | safeHTML }}
                 </div>
             </div>
         </div>
