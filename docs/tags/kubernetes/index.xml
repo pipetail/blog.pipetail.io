@@ -2,32 +2,32 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>kubernetes on PipeTail Blog</title>
-    <link>https://blog.pipetail.io/tags/kubernetes/</link>
+    <link>https://pipetail.github.io/blog.pipetail.io/tags/kubernetes/</link>
     <description>Recent content in kubernetes on PipeTail Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>Copyright © 2020 | TAIL. All rights reserved.</copyright>
     <lastBuildDate>Wed, 12 Feb 2020 08:00:00 +0100</lastBuildDate>
     
-	<atom:link href="https://blog.pipetail.io/tags/kubernetes/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://pipetail.github.io/blog.pipetail.io/tags/kubernetes/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>More complicated EKS scenarios: EKS managed worker nodes without internet access</title>
-      <link>https://blog.pipetail.io/posts/2020-02-12-eks-private-cluster/</link>
+      <link>https://pipetail.github.io/blog.pipetail.io/posts/2020-02-12-eks-private-cluster/</link>
       <pubDate>Wed, 12 Feb 2020 08:00:00 +0100</pubDate>
       
-      <guid>https://blog.pipetail.io/posts/2020-02-12-eks-private-cluster/</guid>
+      <guid>https://pipetail.github.io/blog.pipetail.io/posts/2020-02-12-eks-private-cluster/</guid>
       <description>Are you using EKS managed worker pools? If you don&amp;rsquo;t have any specific reasons for not using them, you should. It saves tons of time plus it boosts the &amp;ldquo;managed Kubernetes&amp;rdquo; feeling.
 However, this pretty new offering did not cover one specific use case: cluster with no Internet access. By default, workers need Internet access so they can pull Docker images and register to the control plane. On the other hand, no internet access is a pretty common requirement, especially in regulated businesses.</description>
     </item>
     
     <item>
       <title>Applications are not easy, tracing is: a brief introduction to OpenTelemetry</title>
-      <link>https://blog.pipetail.io/posts/2020-02-09-opentelemetry-introduction/</link>
+      <link>https://pipetail.github.io/blog.pipetail.io/posts/2020-02-09-opentelemetry-introduction/</link>
       <pubDate>Sun, 09 Feb 2020 10:00:00 +0100</pubDate>
       
-      <guid>https://blog.pipetail.io/posts/2020-02-09-opentelemetry-introduction/</guid>
+      <guid>https://pipetail.github.io/blog.pipetail.io/posts/2020-02-09-opentelemetry-introduction/</guid>
       <description>I have great news! OpenTelemetry will be in beta soon! What does it mean? Well, we can start instrumenting applications directly with OpenTelemetry and we can skip its ancestors.
  Ehmm. Instrumenting? Ancestors? C&amp;rsquo;mon Stepan. What does it mean?
  My bad, let me step back and make it right. OpenTelemetry is pretty new project which merges OpenCensus and OpenTracing projects together. Both projects had the same vision: make the observability of applications better with tracing.</description>
@@ -35,10 +35,10 @@ However, this pretty new offering did not cover one specific use case: cluster w
     
     <item>
       <title>DAPR: introduction to Distributed Application Runtime</title>
-      <link>https://blog.pipetail.io/posts/2020-01-29-dapr-introduction/</link>
+      <link>https://pipetail.github.io/blog.pipetail.io/posts/2020-01-29-dapr-introduction/</link>
       <pubDate>Wed, 29 Jan 2020 20:00:00 +0100</pubDate>
       
-      <guid>https://blog.pipetail.io/posts/2020-01-29-dapr-introduction/</guid>
+      <guid>https://pipetail.github.io/blog.pipetail.io/posts/2020-01-29-dapr-introduction/</guid>
       <description>At the moment, there are no doubts that transformation to the new architectural pattern, microservices architecture, is happening. Today, I don&amp;rsquo;t want to emphasize that microservices architecture does not solve everything. This transformation is happening and my role here is to show you some possible ways how to minimize the struggle.
 I&amp;rsquo;m not a software architect, but I can name few things I&amp;rsquo;ve seen when I was helping clients with their projects:</description>
     </item>
