@@ -25,7 +25,7 @@
 <meta property="og:description" content="By Engineers. For Engineers." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://blog.pipetail.io/" />
-<meta property="og:updated_time" content="2020-02-12T08:00:00+01:00" />
+<meta property="og:updated_time" content="2020-02-17T19:00:00+01:00" />
 <meta itemprop="name" content="">
 <meta itemprop="description" content="By Engineers. For Engineers."><meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content=""/>
@@ -65,20 +65,38 @@
 
     
         <div class="latest row py-lg-5">
-            <div class="col-lg-6 mb-3"><a href="/posts/2020-02-12-eks-private-cluster/" class="d-block">
-                                <img data-src="/images/2020-02-12-EKS-private-cluster-title_huf02a6b4f2b12de994f5ca6e03c02d75b_138871_700x450_resize_box_2.png" class="img-fluid rounded" alt="More complicated EKS scenarios: EKS managed worker nodes without internet access">
+            <div class="col-lg-6 mb-3"><a href="/posts/2020-02-14-opentelemtry-context-propagation/" class="d-block">
+                                <img data-src="/images/2020-02-09-opentelemetry-introduction-title_hu457db7653543d38a6c796e57d0bd75cc_89611_700x450_resize_box_2.png" class="img-fluid rounded" alt="Applications are not easy, tracing is: context propagation">
                             </a></div>
             <div class="col-lg-6 mb-3">
-                <h5 class="created text-muted text-uppercase font-weight-bold">February 12, 2020</h5>
-                <h2><a href="/posts/2020-02-12-eks-private-cluster/">More complicated EKS scenarios: EKS managed worker nodes without internet access</a></h2>
+                <h5 class="created text-muted text-uppercase font-weight-bold">February 17, 2020</h5>
+                <h2><a href="/posts/2020-02-14-opentelemtry-context-propagation/">Applications are not easy, tracing is: context propagation</a></h2>
 
                 <div class="content">
-                    Are you using EKS managed worker pools? If you don&rsquo;t have any specific reasons for not using them, you should. It saves tons of time plus it boosts the &ldquo;managed Kubernetes&rdquo; feeling.
-However, this pretty new offering did not cover one specific use case: cluster with no Internet access. By default, workers need Internet access so they can pull Docker images and register to the control plane. On the other hand, no internet access is a pretty common requirement, especially in regulated businesses.
+                    <p>A few weeks ago I&rsquo;ve published my <a href="https://blog.pipetail.io/posts/2020-02-09-opentelemetry-introduction/">introduction to the tracing with OpenTelemetry
+instrumentation</a>.
+I was trying to explain there that tracing has some value even in standalone applications. It was just a recommendation, but today we&rsquo;re gonna talk about scenarios where tracing
+is a must: distributed systems.</p>
                 </div>
             </div>
         </div>
     <div class="articles row row-cols-1 row-cols-lg-3">
+        
+            <div class="col mb-3">
+                <div class="card h-100">
+    
+    <a href="/posts/2020-02-12-eks-private-cluster/" class="d-block"><img data-src="/images/2020-02-12-EKS-private-cluster-title_huf02a6b4f2b12de994f5ca6e03c02d75b_138871_700x450_resize_box_2.png" class="card-img-top mx-auto d-block" alt="More complicated EKS scenarios: EKS managed worker nodes without internet access"><div class="card-body">
+            <h4 class="card-title">More complicated EKS scenarios: EKS managed worker nodes without internet access</h4>
+            <p class="card-text text-muted text-uppercase">February 12, 2020</p>
+            <div class="card-text">
+                Are you using EKS managed worker pools? If you don&rsquo;t have any specific reasons for not using them, you should. It saves tons of time plus it boosts the &ldquo;managed Kubernetes&rdquo; feeling.
+However, this pretty new offering did not cover one specific use case: cluster with no Internet access. By default, workers need Internet access so they can pull Docker images and register to the control plane. On the other hand, no internet access is a pretty common requirement, especially in regulated businesses.
+            </div>
+        </div>
+    </a>
+</div>
+
+            </div>
         
             <div class="col mb-3">
                 <div class="card h-100">
