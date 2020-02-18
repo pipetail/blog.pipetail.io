@@ -15,9 +15,11 @@ tags:
 Are you using EKS managed worker
 pools? If you don't have any specific reasons for not using them, you should.
 It saves tons of time plus it boosts the "managed Kubernetes" feeling.
-
 However, this pretty new offering did not cover one specific use case:
-cluster with no Internet access. By default,
+cluster with no Internet access.
+<!--more-->
+
+By default,
 [workers need Internet access](https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html)
 so they can pull Docker images and register to the control plane. On the other hand,
 no internet access is a pretty common requirement, especially in

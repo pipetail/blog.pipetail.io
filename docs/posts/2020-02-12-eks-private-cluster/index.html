@@ -19,16 +19,22 @@
 
 
 <link rel="canonical" href="https://blog.pipetail.io/posts/2020-02-12-eks-private-cluster/"><meta property="og:title" content="More complicated EKS scenarios: EKS managed worker nodes without internet access" />
-<meta property="og:description" content="Are you using EKS managed worker pools? If you don&rsquo;t have any specific reasons for not using them, you should. It saves tons of time plus it boosts the &ldquo;managed Kubernetes&rdquo; feeling.
-However, this pretty new offering did not cover one specific use case: cluster with no Internet access. By default, workers need Internet access so they can pull Docker images and register to the control plane. On the other hand, no internet access is a pretty common requirement, especially in regulated businesses." />
+<meta property="og:description" content="Are you using EKS managed worker
+pools? If you don&rsquo;t have any specific reasons for not using them, you should.
+It saves tons of time plus it boosts the &ldquo;managed Kubernetes&rdquo; feeling.
+However, this pretty new offering did not cover one specific use case:
+cluster with no Internet access." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://blog.pipetail.io/posts/2020-02-12-eks-private-cluster/" />
 <meta property="og:image" content="https://blog.pipetail.io/images/2020-02-12-EKS-private-cluster-title.png" />
 <meta property="article:published_time" content="2020-02-12T08:00:00+01:00" />
 <meta property="article:modified_time" content="2020-02-12T08:00:00+01:00" />
 <meta itemprop="name" content="More complicated EKS scenarios: EKS managed worker nodes without internet access">
-<meta itemprop="description" content="Are you using EKS managed worker pools? If you don&rsquo;t have any specific reasons for not using them, you should. It saves tons of time plus it boosts the &ldquo;managed Kubernetes&rdquo; feeling.
-However, this pretty new offering did not cover one specific use case: cluster with no Internet access. By default, workers need Internet access so they can pull Docker images and register to the control plane. On the other hand, no internet access is a pretty common requirement, especially in regulated businesses.">
+<meta itemprop="description" content="Are you using EKS managed worker
+pools? If you don&rsquo;t have any specific reasons for not using them, you should.
+It saves tons of time plus it boosts the &ldquo;managed Kubernetes&rdquo; feeling.
+However, this pretty new offering did not cover one specific use case:
+cluster with no Internet access.">
 <meta itemprop="datePublished" content="2020-02-12T08:00:00&#43;01:00" />
 <meta itemprop="dateModified" content="2020-02-12T08:00:00&#43;01:00" />
 <meta itemprop="wordCount" content="1214">
@@ -40,8 +46,11 @@ However, this pretty new offering did not cover one specific use case: cluster w
 <meta name="twitter:image" content="https://blog.pipetail.io/images/2020-02-12-EKS-private-cluster-title.png"/>
 
 <meta name="twitter:title" content="More complicated EKS scenarios: EKS managed worker nodes without internet access"/>
-<meta name="twitter:description" content="Are you using EKS managed worker pools? If you don&rsquo;t have any specific reasons for not using them, you should. It saves tons of time plus it boosts the &ldquo;managed Kubernetes&rdquo; feeling.
-However, this pretty new offering did not cover one specific use case: cluster with no Internet access. By default, workers need Internet access so they can pull Docker images and register to the control plane. On the other hand, no internet access is a pretty common requirement, especially in regulated businesses."/>
+<meta name="twitter:description" content="Are you using EKS managed worker
+pools? If you don&rsquo;t have any specific reasons for not using them, you should.
+It saves tons of time plus it boosts the &ldquo;managed Kubernetes&rdquo; feeling.
+However, this pretty new offering did not cover one specific use case:
+cluster with no Internet access."/>
 
 </head>
 <body>
@@ -78,9 +87,10 @@ However, this pretty new offering did not cover one specific use case: cluster w
                         <div class="content">
                             <p>Are you using EKS managed worker
 pools? If you don&rsquo;t have any specific reasons for not using them, you should.
-It saves tons of time plus it boosts the &ldquo;managed Kubernetes&rdquo; feeling.</p>
-<p>However, this pretty new offering did not cover one specific use case:
-cluster with no Internet access. By default,
+It saves tons of time plus it boosts the &ldquo;managed Kubernetes&rdquo; feeling.
+However, this pretty new offering did not cover one specific use case:
+cluster with no Internet access.</p>
+<p>By default,
 <a href="https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html">workers need Internet access</a>
 so they can pull Docker images and register to the control plane. On the other hand,
 no internet access is a pretty common requirement, especially in
@@ -453,7 +463,6 @@ ECR repository.</p>
 <p>Seriously, I&rsquo;m really glad that AWS is visible on GitHub and they
 actually care about the users of their products.
 I&rsquo;d be totally lost without that advice I got there.</p>
-
                             <ul class="authors list-inline"><li class="list-inline-item mr-3">
                     <div class="media author"><a href="/authors/stepan-vrany/" class="mr-3">
                                     <picture>

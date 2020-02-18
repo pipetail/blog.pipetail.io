@@ -18,8 +18,11 @@
       <pubDate>Wed, 12 Feb 2020 08:00:00 +0100</pubDate>
       
       <guid>https://blog.pipetail.io/posts/2020-02-12-eks-private-cluster/</guid>
-      <description>Are you using EKS managed worker pools? If you don&amp;rsquo;t have any specific reasons for not using them, you should. It saves tons of time plus it boosts the &amp;ldquo;managed Kubernetes&amp;rdquo; feeling.
-However, this pretty new offering did not cover one specific use case: cluster with no Internet access. By default, workers need Internet access so they can pull Docker images and register to the control plane. On the other hand, no internet access is a pretty common requirement, especially in regulated businesses.</description>
+      <description>&lt;p&gt;Are you using EKS managed worker
+pools? If you don&amp;rsquo;t have any specific reasons for not using them, you should.
+It saves tons of time plus it boosts the &amp;ldquo;managed Kubernetes&amp;rdquo; feeling.
+However, this pretty new offering did not cover one specific use case:
+cluster with no Internet access.&lt;/p&gt;</description>
     </item>
     
   </channel>

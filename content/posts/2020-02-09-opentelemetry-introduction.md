@@ -16,6 +16,7 @@ tags:
 I have great news! [OpenTelemetry will be in beta](https://medium.com/opentelemetry/opentelemetry-monthly-update-january-2020-73579f9cb979) soon!
 What does it mean? Well, we can start instrumenting applications
 directly with OpenTelemetry and we can skip its ancestors.
+<!--more-->
 
 > Ehmm. Instrumenting? Ancestors? C'mon Stepan. What does it mean? 
 

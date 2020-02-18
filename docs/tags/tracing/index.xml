@@ -30,9 +30,9 @@ is a must: distributed systems.&lt;/p&gt;</description>
       <pubDate>Sun, 09 Feb 2020 10:00:00 +0100</pubDate>
       
       <guid>https://blog.pipetail.io/posts/2020-02-09-opentelemetry-introduction/</guid>
-      <description>I have great news! OpenTelemetry will be in beta soon! What does it mean? Well, we can start instrumenting applications directly with OpenTelemetry and we can skip its ancestors.
- Ehmm. Instrumenting? Ancestors? C&amp;rsquo;mon Stepan. What does it mean?
- My bad, let me step back and make it right. OpenTelemetry is pretty new project which merges OpenCensus and OpenTracing projects together. Both projects had the same vision: make the observability of applications better with tracing.</description>
+      <description>&lt;p&gt;I have great news! &lt;a href=&#34;https://medium.com/opentelemetry/opentelemetry-monthly-update-january-2020-73579f9cb979&#34;&gt;OpenTelemetry will be in beta&lt;/a&gt; soon!
+What does it mean? Well, we can start instrumenting applications
+directly with OpenTelemetry and we can skip its ancestors.&lt;/p&gt;</description>
     </item>
     
   </channel>

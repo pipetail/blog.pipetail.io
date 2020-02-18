@@ -16,6 +16,7 @@ architectural pattern, microservices architecture, is happening.
 Today, I don't want to emphasize that microservices architecture does
 not solve everything. This transformation is happening and my
 role here is to show you some possible ways how to minimize the struggle.
+<!--more-->
 
 I'm not a software architect, but I can name few things I've seen when
 I was helping clients with their projects:
