@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><title>AWS Systems Manager Session Manager: bye bye bastion hosts!&nbsp;&ndash;&nbsp;pipetail Blog</title><meta name="description" content="By Engineers. For Engineers."><meta name="author" content="stepan-vrany">
+
+
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.17.1/themes/prism.min.css">
+    
+
+
+
+    
+        
+            <link rel="stylesheet" href="/dist/main.37ab3f61b95417873748.min.css">
+        
+    
+
+
+<link rel="canonical" href="https://blog.pipetail.io/posts/2020-02-24-amazon-ssm-session-manager/"><meta property="og:title" content="AWS Systems Manager Session Manager: bye bye bastion hosts!" />
+<meta property="og:description" content="There are customers where public internet access is no go. But
+at the same time you need to access your EC2 instances,
+right? How would you approach this? Usually, we use bastion hosts,
+that&rsquo;s basically a different name for jump host you can use
+to access internal resources. In AWS, you don&rsquo;t need to manage
+such extra instances and take care of all the low-level configuration.
+Instead, you can leverage fully managed Session Manager from the
+AWS Systems Manager suite!" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://blog.pipetail.io/posts/2020-02-24-amazon-ssm-session-manager/" />
+<meta property="og:image" content="https://blog.pipetail.io/images/2020-02-24-amazon-ssm-session-manager.png" />
+<meta property="article:published_time" content="2020-02-24T07:00:00+01:00" />
+<meta property="article:modified_time" content="2020-02-24T07:00:00+01:00" />
+<meta itemprop="name" content="AWS Systems Manager Session Manager: bye bye bastion hosts!">
+<meta itemprop="description" content="There are customers where public internet access is no go. But
+at the same time you need to access your EC2 instances,
+right? How would you approach this? Usually, we use bastion hosts,
+that&rsquo;s basically a different name for jump host you can use
+to access internal resources. In AWS, you don&rsquo;t need to manage
+such extra instances and take care of all the low-level configuration.
+Instead, you can leverage fully managed Session Manager from the
+AWS Systems Manager suite!">
+<meta itemprop="datePublished" content="2020-02-24T07:00:00&#43;01:00" />
+<meta itemprop="dateModified" content="2020-02-24T07:00:00&#43;01:00" />
+<meta itemprop="wordCount" content="601">
+<meta itemprop="image" content="https://blog.pipetail.io/images/2020-02-24-amazon-ssm-session-manager.png">
+
+
+
+<meta itemprop="keywords" content="aws,amazon,ssm," /><meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://blog.pipetail.io/images/2020-02-24-amazon-ssm-session-manager.png"/>
+
+<meta name="twitter:title" content="AWS Systems Manager Session Manager: bye bye bastion hosts!"/>
+<meta name="twitter:description" content="There are customers where public internet access is no go. But
+at the same time you need to access your EC2 instances,
+right? How would you approach this? Usually, we use bastion hosts,
+that&rsquo;s basically a different name for jump host you can use
+to access internal resources. In AWS, you don&rsquo;t need to manage
+such extra instances and take care of all the low-level configuration.
+Instead, you can leverage fully managed Session Manager from the
+AWS Systems Manager suite!"/>
+
+</head>
+<body>
+    
+<nav class="navbar navbar-expand-md navbar-light bg-light fixed-top shadow-sm" id="navbar-main-menu">
+    <div class="container">
+        <a class="navbar-brand font-weight-bold" href="https://blog.pipetail.io">pipetail Blog</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#main-menu" aria-controls="main-menu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="main-menu">
+            <ul class="navbar-nav ml-auto">
+                
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                
+                    <li class="nav-item"><a class="nav-link" href="https://pipetail.io">pipetail</a></li>
+                
+            
+            </ul>
+        </div>
+    </div>
+</nav>
+
+
+    
+<main class="content-page container pt-7 pb-5">
+    <div class="row">
+        <div class="col">
+            <article>
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <h2 class="mb-3">AWS Systems Manager Session Manager: bye bye bastion hosts!</h2>
+
+                        <div class="content">
+                            <p>There are customers where public internet access is no go. But
+at the same time you need to access your EC2 instances,
+right? How would you approach this? Usually, we use bastion hosts,
+that&rsquo;s basically a different name for jump host you can use
+to access internal resources. In AWS, you don&rsquo;t need to manage
+such extra instances and take care of all the low-level configuration.
+Instead, you can leverage fully managed Session Manager from the
+AWS Systems Manager suite!</p>
+<h2 id="before-you-start">Before you start</h2>
+<p>First, you need to make sure that your systems have SSM Agent installed.
+There&rsquo;s <a href="https://docs.aws.amazon.com/systems-manager/latest/userguide/ssm-agent.html">decent documentation available</a>
+but if you are using official AMI, you can skip this since SSM Agent
+is already pre-installed.</p>
+<p>Also, your instances need proper IAM permissions. And that&rsquo;s actually
+pretty simple task, just attach AWS managed policy
+<code>AmazonSSMManagedInstanceCore</code> to your instances and that&rsquo;s it!
+Alternatively, we can just copy&amp;paste the content of this
+managed role to the existing user-managed role.
+Both scenarios work well.</p>
+<pre><code class="language-json">{
+    &quot;Version&quot;: &quot;2012-10-17&quot;,
+    &quot;Statement&quot;: [
+        {
+            &quot;Effect&quot;: &quot;Allow&quot;,
+            &quot;Action&quot;: [
+                &quot;ssm:DescribeAssociation&quot;,
+                &quot;ssm:GetDeployablePatchSnapshotForInstance&quot;,
+                &quot;ssm:GetDocument&quot;,
+                &quot;ssm:DescribeDocument&quot;,
+                &quot;ssm:GetManifest&quot;,
+                &quot;ssm:GetParameter&quot;,
+                &quot;ssm:GetParameters&quot;,
+                &quot;ssm:ListAssociations&quot;,
+                &quot;ssm:ListInstanceAssociations&quot;,
+                &quot;ssm:PutInventory&quot;,
+                &quot;ssm:PutComplianceItems&quot;,
+                &quot;ssm:PutConfigurePackageResult&quot;,
+                &quot;ssm:UpdateAssociationStatus&quot;,
+                &quot;ssm:UpdateInstanceAssociationStatus&quot;,
+                &quot;ssm:UpdateInstanceInformation&quot;
+            ],
+            &quot;Resource&quot;: &quot;*&quot;
+        },
+        {
+            &quot;Effect&quot;: &quot;Allow&quot;,
+            &quot;Action&quot;: [
+                &quot;ssmmessages:CreateControlChannel&quot;,
+                &quot;ssmmessages:CreateDataChannel&quot;,
+                &quot;ssmmessages:OpenControlChannel&quot;,
+                &quot;ssmmessages:OpenDataChannel&quot;
+            ],
+            &quot;Resource&quot;: &quot;*&quot;
+        },
+        {
+            &quot;Effect&quot;: &quot;Allow&quot;,
+            &quot;Action&quot;: [
+                &quot;ec2messages:AcknowledgeMessage&quot;,
+                &quot;ec2messages:DeleteMessage&quot;,
+                &quot;ec2messages:FailMessage&quot;,
+                &quot;ec2messages:GetEndpoint&quot;,
+                &quot;ec2messages:GetMessages&quot;,
+                &quot;ec2messages:SendReply&quot;
+            ],
+            &quot;Resource&quot;: &quot;*&quot;
+        }
+    ]
+}
+</code></pre>
+<h2 id="viewing-available-sessions">Viewing available sessions</h2>
+<p>When the instances are ready, we can view all the available session
+in the System Manager.</p>
+<figure class="figure">
+    <a href="/images/2020-02-24-amazon-ssm-session-manager-01.png" class="d-block" data-toggle="lightbox" data-gallery="post-gallery">
+        <img src="/images/2020-02-24-amazon-ssm-session-manager-01.png"class="figure-img img-fluid"
+        /> 
+    </a>
+</figure>
+
+<p>And you can even start a new session from here. It&rsquo;ll open a
+new window with web-based terminal.</p>
+<figure class="figure">
+    <a href="/images/2020-02-24-amazon-ssm-session-manager-02.png" class="d-block" data-toggle="lightbox" data-gallery="post-gallery">
+        <img src="/images/2020-02-24-amazon-ssm-session-manager-02.png"class="figure-img img-fluid"
+        /> 
+    </a>
+</figure>
+
+<p>However, it does not feel right for day-to-day operations 😂.
+Let&rsquo;s connect there directly from the workstation.</p>
+<h2 id="just-one-more-step-">Just one more step &hellip;</h2>
+<p>It&rsquo;s just ssh, right? So we&rsquo;re almost ready,
+we just need to quickly prepare our local
+workstation by installing Session Manager plugin.
+This plugin is available for all major platforms, just copy&amp;paste
+a few lines from the <a href="https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html">documentation</a>
+and that&rsquo;s pretty much it.</p>
+<pre><code class="language-bash">curl &quot;https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb&quot; -o &quot;session-manager-plugin.deb&quot;
+sudo dpkg -i session-manager-plugin.deb
+</code></pre>
+<p>Now, we can just add following lines to <code>~/.ssh/config</code>
+so shh command knows how to handle hosts starting with
+<code>i-*</code> or <code>mi-*</code>.</p>
+<pre><code>host i-* mi-*
+    ProxyCommand sh -c &quot;aws ssm start-session --target %h --document-name AWS-StartSSHSession --parameters 'portNumber=%p'&quot;
+</code></pre>
+<h2 id="good-old-ssh">Good old SSH</h2>
+<p>From now it&rsquo;s really straightforward. Get your instance id and
+open the SSH session.</p>
+<pre><code class="language-bash">ssh ubuntu@i-0182d91e85d69cf00
+</code></pre>
+<p>Yeah, it&rsquo;s that simple. We can treat it as good old SSH
+from here. No strings attached.</p>
+<figure class="figure">
+    <a href="/images/2020-02-24-amazon-ssm-session-manager-03.png" class="d-block" data-toggle="lightbox" data-gallery="post-gallery">
+        <img src="/images/2020-02-24-amazon-ssm-session-manager-03.png"class="figure-img img-fluid"
+        /> 
+    </a>
+</figure>
+
+<h2 id="key-advantages-of-session-manager-service">Key advantages of Session Manager service</h2>
+<p>The obvious was already mentioned: no need to manage own EC2
+instances for bastion hosts.</p>
+<p>But there&rsquo;s more of it. You can even control access to the instances
+with IAM! User with the following policy attached can access
+all three instances mentioned in the <code>Resource</code> property. As always,
+<a href="https://docs.aws.amazon.com/systems-manager/latest/userguide/getting-started-restrict-access-examples.html">everything is documented</a> so suit
+yourself.</p>
+<pre><code class="language-json">{
+    &quot;Version&quot;: &quot;2012-10-17&quot;,
+    &quot;Statement&quot;: [
+        {
+            &quot;Effect&quot;: &quot;Allow&quot;,
+            &quot;Action&quot;: [
+                &quot;ssm:StartSession&quot;
+            ],
+            &quot;Resource&quot;: [
+                &quot;arn:aws:ec2:us-east-2:123456789012:instance/i-1234567890EXAMPLE&quot;,
+                &quot;arn:aws:ec2:us-east-2:123456789012:instance/i-abcdefghijEXAMPLE&quot;,
+                &quot;arn:aws:ec2:us-east-2:123456789012:instance/i-0e9d8c7b6aEXAMPLE&quot;
+            ]
+        },
+        {
+            &quot;Effect&quot;: &quot;Allow&quot;,
+            &quot;Action&quot;: [
+                &quot;ssm:TerminateSession&quot;
+            ],
+            &quot;Resource&quot;: [
+                &quot;arn:aws:ssm:*:*:session/${aws:username}-*&quot;
+            ]
+        }
+    ]
+}
+</code></pre>
+<p>And last but not least, you can review all the open session and you can even inspect the history. This will come handy in case of any audit 😏.
+From this perspective, AWS Systems Manager Session Manager is even
+more secure than traditional setups with bastion hosts (of course,
+I&rsquo;m not talking about over-engineered configurations).</p>
+<h2 id="wrap">Wrap</h2>
+<p>Apparently, there&rsquo;s no need to stick with traditional bastion hosts,
+AWS System Manager Session Manager can do all the job. Moreover,
+you can granularly control SSH access via IAM. That&rsquo;s actually,
+at least from my point of view, the most powerful feature.</p>
+<p><strong>Say bye-bye to your jump hosts!</strong></p>
+                            <ul class="authors list-inline"><li class="list-inline-item mr-3">
+                    <div class="media author"><a href="/authors/stepan-vrany/" class="mr-3">
+                                    <picture>
+                                        <source srcset="/authors/stepan-vrany/author_hue776a334b902d7828bf5c7a8aa11ccb3_313320_64x0_resize_q75_box.jpg 1x, /authors/stepan-vrany/author_hue776a334b902d7828bf5c7a8aa11ccb3_313320_128x0_resize_q100_box.jpg 2x, /authors/stepan-vrany/author_hue776a334b902d7828bf5c7a8aa11ccb3_313320_192x0_resize_q100_box.jpg 3x">
+                                        <img src="/authors/stepan-vrany/author_hue776a334b902d7828bf5c7a8aa11ccb3_313320_64x0_resize_q75_box.jpg" class="rounded-circle" alt="Stepan Vrany">
+                                    </picture>
+                                </a><div class="media-body">
+                            <h5 class="name my-0"><a href="/authors/stepan-vrany/" class="small">Stepan Vrany</a>
+                            </h5><p class="social small text-muted">
+                                    <a href="https://twitter.com/@mstrsobserver">@MstrsObserver</a>
+                                </p></div>
+                    </div>
+                </li></ul>
+                        </div><div class="tags my-3"><a class="badge badge-pill badge-light border mr-2" href="/tags/aws">
+                                    <i class="fas fa-tag mr-2"></i>aws
+                                </a><a class="badge badge-pill badge-light border mr-2" href="/tags/amazon">
+                                    <i class="fas fa-tag mr-2"></i>amazon
+                                </a><a class="badge badge-pill badge-light border mr-2" href="/tags/ssm">
+                                    <i class="fas fa-tag mr-2"></i>ssm
+                                </a></div></div>
+                </div>
+            </article>
+        </div>
+    </div>
+</main>
+
+
+    <footer class="footer text-center bg-dark py-6">
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <ul class="list-inline">
+                    <li class="list-inline-item"><a href="https://blog.pipetail.io/index.xml" rel="alternate" type="application/rss+xml" class="icons d-block">
+                                    <span class="fa-stack fa-lg">
+                                        <i class="fa fa-circle fa-stack-2x"></i>
+                                        <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                                    </span>
+                                </a></li><li class="list-inline-item">
+                        <a href="mailto://contact@pipetail.io" class="icons d-block">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li><li class="list-inline-item">
+                            <a href="https://github.com/pipetail" class="icons d-block">
+                                <span class="fa-stack fa-lg">
+                                    <i class="fa fa-circle fa-stack-2x"></i>
+                                    <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+                                </span>
+                            </a>
+                        </li><li class="list-inline-item">
+                            <a href="https://twitter.com/pipetail.io" class="icons d-block">
+                                <span class="fa-stack fa-lg">
+                                    <i class="fa fa-circle fa-stack-2x"></i>
+                                    <i class="fab fa-twitter fa-stack-1x fa-inverse"></i>
+                                </span>
+                            </a>
+                        </li>
+                </ul>
+
+                <p class="text-muted">
+                    
+                        Copyright © 2020 pipetail. All rights reserved.
+                    
+                </p>
+
+                <p class="text-muted">
+                Powered by <a href="https://gohugo.io" target="_blank">Hugo</a> with <a href="https://github.com/puresyntax71/hugo-theme-chunky-poster" target="_blank">Chunky Poster</a>.
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+    
+    
+        
+            <script src="/dist/main.2ed44664366c9940537d.min.js"></script>
+        
+    
+
+
+
+<script>
+    window.Prism = window.Prism || {};
+    window.Prism.manual = true;
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.17.1/components/prism-core.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.17.1/plugins/autoloader/prism-autoloader.min.js"></script>
+
+
+
+    
+</body>
+</html>

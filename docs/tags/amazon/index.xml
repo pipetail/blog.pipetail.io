@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>aws on pipetail Blog</title>
-    <link>https://blog.pipetail.io/tags/aws/</link>
-    <description>Recent content in aws on pipetail Blog</description>
+    <title>amazon on pipetail Blog</title>
+    <link>https://blog.pipetail.io/tags/amazon/</link>
+    <description>Recent content in amazon on pipetail Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>Copyright © 2020 pipetail. All rights reserved.</copyright>
     <lastBuildDate>Mon, 24 Feb 2020 07:00:00 +0100</lastBuildDate>
     
-	<atom:link href="https://blog.pipetail.io/tags/aws/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://blog.pipetail.io/tags/amazon/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
@@ -26,19 +26,6 @@ to access internal resources. In AWS, you don&amp;rsquo;t need to manage
 such extra instances and take care of all the low-level configuration.
 Instead, you can leverage fully managed Session Manager from the
 AWS Systems Manager suite!&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>More complicated EKS scenarios: EKS managed worker nodes without internet access</title>
-      <link>https://blog.pipetail.io/posts/2020-02-12-eks-private-cluster/</link>
-      <pubDate>Wed, 12 Feb 2020 08:00:00 +0100</pubDate>
-      
-      <guid>https://blog.pipetail.io/posts/2020-02-12-eks-private-cluster/</guid>
-      <description>&lt;p&gt;Are you using EKS managed worker
-pools? If you don&amp;rsquo;t have any specific reasons for not using them, you should.
-It saves tons of time plus it boosts the &amp;ldquo;managed Kubernetes&amp;rdquo; feeling.
-However, this pretty new offering did not cover one specific use case:
-cluster with no Internet access.&lt;/p&gt;</description>
     </item>
     
   </channel>

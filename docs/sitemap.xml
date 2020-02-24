@@ -4,21 +4,51 @@
   
   <url>
     <loc>https://blog.pipetail.io/</loc>
-    <lastmod>2020-02-17T19:00:00+01:00</lastmod>
+    <lastmod>2020-02-24T07:00:00+01:00</lastmod>
   </url>
   
   <url>
     <loc>https://blog.pipetail.io/authors/stepan-vrany/</loc>
-    <lastmod>2020-02-17T19:00:00+01:00</lastmod>
+    <lastmod>2020-02-24T07:00:00+01:00</lastmod>
   </url>
   
   <url>
-    <loc>https://blog.pipetail.io/posts/2020-02-14-opentelemtry-context-propagation/</loc>
-    <lastmod>2020-02-17T19:00:00+01:00</lastmod>
+    <loc>https://blog.pipetail.io/tags/amazon/</loc>
+    <lastmod>2020-02-24T07:00:00+01:00</lastmod>
   </url>
   
   <url>
     <loc>https://blog.pipetail.io/authors/</loc>
+    <lastmod>2020-02-24T07:00:00+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.pipetail.io/tags/aws/</loc>
+    <lastmod>2020-02-24T07:00:00+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.pipetail.io/posts/2020-02-24-amazon-ssm-session-manager/</loc>
+    <lastmod>2020-02-24T07:00:00+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.pipetail.io/posts/</loc>
+    <lastmod>2020-02-24T07:00:00+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.pipetail.io/tags/ssm/</loc>
+    <lastmod>2020-02-24T07:00:00+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.pipetail.io/tags/</loc>
+    <lastmod>2020-02-24T07:00:00+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.pipetail.io/posts/2020-02-14-opentelemtry-context-propagation/</loc>
     <lastmod>2020-02-17T19:00:00+01:00</lastmod>
   </url>
   
@@ -38,23 +68,8 @@
   </url>
   
   <url>
-    <loc>https://blog.pipetail.io/posts/</loc>
-    <lastmod>2020-02-17T19:00:00+01:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://blog.pipetail.io/tags/</loc>
-    <lastmod>2020-02-17T19:00:00+01:00</lastmod>
-  </url>
-  
-  <url>
     <loc>https://blog.pipetail.io/tags/tracing/</loc>
     <lastmod>2020-02-17T19:00:00+01:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://blog.pipetail.io/tags/aws/</loc>
-    <lastmod>2020-02-12T08:00:00+01:00</lastmod>
   </url>
   
   <url>
