@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><title>GitLab Runner on EKS&nbsp;&ndash;&nbsp;pipetail Blog</title><meta name="description" content="By Engineers. For Engineers."><meta name="author" content="marek-bartik">
+
+
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.17.1/themes/prism.min.css">
+    
+
+
+
+    
+        
+            <link rel="stylesheet" href="/dist/main.37ab3f61b95417873748.min.css">
+        
+    
+
+
+<link rel="canonical" href="https://blog.pipetail.io/posts/2020-03-05-gitlab-runner-on-eks/"><meta property="og:title" content="GitLab Runner on EKS" />
+<meta property="og:description" content="GitLab-CI/CD is a great and powerful product for CI/CD pipelines. Hosted gitlab.com solution offers shared runners and some usage minutes based on your paid plan (even if the free tier). Though you might want to run your own runner in your private or public cloud. I will show how to run GitLab runner on AWS using terraform, Elastic Kubernetes Service and GitLab kubernetes integration." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://blog.pipetail.io/posts/2020-03-05-gitlab-runner-on-eks/" />
+<meta property="og:image" content="https://blog.pipetail.io/images/2020-03-05-gitlabci-pipeline-cropped.png" />
+<meta property="article:published_time" content="2020-03-05T08:00:00+01:00" />
+<meta property="article:modified_time" content="2020-03-05T08:00:00+01:00" />
+<meta itemprop="name" content="GitLab Runner on EKS">
+<meta itemprop="description" content="GitLab-CI/CD is a great and powerful product for CI/CD pipelines. Hosted gitlab.com solution offers shared runners and some usage minutes based on your paid plan (even if the free tier). Though you might want to run your own runner in your private or public cloud. I will show how to run GitLab runner on AWS using terraform, Elastic Kubernetes Service and GitLab kubernetes integration.">
+<meta itemprop="datePublished" content="2020-03-05T08:00:00&#43;01:00" />
+<meta itemprop="dateModified" content="2020-03-05T08:00:00&#43;01:00" />
+<meta itemprop="wordCount" content="990">
+<meta itemprop="image" content="https://blog.pipetail.io/images/2020-03-05-gitlabci-pipeline-cropped.png">
+
+
+
+<meta itemprop="keywords" content="aws,eks,gitlab,ci/cd," /><meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://blog.pipetail.io/images/2020-03-05-gitlabci-pipeline-cropped.png"/>
+
+<meta name="twitter:title" content="GitLab Runner on EKS"/>
+<meta name="twitter:description" content="GitLab-CI/CD is a great and powerful product for CI/CD pipelines. Hosted gitlab.com solution offers shared runners and some usage minutes based on your paid plan (even if the free tier). Though you might want to run your own runner in your private or public cloud. I will show how to run GitLab runner on AWS using terraform, Elastic Kubernetes Service and GitLab kubernetes integration."/>
+
+</head>
+<body>
+    
+<nav class="navbar navbar-expand-md navbar-light bg-light fixed-top shadow-sm" id="navbar-main-menu">
+    <div class="container">
+        <a class="navbar-brand font-weight-bold" href="https://blog.pipetail.io">pipetail Blog</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#main-menu" aria-controls="main-menu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="main-menu">
+            <ul class="navbar-nav ml-auto">
+                
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                
+                    <li class="nav-item"><a class="nav-link" href="https://pipetail.io">pipetail</a></li>
+                
+            
+            </ul>
+        </div>
+    </div>
+</nav>
+
+
+    
+<main class="content-page container pt-7 pb-5">
+    <div class="row">
+        <div class="col">
+            <article>
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <h2 class="mb-3">GitLab Runner on EKS</h2>
+
+                        <div class="content">
+                            <p>GitLab-CI/CD is a great and powerful product for CI/CD pipelines. Hosted gitlab.com solution offers shared runners and some usage minutes based on your paid plan (even if the free tier). Though you might want to run your own runner in your private or public cloud. I will show how to run GitLab runner on AWS using terraform, Elastic Kubernetes Service and GitLab kubernetes integration.</p>
+<h2 id="when-not-to-use-shared-runners">When not to use shared runners</h2>
+<p>Shared runners can be very slow and you are limited to &ldquo;CI pipeline minutes&rdquo; per month based on your <a href="https://about.gitlab.com/pricing/">paid plan</a>. You could always buy extra minutes but if you run a lot of pipelines, things might get expensive.</p>
+<p>Another reason not to use shared runners can be <strong>security concerns</strong>. Processing sensitive data might be a no-go for a lot of corporations.</p>
+<p>Luckily GitLab allows using <strong>self-hosted gitlab runners</strong>! You can run a single Go binary on a variety of OSes. GitLab runners have the concept of <a href="https://docs.gitlab.com/runner/executors/README.html#compatibility-chart">executors</a>, currently supported executors are:</p>
+<ul>
+<li>shell</li>
+<li>Docker</li>
+<li>Docker Machine</li>
+<li>Docker Machine SSH</li>
+<li>Parallels</li>
+<li>VirtualBox</li>
+<li>SSH</li>
+<li>Kubernetes</li>
+</ul>
+<p>These executors allow running your runners with additional features like private container registry, interactive web terminal, cache, artifacts, etc. Based on the executor used you might find harder or easier to debug problems, cache, persist and share build assets and dependencies and scale / utilize your compute.</p>
+<h2 id="kubernetes-executor">Kubernetes executor</h2>
+<p>We will pick Kubernetes executor as we are already familiar with it and it is quite easy to use it. It is relatively simple to debug problems and great to use at bigger scale to <strong>better utilize our compute resources</strong>.</p>
+<p>You could go through the pain of deploying it yourself on a Kubernetes cluster and registering it in GitLab or you could use <a href="https://docs.gitlab.com/runner/install/kubernetes.html">GitLab Runner Helm Chart</a>. Helm is a package manager for kubernetes (think npm for kubernetes).</p>
+<p>However, we can simplify the previous step and not deploy the chart ourselves! GitLab has a <a href="https://docs.gitlab.com/ee/user/project/clusters/index.html">Kubernetes Integration</a> to create new or add existing kubernetes clusters. As of now it supports <strong>Google Kubernetes Engine</strong> (Google Cloud Platform) and <strong>Elastic Kubernetes Service</strong> (Amazon Web Services) natively but you should be able to add any kubernetes cluster no matter where it runs.</p>
+<p>Integration with GKE seems a bit more seamless than the one for EKS (as of now) at least for creating new clusters. Anyway, I don&rsquo;t want GitLab to provision EKS cluster for me. I will provision it myself (or I could use an existing one) and just add it to the integration.</p>
+<h2 id="provision-the-aws-resources-with-terraform">Provision the AWS resources with terraform</h2>
+<p>We will use terraform to provision a bunch of AWS resources, including the EKS cluster.</p>
+<p>We will use VPC and EKS modules (now with added support for the new EKS managed groups) to easily provision all the necessary resources. Here is a short example:</p>
+<pre><code class="language-hcl">module &quot;eks&quot; {
+  source  = &quot;terraform-aws-modules/eks/aws&quot;
+  version = &quot;~&gt; 9.0&quot;
+
+  cluster_name = local.cluster_name
+  subnets      = module.vpc.private_subnets
+
+  tags = {
+    Environment = &quot;test&quot;
+    GithubRepo  = &quot;terraform-aws-eks&quot;
+    GithubOrg   = &quot;terraform-aws-modules&quot;
+  }
+
+  vpc_id = module.vpc.vpc_id
+
+  node_groups_defaults = {
+    ami_type  = &quot;AL2_x86_64&quot;
+    disk_size = 50
+  }
+
+  node_groups = {
+    example = {
+      desired_capacity = 1
+      max_capacity     = 10
+      min_capacity     = 1
+
+      instance_type = &quot;m5.large&quot;
+    }
+  }
+
+  map_roles    = var.map_roles
+  map_users    = var.map_users
+  map_accounts = var.map_accounts
+}
+</code></pre>
+<p>You might probably want to use <strong>spot instances</strong>, but for the sake of keeping this demo simple, we will just stick with the defaults.</p>
+<p>Check <code>variables.tf</code> for default values. If you want to provide a more sane values or change a region, you can create a <code>*.auto.tfvars</code> file that will be automatically used with following terraform commands.</p>
+<pre><code class="language-bash">echo &lt;&lt;EOF &gt;ci.auto.tfvars
+environment   = &quot;ci&quot;
+region        = &quot;eu-central-1&quot;
+map_accounts = [&quot;111111111YOUR_ACCOUNT_ID&quot;]
+
+EOF
+</code></pre>
+<p>Finally let&rsquo;s provision all the resources. Execute these one by one to see what is going to happen.</p>
+<pre><code class="language-bash">terraform init
+terraform plan -out planfile
+terraform apply planfile
+</code></pre>
+<h2 id="kubectl-all-the-things">kubectl all the things!</h2>
+<p>We will add a service account for GitLab to our new kubernetes cluster. For simplicity we follow the <a href="https://gitlab.com/help/user/project/clusters/add_remove_clusters.md#add-existing-cluster">official docs</a> and giving the service account a <code>cluster-admin</code> role.</p>
+<pre><code class="language-yaml"># eks-admin-sa.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: eks-admin
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: eks-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: eks-admin
+  namespace: kube-system
+</code></pre>
+<p>In the previous step there was a <em>kubeconfig</em> generated for us in the current directory. We can use it to apply the previous yaml on our kubernetes cluster.</p>
+<pre><code class="language-bash">KUBECONFIG=./kubeconfig_* kubectl apply -f eks-admin-sa.yaml
+</code></pre>
+<h2 id="gather-the-information">gather the information</h2>
+<p>Now let&rsquo;s fetch all the necessary information we need to set up the GitLab k8s integration.</p>
+<pre><code class="language-bash">echo &quot;Kubernetes cluster name:&quot;
+terraform output kubernetes_cluster_name
+echo &quot;&quot;
+
+echo &quot;API URL:&quot;
+terraform output API_URL
+echo &quot;&quot;
+
+echo &quot;CA Certificate:&quot;
+kubectl -n kube-system get secret \
+  -o jsonpath='{.items[?(@.metadata.annotations.kubernetes\.io/service-account\.name==&quot;default&quot;)].data.ca\.crt}'\
+   | base64 --decode
+echo &quot;&quot;
+
+echo &quot;Service Token:&quot;
+ kubectl -n kube-system get secret \
+   -o jsonpath='{.items[?(@.metadata.annotations.kubernetes\.io/service-account\.name==&quot;eks-admin&quot;)].data.token}'\
+   | base64 --decode
+echo &quot;&quot;
+</code></pre>
+<p>When you save the changes, you should get an information confirming successfully adding a kubernetes cluster to GitLab.</p>
+<h2 id="install-tiller-and-runners">install tiller and runners</h2>
+<p>When the integration was successfully added and verified to work, we can install Helm tiller (server part of helm that will install the rest of the things we need).</p>
+<p>Click on Install:
+<figure class="figure">
+    <a href="/images/2020-03-05-install-tiller.png" class="d-block" data-toggle="lightbox" data-gallery="post-gallery">
+        <img src="/images/2020-03-05-install-tiller.png"class="figure-img img-fluid"
+        /> 
+    </a>
+</figure>
+</p>
+<p>When that is done, we will install GitLab runner too:
+<figure class="figure">
+    <a href="/images/2020-03-05-install-gitlab-runner.png" class="d-block" data-toggle="lightbox" data-gallery="post-gallery">
+        <img src="/images/2020-03-05-install-gitlab-runner.png"class="figure-img img-fluid"
+        /> 
+    </a>
+</figure>
+</p>
+<h2 id="testing-it">testing it</h2>
+<p>Now go to <code>CI/CD</code> pane and see if this runner is enabled. Also you might want to disable your shared runners.</p>
+<figure class="figure">
+    <a href="/images/2020-03-05-runners-activated.png" class="d-block" data-toggle="lightbox" data-gallery="post-gallery">
+        <img src="/images/2020-03-05-runners-activated.png"class="figure-img img-fluid"
+        /> 
+    </a>
+</figure>
+
+<p>Run a pipeline and see if it is being run on the new runner in EKS. Check both the GitLab UI - detail of the pipeline stages:
+<figure class="figure">
+    <a href="/images/2020-03-05-pipeline-working-ui.png" class="d-block" data-toggle="lightbox" data-gallery="post-gallery">
+        <img src="/images/2020-03-05-pipeline-working-ui.png"class="figure-img img-fluid"
+        /> 
+    </a>
+</figure>
+</p>
+<p>and the cluster using <code>kubectl get pods --all-namespaces</code>:
+<figure class="figure">
+    <a href="/images/2020-03-05-pipeline-working-terminal.png" class="d-block" data-toggle="lightbox" data-gallery="post-gallery">
+        <img src="/images/2020-03-05-pipeline-working-terminal.png"class="figure-img img-fluid"
+        /> 
+    </a>
+</figure>
+</p>
+<p>Yay, it works!</p>
+<h2 id="to-finish">to finish</h2>
+<p>Let&rsquo;s summarize the specification of this setup:</p>
+<ul>
+<li>EKS cluster with managed nodes</li>
+<li>GitLab Runners installed using GitLab Kubernetes Integration</li>
+</ul>
+<p>You should take a look at few more stuff:</p>
+<ul>
+<li>how to optimize build cache using in-cluster distributed Minio cache</li>
+<li>using spot instances in EKS when they are available in EKS managed workers</li>
+<li>having <strong>cluster autoscaler</strong> in the cluster to autoscale the worker nodes based on demand</li>
+</ul>
+                            <ul class="authors list-inline"><li class="list-inline-item mr-3">
+                    <div class="media author"><a href="/authors/marek-bartik/" class="mr-3">
+                                    <picture>
+                                        <source srcset="/authors/marek-bartik/author_hucdd9f24c53f5ea92733ca69b300ffe66_1970172_64x0_resize_q75_box.jpg 1x, /authors/marek-bartik/author_hucdd9f24c53f5ea92733ca69b300ffe66_1970172_128x0_resize_q100_box.jpg 2x, /authors/marek-bartik/author_hucdd9f24c53f5ea92733ca69b300ffe66_1970172_192x0_resize_q100_box.jpg 3x">
+                                        <img src="/authors/marek-bartik/author_hucdd9f24c53f5ea92733ca69b300ffe66_1970172_64x0_resize_q75_box.jpg" class="rounded-circle" alt="Marek Bartik">
+                                    </picture>
+                                </a><div class="media-body">
+                            <h5 class="name my-0"><a href="/authors/marek-bartik/" class="small">Marek Bartik</a>
+                            </h5><p class="social small text-muted">
+                                    <a href="https://twitter.com/@marekbartik">@MarekBartik</a>
+                                </p></div>
+                    </div>
+                </li></ul>
+                        </div><div class="tags my-3"><a class="badge badge-pill badge-light border mr-2" href="/tags/aws">
+                                    <i class="fas fa-tag mr-2"></i>aws
+                                </a><a class="badge badge-pill badge-light border mr-2" href="/tags/eks">
+                                    <i class="fas fa-tag mr-2"></i>eks
+                                </a><a class="badge badge-pill badge-light border mr-2" href="/tags/gitlab">
+                                    <i class="fas fa-tag mr-2"></i>gitlab
+                                </a><a class="badge badge-pill badge-light border mr-2" href="/tags/ci/cd">
+                                    <i class="fas fa-tag mr-2"></i>ci/cd
+                                </a></div></div>
+                </div>
+            </article>
+        </div>
+    </div>
+</main>
+
+
+    <footer class="footer text-center bg-dark py-6">
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <ul class="list-inline">
+                    <li class="list-inline-item"><a href="https://blog.pipetail.io/index.xml" rel="alternate" type="application/rss+xml" class="icons d-block">
+                                    <span class="fa-stack fa-lg">
+                                        <i class="fa fa-circle fa-stack-2x"></i>
+                                        <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                                    </span>
+                                </a></li><li class="list-inline-item">
+                        <a href="mailto://contact@pipetail.io" class="icons d-block">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li><li class="list-inline-item">
+                            <a href="https://github.com/pipetail" class="icons d-block">
+                                <span class="fa-stack fa-lg">
+                                    <i class="fa fa-circle fa-stack-2x"></i>
+                                    <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+                                </span>
+                            </a>
+                        </li><li class="list-inline-item">
+                            <a href="https://twitter.com/pipetail.io" class="icons d-block">
+                                <span class="fa-stack fa-lg">
+                                    <i class="fa fa-circle fa-stack-2x"></i>
+                                    <i class="fab fa-twitter fa-stack-1x fa-inverse"></i>
+                                </span>
+                            </a>
+                        </li>
+                </ul>
+
+                <p class="text-muted">
+                    
+                        Copyright © 2020 pipetail. All rights reserved.
+                    
+                </p>
+
+                <p class="text-muted">
+                Powered by <a href="https://gohugo.io" target="_blank">Hugo</a> with <a href="https://github.com/puresyntax71/hugo-theme-chunky-poster" target="_blank">Chunky Poster</a>.
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+    
+    
+        
+            <script src="/dist/main.2ed44664366c9940537d.min.js"></script>
+        
+    
+
+
+
+<script>
+    window.Prism = window.Prism || {};
+    window.Prism.manual = true;
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.17.1/components/prism-core.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.17.1/plugins/autoloader/prism-autoloader.min.js"></script>
+
+
+
+    
+</body>
+</html>

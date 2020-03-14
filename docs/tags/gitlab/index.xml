@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>eks on pipetail Blog</title>
-    <link>https://blog.pipetail.io/tags/eks/</link>
-    <description>Recent content in eks on pipetail Blog</description>
+    <title>gitlab on pipetail Blog</title>
+    <link>https://blog.pipetail.io/tags/gitlab/</link>
+    <description>Recent content in gitlab on pipetail Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>Copyright © 2020 pipetail. All rights reserved.</copyright>
     <lastBuildDate>Thu, 05 Mar 2020 08:00:00 +0100</lastBuildDate>
     
-	<atom:link href="https://blog.pipetail.io/tags/eks/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://blog.pipetail.io/tags/gitlab/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
@@ -19,19 +19,6 @@
       
       <guid>https://blog.pipetail.io/posts/2020-03-05-gitlab-runner-on-eks/</guid>
       <description>&lt;p&gt;GitLab-CI/CD is a great and powerful product for CI/CD pipelines. Hosted gitlab.com solution offers shared runners and some usage minutes based on your paid plan (even if the free tier). Though you might want to run your own runner in your private or public cloud. I will show how to run GitLab runner on AWS using terraform, Elastic Kubernetes Service and GitLab kubernetes integration.&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>More complicated EKS scenarios: EKS managed worker nodes without internet access</title>
-      <link>https://blog.pipetail.io/posts/2020-02-12-eks-private-cluster/</link>
-      <pubDate>Wed, 12 Feb 2020 08:00:00 +0100</pubDate>
-      
-      <guid>https://blog.pipetail.io/posts/2020-02-12-eks-private-cluster/</guid>
-      <description>&lt;p&gt;Are you using EKS managed worker
-pools? If you don&amp;rsquo;t have any specific reasons for not using them, you should.
-It saves tons of time plus it boosts the &amp;ldquo;managed Kubernetes&amp;rdquo; feeling.
-However, this pretty new offering did not cover one specific use case:
-cluster with no Internet access.&lt;/p&gt;</description>
     </item>
     
   </channel>
