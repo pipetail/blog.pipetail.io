@@ -21,8 +21,8 @@
       <description>&lt;p&gt;There are customers where public internet access is no go. But
 at the same time you need to access your EC2 instances,
 right? How would you approach this? Usually, we use bastion hosts,
-that&amp;rsquo;s basically a different name for jump host you can use
-to access internal resources. In AWS, you don&amp;rsquo;t need to manage
+that&#39;s basically a different name for jump host you can use
+to access internal resources. In AWS, you don&#39;t need to manage
 such extra instances and take care of all the low-level configuration.
 Instead, you can leverage fully managed Session Manager from the
 AWS Systems Manager suite!&lt;/p&gt;</description>
@@ -34,9 +34,9 @@ AWS Systems Manager suite!&lt;/p&gt;</description>
       <pubDate>Mon, 17 Feb 2020 19:00:00 +0100</pubDate>
       
       <guid>https://blog.pipetail.io/posts/2020-02-14-opentelemtry-context-propagation/</guid>
-      <description>&lt;p&gt;A few weeks ago I&amp;rsquo;ve published my &lt;a href=&#34;https://blog.pipetail.io/posts/2020-02-09-opentelemetry-introduction/&#34;&gt;introduction to the tracing with OpenTelemetry
+      <description>&lt;p&gt;A few weeks ago I&#39;ve published my &lt;a href=&#34;https://blog.pipetail.io/posts/2020-02-09-opentelemetry-introduction/&#34;&gt;introduction to the tracing with OpenTelemetry
 instrumentation&lt;/a&gt;.
-I was trying to explain there that tracing has some value even in standalone applications. It was just a recommendation, but today we&amp;rsquo;re gonna talk about scenarios where tracing
+I was trying to explain there that tracing has some value even in standalone applications. It was just a recommendation, but today we&#39;re gonna talk about scenarios where tracing
 is a must: distributed systems.&lt;/p&gt;</description>
     </item>
     
@@ -47,7 +47,7 @@ is a must: distributed systems.&lt;/p&gt;</description>
       
       <guid>https://blog.pipetail.io/posts/2020-02-12-eks-private-cluster/</guid>
       <description>&lt;p&gt;Are you using EKS managed worker
-pools? If you don&amp;rsquo;t have any specific reasons for not using them, you should.
+pools? If you don&#39;t have any specific reasons for not using them, you should.
 It saves tons of time plus it boosts the &amp;ldquo;managed Kubernetes&amp;rdquo; feeling.
 However, this pretty new offering did not cover one specific use case:
 cluster with no Internet access.&lt;/p&gt;</description>
@@ -72,7 +72,7 @@ directly with OpenTelemetry and we can skip its ancestors.&lt;/p&gt;</descriptio
       <guid>https://blog.pipetail.io/posts/2020-01-29-dapr-introduction/</guid>
       <description>&lt;p&gt;At the moment, there are no doubts that transformation to the new
 architectural pattern, microservices architecture, is happening.
-Today, I don&amp;rsquo;t want to emphasize that microservices architecture does
+Today, I don&#39;t want to emphasize that microservices architecture does
 not solve everything. This transformation is happening and my
 role here is to show you some possible ways how to minimize the struggle.&lt;/p&gt;</description>
     </item>

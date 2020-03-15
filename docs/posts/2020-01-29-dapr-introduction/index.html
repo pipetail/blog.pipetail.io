@@ -21,7 +21,7 @@
 <link rel="canonical" href="https://blog.pipetail.io/posts/2020-01-29-dapr-introduction/"><meta property="og:title" content="DAPR: introduction to Distributed Application Runtime" />
 <meta property="og:description" content="At the moment, there are no doubts that transformation to the new
 architectural pattern, microservices architecture, is happening.
-Today, I don&rsquo;t want to emphasize that microservices architecture does
+Today, I don&#39;t want to emphasize that microservices architecture does
 not solve everything. This transformation is happening and my
 role here is to show you some possible ways how to minimize the struggle." />
 <meta property="og:type" content="article" />
@@ -32,7 +32,7 @@ role here is to show you some possible ways how to minimize the struggle." />
 <meta itemprop="name" content="DAPR: introduction to Distributed Application Runtime">
 <meta itemprop="description" content="At the moment, there are no doubts that transformation to the new
 architectural pattern, microservices architecture, is happening.
-Today, I don&rsquo;t want to emphasize that microservices architecture does
+Today, I don&#39;t want to emphasize that microservices architecture does
 not solve everything. This transformation is happening and my
 role here is to show you some possible ways how to minimize the struggle.">
 <meta itemprop="datePublished" content="2020-01-29T20:00:00&#43;01:00" />
@@ -48,7 +48,7 @@ role here is to show you some possible ways how to minimize the struggle.">
 <meta name="twitter:title" content="DAPR: introduction to Distributed Application Runtime"/>
 <meta name="twitter:description" content="At the moment, there are no doubts that transformation to the new
 architectural pattern, microservices architecture, is happening.
-Today, I don&rsquo;t want to emphasize that microservices architecture does
+Today, I don&#39;t want to emphasize that microservices architecture does
 not solve everything. This transformation is happening and my
 role here is to show you some possible ways how to minimize the struggle."/>
 
@@ -87,10 +87,10 @@ role here is to show you some possible ways how to minimize the struggle."/>
                         <div class="content">
                             <p>At the moment, there are no doubts that transformation to the new
 architectural pattern, microservices architecture, is happening.
-Today, I don&rsquo;t want to emphasize that microservices architecture does
+Today, I don't want to emphasize that microservices architecture does
 not solve everything. This transformation is happening and my
 role here is to show you some possible ways how to minimize the struggle.</p>
-<p>I&rsquo;m not a software architect, but I can name few things I&rsquo;ve seen when
+<p>I'm not a software architect, but I can name few things I've seen when
 I was helping clients with their projects:</p>
 <ul>
 <li>communication is complex</li>
@@ -101,7 +101,7 @@ I was helping clients with their projects:</p>
 <h2 id="abstraction-is-the-key">Abstraction is the key</h2>
 <p>What if you can offload some of these concerns to the underlying
 platform so you can keep the codebase small, lean and vendor-agnostic?</p>
-<p>Well, that&rsquo;s exactly what DAPR does. It is able to handle
+<p>Well, that's exactly what DAPR does. It is able to handle
 all the complicated logic, the application itself communicates
 only with simple HTTP or gRPC interfaces.</p>
 <figure class="figure">
@@ -145,7 +145,7 @@ we can use the given Component via HTTP or gRPC abstraction.</p>
 <p>The injecting of the sidecars is controlled by Pod annotations,
 for instance, the following set of annotations is saying that we
 want to inject a DAPR sidecar and we want to identify this service
-as <code>backend</code> and it&rsquo;s listening on TCP port <code>8080</code>.</p>
+as <code>backend</code> and it's listening on TCP port <code>8080</code>.</p>
 <pre><code class="language-yaml">          annotations:
             dapr.io/enabled: &quot;true&quot;
             dapr.io/id: &quot;backend&quot;
@@ -153,17 +153,17 @@ as <code>backend</code> and it&rsquo;s listening on TCP port <code>8080</code>.<
 </code></pre>
 <p>Anyways, you can learn more about the key concepts from the
 <a href="https://github.com/dapr/docs">official documentation</a>.
-It does not cover all the parts but still, it&rsquo;s pretty extensive.</p>
+It does not cover all the parts but still, it's pretty extensive.</p>
 <p>So now we can skip the theory and proceed to some fun stuff!</p>
 <h2 id="talk-is-cheap-show-me-the-code">Talk is cheap, show me the code</h2>
-<p>Today we&rsquo;re going to build a simple application with three main
+<p>Today we're going to build a simple application with three main
 components: frontend, backend, and worker. The whole application
 will be doing pretty much nothing, but it should be enough
 to get some idea about the concept of DAPR pub/sub model.</p>
 <h2 id="frontend">Frontend</h2>
 <p>You can find the whole frontend service
 <a href="https://github.com/vranystepan/cncf-meetup-dapr-example-01/tree/master/frontend">here</a>,
-I know literally nothing about the frontend development so I&rsquo;ve
+I know literally nothing about the frontend development so I've
 chosen Vue framework cause the Internet is full of good examples
 for this tool.</p>
 <p>The frontend bit has just a few form components and a few lines
@@ -202,11 +202,11 @@ so we can route traffic based on the request path easily.
 Check <code>garden.yml</code> files for further details.</p>
 </blockquote>
 <h2 id="backend">Backend</h2>
-<p>With the knowledge of the frontend service, it&rsquo;s pretty obvious
-what&rsquo;s the role of backend service: receive the message on
+<p>With the knowledge of the frontend service, it's pretty obvious
+what's the role of backend service: receive the message on
 given HTTP endpoint. When we receive the order, we want to send it
 for further asynchronous processing via the message broker.</p>
-<p>For this purpose, I&rsquo;ve created a simple function which sends<br>
+<p>For this purpose, I've created a simple function which sends<br>
 HTTP request to the DAPR sidecar:</p>
 <pre><code class="language-go">func sendMessage(topic string, message interface{}) error {
         json, err := json.Marshal(message)
@@ -226,7 +226,7 @@ HTTP request to the DAPR sidecar:</p>
 }
 </code></pre>
 <p>Note the URL part, the URL always has a fixed structure and it
-ends with the topic name. We&rsquo;ll be working with this topic in
+ends with the topic name. We'll be working with this topic in
 the worker part. Now we just need to send the message:</p>
 <pre><code class="language-go">        err = sendMessage(&quot;order&quot;, order)
         if err != nil {
@@ -235,15 +235,15 @@ the worker part. Now we just need to send the message:</p>
         }
 </code></pre>
 <blockquote>
-<p>In this example I&rsquo;m using type <code>interface{}</code> for the message.
-As you can figure out, it&rsquo;s pretty filthy, don&rsquo;t do such
+<p>In this example I'm using type <code>interface{}</code> for the message.
+As you can figure out, it's pretty filthy, don't do such
 dirty exercises in your code!</p>
 </blockquote>
 <h2 id="worker">Worker</h2>
-<p>And finally, we&rsquo;re approaching the most interesting part: worker
+<p>And finally, we're approaching the most interesting part: worker
 which is basically subscriber to the topics.</p>
 <p>First of all, we need to advertise the subscriptions we want to
-receive from the message broker. It&rsquo;s pretty easy, we just need
+receive from the message broker. It's pretty easy, we just need
 to advertise those subscriptions as JSON array at
 <code>/dapr/subscribe</code>.</p>
 <pre><code class="language-go">func main() {
@@ -305,12 +305,12 @@ checking for the desired subscriptions.</p>
 [GIN] 2020/01/29 - 14:37:05 | 404 |       1.016µs |       127.0.0.1 | GET      /dapr/config
 [GIN] 2020/01/29 - 14:37:05 | 200 |      61.846µs |       127.0.0.1 | GET      /dapr/subscribe
 </code></pre>
-<p>So let&rsquo;s just open the frontend and send some payload to the backend.
+<p>So let's just open the frontend and send some payload to the backend.
 When we do so, we can review the result in the worker logs:</p>
 <pre><code>2020/01/29 14:44:09 {ab2360d8-8b0c-40fb-9851-991edffe77e4 {100 stepan@vrany.name}}
 [GIN] 2020/01/29 - 14:44:09 | 200 |    1.046011ms |       127.0.0.1 | POST     /order
 </code></pre>
-<p>Great! We&rsquo;ve managed to process our first message with DAPR!
+<p>Great! We've managed to process our first message with DAPR!
 What an awesome waste of computing resources, right?</p>
 <h2 id="wrap">Wrap</h2>
 <p>I know that everything above is just an extremely stupid and
@@ -323,12 +323,12 @@ same manner, create a component and consume it as HTTP endpoints or
 gRPC methods. Easy.</p>
 <p>You can find the whole codebase in my
 <a href="https://github.com/vranystepan/cncf-meetup-dapr-example-01">GitHub repository</a>. It contains even the recipes
-for the infrastructure. Just make sure you don&rsquo;t
-use my domain name there. Also, please don&rsquo;t be offended
+for the infrastructure. Just make sure you don't
+use my domain name there. Also, please don't be offended
 by my code 😬</p>
 <p>I will be talking about this stuff tomorrow at
 <a href="https://www.meetup.com/Cloud-Native-Prague/events/267687926/">Cloud Native Prague meetup #7</a>.
-Come and let&rsquo;s talk about pitfalls in the development of microservices!</p>
+Come and let's talk about pitfalls in the development of microservices!</p>
                             <ul class="authors list-inline"><li class="list-inline-item mr-3">
                     <div class="media author"><a href="/authors/stepan-vrany/" class="mr-3">
                                     <picture>

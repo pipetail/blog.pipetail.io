@@ -22,6 +22,15 @@
     </item>
     
     <item>
+      <title>ci/cd</title>
+      <link>https://blog.pipetail.io/tags/ci/cd/</link>
+      <pubDate>Thu, 05 Mar 2020 08:00:00 +0100</pubDate>
+      
+      <guid>https://blog.pipetail.io/tags/ci/cd/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>eks</title>
       <link>https://blog.pipetail.io/tags/eks/</link>
       <pubDate>Thu, 05 Mar 2020 08:00:00 +0100</pubDate>
@@ -90,24 +99,6 @@
       <pubDate>Mon, 17 Feb 2020 19:00:00 +0100</pubDate>
       
       <guid>https://blog.pipetail.io/tags/tracing/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>ci/cd</title>
-      <link>https://blog.pipetail.io/tags/ci/cd/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>https://blog.pipetail.io/tags/ci/cd/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>index</title>
-      <link>https://blog.pipetail.io/tags/index/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>https://blog.pipetail.io/tags/index/</guid>
       <description></description>
     </item>
     

@@ -19,9 +19,9 @@
 
 
 <link rel="canonical" href="https://blog.pipetail.io/posts/2020-02-14-opentelemtry-context-propagation/"><meta property="og:title" content="Applications are not easy, tracing is: context propagation" />
-<meta property="og:description" content="A few weeks ago I&rsquo;ve published my introduction to the tracing with OpenTelemetry
+<meta property="og:description" content="A few weeks ago I&#39;ve published my introduction to the tracing with OpenTelemetry
 instrumentation.
-I was trying to explain there that tracing has some value even in standalone applications. It was just a recommendation, but today we&rsquo;re gonna talk about scenarios where tracing
+I was trying to explain there that tracing has some value even in standalone applications. It was just a recommendation, but today we&#39;re gonna talk about scenarios where tracing
 is a must: distributed systems." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://blog.pipetail.io/posts/2020-02-14-opentelemtry-context-propagation/" />
@@ -29,9 +29,9 @@ is a must: distributed systems." />
 <meta property="article:published_time" content="2020-02-17T19:00:00+01:00" />
 <meta property="article:modified_time" content="2020-02-17T19:00:00+01:00" />
 <meta itemprop="name" content="Applications are not easy, tracing is: context propagation">
-<meta itemprop="description" content="A few weeks ago I&rsquo;ve published my introduction to the tracing with OpenTelemetry
+<meta itemprop="description" content="A few weeks ago I&#39;ve published my introduction to the tracing with OpenTelemetry
 instrumentation.
-I was trying to explain there that tracing has some value even in standalone applications. It was just a recommendation, but today we&rsquo;re gonna talk about scenarios where tracing
+I was trying to explain there that tracing has some value even in standalone applications. It was just a recommendation, but today we&#39;re gonna talk about scenarios where tracing
 is a must: distributed systems.">
 <meta itemprop="datePublished" content="2020-02-17T19:00:00&#43;01:00" />
 <meta itemprop="dateModified" content="2020-02-17T19:00:00&#43;01:00" />
@@ -44,9 +44,9 @@ is a must: distributed systems.">
 <meta name="twitter:image" content="https://blog.pipetail.io/images/2020-02-09-opentelemetry-introduction-title.png"/>
 
 <meta name="twitter:title" content="Applications are not easy, tracing is: context propagation"/>
-<meta name="twitter:description" content="A few weeks ago I&rsquo;ve published my introduction to the tracing with OpenTelemetry
+<meta name="twitter:description" content="A few weeks ago I&#39;ve published my introduction to the tracing with OpenTelemetry
 instrumentation.
-I was trying to explain there that tracing has some value even in standalone applications. It was just a recommendation, but today we&rsquo;re gonna talk about scenarios where tracing
+I was trying to explain there that tracing has some value even in standalone applications. It was just a recommendation, but today we&#39;re gonna talk about scenarios where tracing
 is a must: distributed systems."/>
 
 </head>
@@ -82,9 +82,9 @@ is a must: distributed systems."/>
                         <h2 class="mb-3">Applications are not easy, tracing is: context propagation</h2>
 
                         <div class="content">
-                            <p>A few weeks ago I&rsquo;ve published my <a href="https://blog.pipetail.io/posts/2020-02-09-opentelemetry-introduction/">introduction to the tracing with OpenTelemetry
+                            <p>A few weeks ago I've published my <a href="https://blog.pipetail.io/posts/2020-02-09-opentelemetry-introduction/">introduction to the tracing with OpenTelemetry
 instrumentation</a>.
-I was trying to explain there that tracing has some value even in standalone applications. It was just a recommendation, but today we&rsquo;re gonna talk about scenarios where tracing
+I was trying to explain there that tracing has some value even in standalone applications. It was just a recommendation, but today we're gonna talk about scenarios where tracing
 is a must: distributed systems.</p>
 <h2 id="motivation">Motivation</h2>
 <p>In traditional standalone monoliths, everything is happening in the same process. Communication between components is pretty reliable and fast. But when we shift to a
@@ -97,7 +97,7 @@ What would you do now?</p>
 <h2 id="propagating-trace-context-is-the-key">Propagating trace context is the key</h2>
 <p>What if we can put execution details of the different services under the same
 trace so we can observe the complete life cycle of the event from one place?
-That&rsquo;s actually the idea of context propagation. When we&rsquo;re delegating some work
+That's actually the idea of context propagation. When we're delegating some work
 to other components within the distributed application, we mark such event
 appropriately so the trace can be continued no matter which service is
 actually executing.</p>
@@ -112,8 +112,8 @@ the event which happened in the distributed application with two services.</p>
 
 <p>How was I able to continue with the same trace in the different service?</p>
 <h2 id="injecting-the-context">Injecting the context</h2>
-<p>Because we&rsquo;re starting with the execution in the service <code>a</code>,
-we&rsquo;re gonna use pretty much the same code as in the previous article.</p>
+<p>Because we're starting with the execution in the service <code>a</code>,
+we're gonna use pretty much the same code as in the previous article.</p>
 <pre><code class="language-go">func indexHandler(w http.ResponseWriter, r *http.Request) {
     tracer := global.TraceProvider().Tracer(&quot;index&quot;)
     _, span := tracer.Start(r.Context(), &quot;test&quot;)
@@ -123,7 +123,7 @@ we&rsquo;re gonna use pretty much the same code as in the previous article.</p>
 </code></pre>
 <p>But now we need to send an HTTP request to the service <code>b</code>. This is the
 interesting part, we need to use the same HTTP request to transmit
-the information about the trace context. Let&rsquo;s just add HTTP request
+the information about the trace context. Let's just add HTTP request
 and see how we can inject the context with the OpenTelemetry library.</p>
 <pre><code class="language-go">func indexHandler(w http.ResponseWriter, r *http.Request) {
     tracer := global.TraceProvider().Tracer(&quot;index&quot;)
@@ -143,8 +143,8 @@ and see how we can inject the context with the OpenTelemetry library.</p>
 <p>Note this part:</p>
 <pre><code class="language-go">httptrace.Inject(ctx, req)
 </code></pre>
-<p>We&rsquo;re actually modifying the HTTP request there. Curious about the content?
-Me too! Let&rsquo;s check all the headers.</p>
+<p>We're actually modifying the HTTP request there. Curious about the content?
+Me too! Let's check all the headers.</p>
 <pre><code class="language-json">{
   &quot;Traceparent&quot;: [
     &quot;00-e33455b57a89a9660afacf9fc16cfbbb-8c5d2880e8cece90-01&quot;
@@ -153,10 +153,10 @@ Me too! Let&rsquo;s check all the headers.</p>
 </code></pre>
 <p>You can see all the details about the context propagation in the
 <a href="https://www.w3.org/TR/trace-context/">official W3C documentation</a>.
-It&rsquo;s pretty straightforward, recommended read.</p>
+It's pretty straightforward, recommended read.</p>
 <h2 id="extracting-the-context">Extracting the context</h2>
 <p>Now, we just need to reverse this action and extract the context, right?
-It&rsquo;s as easy as injecting. OpenTelemetry library for Go contains
+It's as easy as injecting. OpenTelemetry library for Go contains
 <code>httptrace.Extract()</code> function so you can get parent span details
 with a single line of code.</p>
 <pre><code class="language-go">func indexHandler(w http.ResponseWriter, r *http.Request) {
@@ -174,12 +174,12 @@ with a single line of code.</p>
 }
 </code></pre>
 <h2 id="wrap">Wrap</h2>
-<p>Today we&rsquo;ve learned that context propagation is basically about some
+<p>Today we've learned that context propagation is basically about some
 sort of manipulation with HTTP headers. It was pretty easy, right?
-Well, that&rsquo;s why we called this series &ldquo;Applications are not easy,
-tracing is.&rdquo; That&rsquo;s just true.</p>
-<p>Next time we&rsquo;re gonna show you how to add some diagnostic data to spans.
-It&rsquo;ll be fun!</p>
+Well, that's why we called this series &ldquo;Applications are not easy,
+tracing is.&rdquo; That's just true.</p>
+<p>Next time we're gonna show you how to add some diagnostic data to spans.
+It'll be fun!</p>
 <hr>
 <p>If you want to learn more about Go instrumentation,
 please follow this <a href="https://docs.lightstep.com/otel/golang-get-started-with-opentelemetry">awesome blog post at the LightStep blog</a>.</p>

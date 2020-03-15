@@ -23,6 +23,11 @@
   </url>
   
   <url>
+    <loc>https://blog.pipetail.io/tags/ci/cd/</loc>
+    <lastmod>2020-03-05T08:00:00+01:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://blog.pipetail.io/tags/eks/</loc>
     <lastmod>2020-03-05T08:00:00+01:00</lastmod>
   </url>
@@ -113,14 +118,6 @@
   
   <url>
     <loc>https://blog.pipetail.io/categories/</loc>
-  </url>
-  
-  <url>
-    <loc>https://blog.pipetail.io/tags/ci/cd/</loc>
-  </url>
-  
-  <url>
-    <loc>https://blog.pipetail.io/tags/index/</loc>
   </url>
   
   <url>
