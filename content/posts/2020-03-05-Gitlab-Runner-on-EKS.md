@@ -3,7 +3,7 @@ title: "GitLab Runner on EKS"
 date: 2020-03-05T08:00:00+01:00
 draft: false
 images:
-  - images/2020-03-05-gitlabci-pipeline-cropped.png
+  - images/2020-03-05-gitlab-cicd.png
 authors:
   - marek-bartik
 tags:
