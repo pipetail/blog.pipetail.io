@@ -22,7 +22,7 @@
 <meta property="og:description" content="GitLab-CI/CD is a great and powerful product for CI/CD pipelines. Hosted gitlab.com solution offers shared runners and some usage minutes based on your paid plan (even if the free tier). Though you might want to run your own runner in your private or public cloud. I will show how to run GitLab runner on AWS using terraform, Elastic Kubernetes Service and GitLab kubernetes integration." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://blog.pipetail.io/posts/2020-03-05-gitlab-runner-on-eks/" />
-<meta property="og:image" content="https://blog.pipetail.io/images/2020-03-05-gitlab-cicd.png" />
+<meta property="og:image" content="https://blog.pipetail.io/images/2020-03-05-gitlabci-pipeline-cropped.png" />
 <meta property="article:published_time" content="2020-03-05T08:00:00+01:00" />
 <meta property="article:modified_time" content="2020-03-05T08:00:00+01:00" />
 <meta itemprop="name" content="GitLab Runner on EKS">
@@ -30,12 +30,12 @@
 <meta itemprop="datePublished" content="2020-03-05T08:00:00&#43;01:00" />
 <meta itemprop="dateModified" content="2020-03-05T08:00:00&#43;01:00" />
 <meta itemprop="wordCount" content="990">
-<meta itemprop="image" content="https://blog.pipetail.io/images/2020-03-05-gitlab-cicd.png">
+<meta itemprop="image" content="https://blog.pipetail.io/images/2020-03-05-gitlabci-pipeline-cropped.png">
 
 
 
 <meta itemprop="keywords" content="aws,eks,gitlab,ci/cd," /><meta name="twitter:card" content="summary_large_image"/>
-<meta name="twitter:image" content="https://blog.pipetail.io/images/2020-03-05-gitlab-cicd.png"/>
+<meta name="twitter:image" content="https://blog.pipetail.io/images/2020-03-05-gitlabci-pipeline-cropped.png"/>
 
 <meta name="twitter:title" content="GitLab Runner on EKS"/>
 <meta name="twitter:description" content="GitLab-CI/CD is a great and powerful product for CI/CD pipelines. Hosted gitlab.com solution offers shared runners and some usage minutes based on your paid plan (even if the free tier). Though you might want to run your own runner in your private or public cloud. I will show how to run GitLab runner on AWS using terraform, Elastic Kubernetes Service and GitLab kubernetes integration."/>
@@ -93,7 +93,7 @@
 <p>We will pick Kubernetes executor as we are already familiar with it and it is quite easy to use it. It is relatively simple to debug problems and great to use at bigger scale to <strong>better utilize our compute resources</strong>.</p>
 <p>You could go through the pain of deploying it yourself on a Kubernetes cluster and registering it in GitLab or you could use <a href="https://docs.gitlab.com/runner/install/kubernetes.html">GitLab Runner Helm Chart</a>. Helm is a package manager for kubernetes (think npm for kubernetes).</p>
 <p>However, we can simplify the previous step and not deploy the chart ourselves! GitLab has a <a href="https://docs.gitlab.com/ee/user/project/clusters/index.html">Kubernetes Integration</a> to create new or add existing kubernetes clusters. As of now it supports <strong>Google Kubernetes Engine</strong> (Google Cloud Platform) and <strong>Elastic Kubernetes Service</strong> (Amazon Web Services) natively but you should be able to add any kubernetes cluster no matter where it runs.</p>
-<p>Integration with GKE seems a bit more seamless than the one for EKS (as of now) at least for creating new clusters. Anyway, I don't want GitLab to provision EKS cluster for me. I will provision it myself (or I could use an existing one) and just add it to the integration.</p>
+<p>Integration with GKE seems a bit more seamless than the one for EKS (as of now) at least for creating new clusters. Anyway, I don&rsquo;t want GitLab to provision EKS cluster for me. I will provision it myself (or I could use an existing one) and just add it to the integration.</p>
 <h2 id="provision-the-aws-resources-with-terraform">Provision the AWS resources with terraform</h2>
 <p>We will use terraform to provision a bunch of AWS resources, including the EKS cluster.</p>
 <p>We will use VPC and EKS modules (now with added support for the new EKS managed groups) to easily provision all the necessary resources. Here is a short example:</p>
@@ -141,7 +141,7 @@ map_accounts = [&quot;111111111YOUR_ACCOUNT_ID&quot;]
 
 EOF
 </code></pre>
-<p>Finally let's provision all the resources. Execute these one by one to see what is going to happen.</p>
+<p>Finally let&rsquo;s provision all the resources. Execute these one by one to see what is going to happen.</p>
 <pre><code class="language-bash">terraform init
 terraform plan -out planfile
 terraform apply planfile
@@ -172,7 +172,7 @@ subjects:
 <pre><code class="language-bash">KUBECONFIG=./kubeconfig_* kubectl apply -f eks-admin-sa.yaml
 </code></pre>
 <h2 id="gather-the-information">gather the information</h2>
-<p>Now let's fetch all the necessary information we need to set up the GitLab k8s integration.</p>
+<p>Now let&rsquo;s fetch all the necessary information we need to set up the GitLab k8s integration.</p>
 <pre><code class="language-bash">echo &quot;Kubernetes cluster name:&quot;
 terraform output kubernetes_cluster_name
 echo &quot;&quot;
@@ -239,7 +239,7 @@ echo &quot;&quot;
 </p>
 <p>Yay, it works!</p>
 <h2 id="to-finish">to finish</h2>
-<p>Let's summarize the specification of this setup:</p>
+<p>Let&rsquo;s summarize the specification of this setup:</p>
 <ul>
 <li>EKS cluster with managed nodes</li>
 <li>GitLab Runners installed using GitLab Kubernetes Integration</li>
