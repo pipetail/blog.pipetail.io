@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><title>Getting started with PodSecurityPolicy on EKS&nbsp;&ndash;&nbsp;pipetail Blog</title><meta name="description" content="By Engineers. For Engineers."><meta name="author" content="stepan-vrany">
+
+
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.17.1/themes/prism.min.css">
+    
+
+
+
+    
+        
+            <link rel="stylesheet" href="/dist/main.37ab3f61b95417873748.min.css">
+        
+    
+
+
+<link rel="canonical" href="https://blog.pipetail.io/posts/2020-03-15-psp-on-eks/"><meta property="og:title" content="Getting started with PodSecurityPolicy on EKS" />
+<meta property="og:description" content="As you might already know, security is not something that a specialized department should
+be responsible for. Instead, we all should bear in mind that security matters and build
+secure solutions from the very beginning. Today we&rsquo;re gonna talk about some practices
+in the world of containerized apps and Kubernetess. So let&rsquo;s say we have some best practices
+for the containerized workloads. But how to enforce that? We&rsquo;ll tell you right away." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://blog.pipetail.io/posts/2020-03-15-psp-on-eks/" />
+<meta property="og:image" content="https://blog.pipetail.io/images/2020-03-15-EKS-private-cluster.png" />
+<meta property="article:published_time" content="2020-03-15T07:00:00+01:00" />
+<meta property="article:modified_time" content="2020-03-15T07:00:00+01:00" />
+<meta itemprop="name" content="Getting started with PodSecurityPolicy on EKS">
+<meta itemprop="description" content="As you might already know, security is not something that a specialized department should
+be responsible for. Instead, we all should bear in mind that security matters and build
+secure solutions from the very beginning. Today we&rsquo;re gonna talk about some practices
+in the world of containerized apps and Kubernetess. So let&rsquo;s say we have some best practices
+for the containerized workloads. But how to enforce that? We&rsquo;ll tell you right away.">
+<meta itemprop="datePublished" content="2020-03-15T07:00:00&#43;01:00" />
+<meta itemprop="dateModified" content="2020-03-15T07:00:00&#43;01:00" />
+<meta itemprop="wordCount" content="936">
+<meta itemprop="image" content="https://blog.pipetail.io/images/2020-03-15-EKS-private-cluster.png">
+
+
+
+<meta itemprop="keywords" content="aws,amazon,eks,kubernetes,security," /><meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://blog.pipetail.io/images/2020-03-15-EKS-private-cluster.png"/>
+
+<meta name="twitter:title" content="Getting started with PodSecurityPolicy on EKS"/>
+<meta name="twitter:description" content="As you might already know, security is not something that a specialized department should
+be responsible for. Instead, we all should bear in mind that security matters and build
+secure solutions from the very beginning. Today we&rsquo;re gonna talk about some practices
+in the world of containerized apps and Kubernetess. So let&rsquo;s say we have some best practices
+for the containerized workloads. But how to enforce that? We&rsquo;ll tell you right away."/>
+
+</head>
+<body>
+    
+<nav class="navbar navbar-expand-md navbar-light bg-light fixed-top shadow-sm" id="navbar-main-menu">
+    <div class="container">
+        <a class="navbar-brand font-weight-bold" href="https://blog.pipetail.io">pipetail Blog</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#main-menu" aria-controls="main-menu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="main-menu">
+            <ul class="navbar-nav ml-auto">
+                
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                
+                    <li class="nav-item"><a class="nav-link" href="https://pipetail.io">pipetail</a></li>
+                
+            
+            </ul>
+        </div>
+    </div>
+</nav>
+
+
+    
+<main class="content-page container pt-7 pb-5">
+    <div class="row">
+        <div class="col">
+            <article>
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <h2 class="mb-3">Getting started with PodSecurityPolicy on EKS</h2>
+
+                        <div class="content">
+                            <p>As you might already know, security is not something that a specialized department should
+be responsible for. Instead, we all should bear in mind that security matters and build
+secure solutions from the very beginning. Today we&rsquo;re gonna talk about some practices
+in the world of containerized apps and Kubernetess. So let&rsquo;s say we have some best practices
+for the containerized workloads. But how to enforce that? We&rsquo;ll tell you right away.</p>
+<p>And the answer is actually pretty straightforward. Do you want to enforce some security policies?
+Use <a href="https://kubernetes.io/docs/concepts/policy/pod-security-policy/">Pod Security Policy resource</a>.
+In reality, Pod Security Policy is just an admission controller which is able to check if
+pods comply to assigned set of rules.</p>
+<p>For instance, we can check if pod is not running in privileged mode or we can also restrict
+the use of certain volumes types, this comes handy for example when you don&rsquo;t want to
+allow access to host filesystem.</p>
+<p>So why do I even write this post? We have some specialized resource so we just create it
+and that&rsquo;s it, right? Well, it&rsquo;s not that easy. And that&rsquo;s why I wrote this article. Let&rsquo;s begin.</p>
+<h2 id="key-principles">Key principles</h2>
+<p>As already mentioned, Pod Security Policy is just another Kubernetes resource.
+The following document contains a really simple policy that prohibits the run of
+privileged containers.</p>
+<pre><code class="language-yaml">apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: example
+spec:
+  privileged: false
+  seLinux:
+    rule: RunAsAny
+  supplementalGroups:
+    rule: RunAsAny
+  runAsUser:
+    rule: RunAsAny
+  fsGroup:
+    rule: RunAsAny
+  volumes:
+  - '*'
+</code></pre>
+<p>But when you apply this document with <code>kubectl</code>, it just does nothing.
+That&rsquo;s because PSP mechanism is deeply integrated with RBAC system.
+In order to use this policy, you need to authorize the respective accounts
+to use it first.</p>
+<h2 id="rbac-magic">RBAC magic</h2>
+<p>So this is the basic ClusterRole which authorizes the use of verb <code>use</code> on
+the PSP created before.</p>
+<pre><code class="language-yaml">apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: psp:example
+rules:
+- apiGroups:
+    - policy
+  resources:
+    - podsecuritypolicies
+  verbs:
+    - use
+  resourceNames:
+  - example
+</code></pre>
+<p>Now we need to bind this <code>ClusterRole</code> to the certain <code>ServiceAcccout</code>.
+Here I need to step in and add some context. Why are we talking about ServiceAccounts
+when the workload is created by some users from flesh and bones?</p>
+<p>The thing is that usually, we don&rsquo;t create pod resources by ourselves but
+we&rsquo;re using some controllers instead. You can check more details in the
+<a href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/">official documentation</a>. So the whole job is done by <em>someone else</em> hence
+we need to bind <code>ClusterRole</code> accordingly. To show you the whole picture,
+here are <code>ServiceAccount</code> and <code>Deployment</code> resources we want to use for our
+workload.</p>
+<pre><code class="language-yaml">apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: app
+  namespace: app-test
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+  namespace: app-test
+  labels:
+    app: app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app
+  template:
+    metadata:
+      labels:
+        app: app
+    spec:
+      serviceAccountName: app
+      containers:
+      - name: app
+        image: mycustomnamespace/app:v1.0.0
+        ports:
+        - containerPort: 80
+</code></pre>
+<p>Now we know that <code>ServiceAccount</code> <code>app</code> lives in the <code>app-test</code> <code>Namespace</code> so
+we can create a suitable <code>ClusterRoleBinding</code>.</p>
+<pre><code class="language-yaml">apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: psp:example:app:app-test
+roleRef:
+  kind: ClusterRole
+  name: psp:example
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+- kind: ServiceAccount
+  name: app
+  namespace: app-test
+</code></pre>
+<p>From now, we should be able to run our workload as long as it does not run
+in privileged mode. Sweet.</p>
+<h2 id="eks-specific-configuration">EKS specific configuration</h2>
+<p>But let&rsquo;s talk about EKS. This offering has enabled PSP out of the box.
+Do you have any experience with EKS? If yes, you know then that you are able to
+create any workload with no restrictions.</p>
+<p>However, it does not mean that <em>policy engine</em> is not enabled. The reason is that
+PSP is a pretty comprehensive topic so EKS comes with preconfigured policy
+bound to all authenticated users.</p>
+<p>The key elements are <code>PodSecurityPolicy</code> <code>eks.privileged</code> and
+<code>ClusterRoleBinding</code> <code>eks:podsecuritypolicy:authenticated</code>.</p>
+<p>What I&rsquo;m saying here is that in order to apply your own rules you need to delete those
+resources and start on the green field.</p>
+<pre><code class="language-bash">kubectl delete podsecuritypolicy eks.privileged
+kubectl delete clusterrolebinding eks:podsecuritypolicy:authenticated
+</code></pre>
+<p>But when you do so, please be prepared for the following: no new pods can be created
+from now. You&rsquo;ll most likely get a similar error since we need at least
+one policy in order to start any pod with Pod Security Policy enabled.</p>
+<pre><code>unable to validate against any pod security policy: []
+</code></pre>
+<blockquote>
+<p>All mentioned is already documented by Amazon, personally
+I really like this <a href="https://aws.amazon.com/blogs/opensource/using-pod-security-policies-amazon-eks-clusters/">blog post</a> with a step-by-step guide.</p>
+</blockquote>
+<h2 id="rbac-pitfalls">RBAC pitfalls</h2>
+<p>When applying ultra restrictive policies, time to time you might encounter situations when
+the pod starts even when it does not comply with the PodSecurityPolicy.
+From my experience, it&rsquo;s always caused by incorrectly configured RBAC.</p>
+<p>For instance, you&rsquo;ve allowed all verbs to all resources in the <code>extensions</code> API group
+so now your <code>ServiceAccount</code> is assigned to all <code>PodSecurityPolicy</code> resources
+hence the restrictions don&rsquo;t work as intended.</p>
+<blockquote>
+<p>Please also note that some resources are availabel in multiple api groups.
+For instance, <code>PodSecurityPolicy</code> can be in <code>policy</code> and <code>extensions</code> at the same time!
+Dangerous stuff 😀</p>
+</blockquote>
+<p>But don&rsquo;t worry, you can address such issues with <code>auth can-i</code> <a href="https://kubernetes.io/docs/reference/access-authn-authz/authorization/#checking-api-access">command</a>!</p>
+<pre><code class="language-bash">kubectl auth can-i use podsecuritypolicy/example --namespace app-test --as app
+</code></pre>
+<h2 id="wrap">Wrap</h2>
+<p>Security really matters and you should not skip <code>PodSecurityPolicy</code>
+just because it&rsquo;s not as straightforward as other Kubernetes resources.
+Sure, this component can&rsquo;t save the whole world but it can help you with some
+basics. Moreover, it&rsquo;s no so complex as you could see in this post. Give it a shot!</p>
+<p>Do you have any specific questions regarding PSP? Do not hesitate to reach us,
+we&rsquo;re always happy to help.</p>
+<h2 id="additional-resources">Additional resources</h2>
+<ul>
+<li><a href="https://kubernetes.io/docs/concepts/policy/pod-security-policy/#policy-order">Policy order</a></li>
+<li><a href="https://aws.amazon.com/blogs/opensource/using-pod-security-policies-amazon-eks-clusters/">EKS step-by-step guide for PSP</a></li>
+<li><a href="https://docs.aws.amazon.com/eks/latest/userguide/pod-security-policy.html">EKS documentation for PSP</a></li>
+<li><a href="https://snyk.io/blog/10-docker-image-security-best-practices/">Docker best practices</a>, see the section about least privileged user</li>
+<li><a href="https://kubernetes.io/docs/tasks/configure-pod-container/security-context/">Kubernetes security context</a></li>
+<li><a href="https://kubernetes.io/docs/reference/access-authn-authz/authorization/#checking-api-access">Checking API access with Kubectl</a></li>
+</ul>
+                            <ul class="authors list-inline"><li class="list-inline-item mr-3">
+                    <div class="media author"><a href="/authors/stepan-vrany/" class="mr-3">
+                                    <picture>
+                                        <source srcset="/authors/stepan-vrany/author_hue776a334b902d7828bf5c7a8aa11ccb3_313320_64x0_resize_q75_box.jpg 1x, /authors/stepan-vrany/author_hue776a334b902d7828bf5c7a8aa11ccb3_313320_128x0_resize_q100_box.jpg 2x, /authors/stepan-vrany/author_hue776a334b902d7828bf5c7a8aa11ccb3_313320_192x0_resize_q100_box.jpg 3x">
+                                        <img src="/authors/stepan-vrany/author_hue776a334b902d7828bf5c7a8aa11ccb3_313320_64x0_resize_q75_box.jpg" class="rounded-circle" alt="Stepan Vrany">
+                                    </picture>
+                                </a><div class="media-body">
+                            <h5 class="name my-0"><a href="/authors/stepan-vrany/" class="small">Stepan Vrany</a>
+                            </h5><p class="social small text-muted">
+                                    <a href="https://twitter.com/@mstrsobserver">@MstrsObserver</a>
+                                </p></div>
+                    </div>
+                </li></ul>
+                        </div><div class="tags my-3"><a class="badge badge-pill badge-light border mr-2" href="/tags/aws">
+                                    <i class="fas fa-tag mr-2"></i>aws
+                                </a><a class="badge badge-pill badge-light border mr-2" href="/tags/amazon">
+                                    <i class="fas fa-tag mr-2"></i>amazon
+                                </a><a class="badge badge-pill badge-light border mr-2" href="/tags/eks">
+                                    <i class="fas fa-tag mr-2"></i>eks
+                                </a><a class="badge badge-pill badge-light border mr-2" href="/tags/kubernetes">
+                                    <i class="fas fa-tag mr-2"></i>kubernetes
+                                </a><a class="badge badge-pill badge-light border mr-2" href="/tags/security">
+                                    <i class="fas fa-tag mr-2"></i>security
+                                </a></div></div>
+                </div>
+            </article>
+        </div>
+    </div>
+</main>
+
+
+    <footer class="footer text-center bg-dark py-6">
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <ul class="list-inline">
+                    <li class="list-inline-item"><a href="https://blog.pipetail.io/index.xml" rel="alternate" type="application/rss+xml" class="icons d-block">
+                                    <span class="fa-stack fa-lg">
+                                        <i class="fa fa-circle fa-stack-2x"></i>
+                                        <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                                    </span>
+                                </a></li><li class="list-inline-item">
+                        <a href="mailto://contact@pipetail.io" class="icons d-block">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li><li class="list-inline-item">
+                            <a href="https://github.com/pipetail" class="icons d-block">
+                                <span class="fa-stack fa-lg">
+                                    <i class="fa fa-circle fa-stack-2x"></i>
+                                    <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+                                </span>
+                            </a>
+                        </li><li class="list-inline-item">
+                            <a href="https://twitter.com/pipetail.io" class="icons d-block">
+                                <span class="fa-stack fa-lg">
+                                    <i class="fa fa-circle fa-stack-2x"></i>
+                                    <i class="fab fa-twitter fa-stack-1x fa-inverse"></i>
+                                </span>
+                            </a>
+                        </li>
+                </ul>
+
+                <p class="text-muted">
+                    
+                        Copyright © 2020 pipetail. All rights reserved.
+                    
+                </p>
+
+                <p class="text-muted">
+                Powered by <a href="https://gohugo.io" target="_blank">Hugo</a> with <a href="https://github.com/puresyntax71/hugo-theme-chunky-poster" target="_blank">Chunky Poster</a>.
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+    
+    
+        
+            <script src="/dist/main.2ed44664366c9940537d.min.js"></script>
+        
+    
+
+
+
+<script>
+    window.Prism = window.Prism || {};
+    window.Prism.manual = true;
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.17.1/components/prism-core.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.17.1/plugins/autoloader/prism-autoloader.min.js"></script>
+
+
+
+    
+</body>
+</html>
