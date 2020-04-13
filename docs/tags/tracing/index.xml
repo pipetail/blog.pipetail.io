@@ -18,9 +18,9 @@
       <pubDate>Mon, 17 Feb 2020 19:00:00 +0100</pubDate>
       
       <guid>https://blog.pipetail.io/posts/2020-02-14-opentelemtry-context-propagation/</guid>
-      <description>&lt;p&gt;A few weeks ago I&#39;ve published my &lt;a href=&#34;https://blog.pipetail.io/posts/2020-02-09-opentelemetry-introduction/&#34;&gt;introduction to the tracing with OpenTelemetry
+      <description>&lt;p&gt;A few weeks ago I&amp;rsquo;ve published my &lt;a href=&#34;https://blog.pipetail.io/posts/2020-02-09-opentelemetry-introduction/&#34;&gt;introduction to the tracing with OpenTelemetry
 instrumentation&lt;/a&gt;.
-I was trying to explain there that tracing has some value even in standalone applications. It was just a recommendation, but today we&#39;re gonna talk about scenarios where tracing
+I was trying to explain there that tracing has some value even in standalone applications. It was just a recommendation, but today we&amp;rsquo;re gonna talk about scenarios where tracing
 is a must: distributed systems.&lt;/p&gt;</description>
     </item>
     

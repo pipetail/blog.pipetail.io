@@ -20,7 +20,7 @@
 
 <link rel="canonical" href="https://blog.pipetail.io/posts/2020-02-12-eks-private-cluster/"><meta property="og:title" content="More complicated EKS scenarios: EKS managed worker nodes without internet access" />
 <meta property="og:description" content="Are you using EKS managed worker
-pools? If you don&#39;t have any specific reasons for not using them, you should.
+pools? If you don&rsquo;t have any specific reasons for not using them, you should.
 It saves tons of time plus it boosts the &ldquo;managed Kubernetes&rdquo; feeling.
 However, this pretty new offering did not cover one specific use case:
 cluster with no Internet access." />
@@ -31,7 +31,7 @@ cluster with no Internet access." />
 <meta property="article:modified_time" content="2020-02-12T08:00:00+01:00" />
 <meta itemprop="name" content="More complicated EKS scenarios: EKS managed worker nodes without internet access">
 <meta itemprop="description" content="Are you using EKS managed worker
-pools? If you don&#39;t have any specific reasons for not using them, you should.
+pools? If you don&rsquo;t have any specific reasons for not using them, you should.
 It saves tons of time plus it boosts the &ldquo;managed Kubernetes&rdquo; feeling.
 However, this pretty new offering did not cover one specific use case:
 cluster with no Internet access.">
@@ -47,7 +47,7 @@ cluster with no Internet access.">
 
 <meta name="twitter:title" content="More complicated EKS scenarios: EKS managed worker nodes without internet access"/>
 <meta name="twitter:description" content="Are you using EKS managed worker
-pools? If you don&#39;t have any specific reasons for not using them, you should.
+pools? If you don&rsquo;t have any specific reasons for not using them, you should.
 It saves tons of time plus it boosts the &ldquo;managed Kubernetes&rdquo; feeling.
 However, this pretty new offering did not cover one specific use case:
 cluster with no Internet access."/>
@@ -86,7 +86,7 @@ cluster with no Internet access."/>
 
                         <div class="content">
                             <p>Are you using EKS managed worker
-pools? If you don't have any specific reasons for not using them, you should.
+pools? If you don&rsquo;t have any specific reasons for not using them, you should.
 It saves tons of time plus it boosts the &ldquo;managed Kubernetes&rdquo; feeling.
 However, this pretty new offering did not cover one specific use case:
 cluster with no Internet access.</p>
@@ -99,12 +99,12 @@ regulated businesses.</p>
 <blockquote>
 <p>For the record, it really does not work by default.
 When we put everything to the private subnets with no outbound
-Internet access, workers can't join the cluster.</p>
+Internet access, workers can&rsquo;t join the cluster.</p>
 </blockquote>
 <h2 id="community-for-the-rescue">Community for the rescue</h2>
 <p>If you know me, you know what I did. <a href="https://duckduckgo.com/">Search engine</a>!
-And I was very successful cause I've found this GitHub issue after five
-minutes of searching. What's going on there?</p>
+And I was very successful cause I&rsquo;ve found this GitHub issue after five
+minutes of searching. What&rsquo;s going on there?</p>
 <p><a href="https://github.com/mikestef9">Mike Stefaniak</a> from the EKS team is saying there
 that it can work as long as you set up the other required PrivateLink
 endpoints correctly.</p>
@@ -115,12 +115,12 @@ endpoints correctly.</p>
     </a>
 </figure>
 
-<p>Moreover, there's also a link to the <a href="https://github.com/jpbarto/private-eks-cluster/blob/master/cloudformation/network.yaml">GitHub repository</a>
-with some CloudFormation samples. Challenge accepted. I'm gonna build it 💪</p>
+<p>Moreover, there&rsquo;s also a link to the <a href="https://github.com/jpbarto/private-eks-cluster/blob/master/cloudformation/network.yaml">GitHub repository</a>
+with some CloudFormation samples. Challenge accepted. I&rsquo;m gonna build it 💪</p>
 <h2 id="terraforming-the-cloudformation-stack">Terraforming the CloudFormation stack</h2>
-<p>I'm not that much into CloudFormation. Not yet.
+<p>I&rsquo;m not that much into CloudFormation. Not yet.
 So I had to rewrite it to Terraform first.
-Check the key components below, I'll also add some explanation.</p>
+Check the key components below, I&rsquo;ll also add some explanation.</p>
 <p><strong>VPC settings</strong></p>
 <p>Note the property <code>enable_dns_support</code>, this part is required by
 private EKS endpoint. <a href="https://docs.aws.amazon.com/eks/latest/userguide/cluster-endpoint.html">See more details in the documentation</a>.</p>
@@ -133,7 +133,7 @@ private EKS endpoint. <a href="https://docs.aws.amazon.com/eks/latest/userguide/
 }
 </code></pre>
 <p><strong>Private subnets</strong></p>
-<p>Also, let's add some basic private networks.</p>
+<p>Also, let&rsquo;s add some basic private networks.</p>
 <pre><code class="language-hcl">resource &quot;aws_subnet&quot; &quot;private-0&quot; {
   availability_zone = &quot;eu-central-1a&quot;
   cidr_block        = &quot;10.20.1.0/24&quot;
@@ -251,11 +251,11 @@ resource &quot;aws_vpc_endpoint&quot; &quot;ecr_dkr&quot; {
 }
 </code></pre>
 <p><strong>Endpoint for s3 API</strong></p>
-<p>In this part, we're associating s3 private gateway with our private
+<p>In this part, we&rsquo;re associating s3 private gateway with our private
 subnets&rsquo; routing tables.
 <a href="https://docs.aws.amazon.com/vpc/latest/userguide/vpce-gateway.html">See more details in the documentation</a>.
-We need this API as images are stored in S3 buckets. So when it's not enabled,
-nodes won't be able to start essential services (pods).</p>
+We need this API as images are stored in S3 buckets. So when it&rsquo;s not enabled,
+nodes won&rsquo;t be able to start essential services (pods).</p>
 <pre><code class="language-hcl">resource &quot;aws_vpc_endpoint&quot; &quot;s3&quot; {
   vpc_id            = aws_vpc.main.id
   service_name      = &quot;com.amazonaws.eu-central-1.s3&quot;
@@ -296,9 +296,9 @@ resource &quot;aws_route_table_association&quot; &quot;private-2&quot; {
 </code></pre>
 <p><strong>EKS</strong></p>
 <p>Now are somehow ready to start the control plane.
-Please note I don't mention there IAM resources and Security
+Please note I don&rsquo;t mention there IAM resources and Security
 Groups as it would make the whole post even bigger.
-But don't worry, Hashicorp prepared a <a href="https://learn.hashicorp.com/terraform/aws/eks-intro">beautiful tutorial</a>
+But don&rsquo;t worry, Hashicorp prepared a <a href="https://learn.hashicorp.com/terraform/aws/eks-intro">beautiful tutorial</a>
 so you can use those.</p>
 <p>In the following example note the property <code>vpc_config.endpoint_private_access</code>.
 This is the private EKS endpoint I was talking about.</p>
@@ -327,8 +327,8 @@ This is the private EKS endpoint I was talking about.</p>
   ]
 }
 </code></pre>
-<p>And that's pretty much it for the control plane.
-Let's proceed to managed worker nodes!</p>
+<p>And that&rsquo;s pretty much it for the control plane.
+Let&rsquo;s proceed to managed worker nodes!</p>
 <pre><code class="language-hcl">resource &quot;aws_eks_node_group&quot; &quot;aza&quot; {
   cluster_name    = aws_eks_cluster.master.name
   node_group_name = &quot;AZa&quot;
@@ -413,11 +413,11 @@ resource &quot;aws_eks_node_group&quot; &quot;azc&quot; {
   ]
 }
 </code></pre>
-<p>Please note that we're using 3 managed node groups. That's because we are
+<p>Please note that we&rsquo;re using 3 managed node groups. That&rsquo;s because we are
 following the <a href="https://github.com/awsdocs/amazon-eks-user-guide/blob/master/doc_source/managed-node-groups.md">official recommendation</a> about the stateful applications
-and cluster autoscaler. In any perspective, this setup can't cause any harm.</p>
+and cluster autoscaler. In any perspective, this setup can&rsquo;t cause any harm.</p>
 <h2 id="rise-of-the-eks-cluster">Rise of the EKS cluster</h2>
-<p>We're ready to go. Let's give it a spin! The creation of such a setup
+<p>We&rsquo;re ready to go. Let&rsquo;s give it a spin! The creation of such a setup
 takes almost 20 minutes. I usually use such time for emailing
 or Slack conversations but there might be a better way to utilize that 😄</p>
 <pre><code class="language-bash">terraform apply
@@ -430,7 +430,7 @@ or Slack conversations but there might be a better way to utilize that 😄</p>
     </a>
 </figure>
 
-<p>It's truly beautiful and guess what, even all the Kubernetes
+<p>It&rsquo;s truly beautiful and guess what, even all the Kubernetes
 components are up and running! This means that worker
 nodes were able to pull everything via configured private endpoints.</p>
 <pre><code class="language-bash">NAMESPACE     NAME                       READY   STATUS    RESTARTS   AGE
@@ -444,7 +444,7 @@ kube-system   kube-proxy-fhsxt           1/1     Running   0          88s
 kube-system   kube-proxy-w2sbp           1/1     Running   0          78s
 </code></pre>
 <h2 id="wrap">Wrap</h2>
-<p>Let's summarize the specification of this setup:</p>
+<p>Let&rsquo;s summarize the specification of this setup:</p>
 <ul>
 <li>3 private subnets</li>
 <li><a href="https://docs.aws.amazon.com/AmazonECR/latest/userguide/vpc-endpoints.html#ecr-vpc-endpoint-considerations">VPC endpoints for ECR</a></li>
@@ -453,16 +453,16 @@ kube-system   kube-proxy-w2sbp           1/1     Running   0          78s
 <li>EKS control plane with private endpoint</li>
 <li>no internet access</li>
 </ul>
-<p>We've just witnessed that it is absolutely possible to
+<p>We&rsquo;ve just witnessed that it is absolutely possible to
 create totally isolated clusters even for the most demanding
 customers. Moreover, official documentation
-<a href="https://github.com/aws/containers-roadmap/issues/298#issuecomment-584403418">will reflect this setup soon</a>! Don't forget that such setup can't
-pull images from the public repositories, so there's always an
+<a href="https://github.com/aws/containers-roadmap/issues/298#issuecomment-584403418">will reflect this setup soon</a>! Don&rsquo;t forget that such setup can&rsquo;t
+pull images from the public repositories, so there&rsquo;s always an
 extra step needed for each application deployed: pushing its images to the
 ECR repository.</p>
-<p>Seriously, I'm really glad that AWS is visible on GitHub and they
+<p>Seriously, I&rsquo;m really glad that AWS is visible on GitHub and they
 actually care about the users of their products.
-I'd be totally lost without that advice I got there.</p>
+I&rsquo;d be totally lost without that advice I got there.</p>
                             <ul class="authors list-inline"><li class="list-inline-item mr-3">
                     <div class="media author"><a href="/authors/stepan-vrany/" class="mr-3">
                                     <picture>

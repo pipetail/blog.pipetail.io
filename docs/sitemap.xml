@@ -4,32 +4,57 @@
   
   <url>
     <loc>https://blog.pipetail.io/</loc>
-    <lastmod>2020-03-15T07:00:00+01:00</lastmod>
+    <lastmod>2020-04-13T07:00:00+01:00</lastmod>
   </url>
   
   <url>
     <loc>https://blog.pipetail.io/authors/stepan-vrany/</loc>
-    <lastmod>2020-03-15T07:00:00+01:00</lastmod>
+    <lastmod>2020-04-13T07:00:00+01:00</lastmod>
   </url>
   
   <url>
     <loc>https://blog.pipetail.io/tags/amazon/</loc>
-    <lastmod>2020-03-15T07:00:00+01:00</lastmod>
+    <lastmod>2020-04-13T07:00:00+01:00</lastmod>
   </url>
   
   <url>
     <loc>https://blog.pipetail.io/authors/</loc>
-    <lastmod>2020-03-15T07:00:00+01:00</lastmod>
+    <lastmod>2020-04-13T07:00:00+01:00</lastmod>
   </url>
   
   <url>
     <loc>https://blog.pipetail.io/tags/aws/</loc>
-    <lastmod>2020-03-15T07:00:00+01:00</lastmod>
+    <lastmod>2020-04-13T07:00:00+01:00</lastmod>
   </url>
   
   <url>
     <loc>https://blog.pipetail.io/tags/eks/</loc>
-    <lastmod>2020-03-15T07:00:00+01:00</lastmod>
+    <lastmod>2020-04-13T07:00:00+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.pipetail.io/tags/kubernetes/</loc>
+    <lastmod>2020-04-13T07:00:00+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.pipetail.io/posts/2020-04-13-more-eks-tips/</loc>
+    <lastmod>2020-04-13T07:00:00+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.pipetail.io/posts/</loc>
+    <lastmod>2020-04-13T07:00:00+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.pipetail.io/tags/security/</loc>
+    <lastmod>2020-04-13T07:00:00+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.pipetail.io/tags/</loc>
+    <lastmod>2020-04-13T07:00:00+01:00</lastmod>
   </url>
   
   <url>
@@ -38,32 +63,7 @@
   </url>
   
   <url>
-    <loc>https://blog.pipetail.io/tags/kubernetes/</loc>
-    <lastmod>2020-03-15T07:00:00+01:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://blog.pipetail.io/posts/</loc>
-    <lastmod>2020-03-15T07:00:00+01:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://blog.pipetail.io/tags/security/</loc>
-    <lastmod>2020-03-15T07:00:00+01:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://blog.pipetail.io/tags/</loc>
-    <lastmod>2020-03-15T07:00:00+01:00</lastmod>
-  </url>
-  
-  <url>
     <loc>https://blog.pipetail.io/authors/marek-bartik/</loc>
-    <lastmod>2020-03-05T08:00:00+01:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://blog.pipetail.io/tags/ci/cd/</loc>
     <lastmod>2020-03-05T08:00:00+01:00</lastmod>
   </url>
   
@@ -128,6 +128,14 @@
   
   <url>
     <loc>https://blog.pipetail.io/categories/</loc>
+  </url>
+  
+  <url>
+    <loc>https://blog.pipetail.io/tags/ci/cd/</loc>
+  </url>
+  
+  <url>
+    <loc>https://blog.pipetail.io/tags/index/</loc>
   </url>
   
   <url>
