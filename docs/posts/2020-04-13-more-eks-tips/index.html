@@ -31,7 +31,7 @@ Skip kube2iam, go directly with IAM Roles for Service Accounts Kube2iam is amazi
 Skip kube2iam, go directly with IAM Roles for Service Accounts Kube2iam is amazing tool. I really like it and it helped me with granular control access in couple of projects. However, there&rsquo;s a better solution that is supported out of the box: IAM roles for services accounts.">
 <meta itemprop="datePublished" content="2020-04-13T07:00:00&#43;01:00" />
 <meta itemprop="dateModified" content="2020-04-13T07:00:00&#43;01:00" />
-<meta itemprop="wordCount" content="717">
+<meta itemprop="wordCount" content="714">
 <meta itemprop="image" content="https://blog.pipetail.io/images/2020-04-13-more-EKS-tips.png">
 
 
@@ -93,16 +93,15 @@ obtain credentials to AWS so your application can interact with AWS API in stric
 controlled fashion. This works with all main stream applications,
 to name a few: Cluster Autoscaler, ALB Ingress Controller or even Gitlab CI runner for Kubernetes.
 It&rsquo;s all about supported SDK versions. <a href="https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts-minimum-sdk.html">Here&rsquo;s the list.</a></p>
-<h2 id="tag-your-asgs-properly-for-the-maximum-savings">Tag your ASGs properly for the maximum savings</h2>
+<h2 id="tag-your-asgs-properly-for-maximum-savings">Tag your ASGs properly for maximum savings</h2>
 <p>EKS environment is well suited for scaling from zero. This comes handy for downscaling
-after working hours (for instance for preview environments) or upscaling of instance
+after working hours (e.g. preview environments) or upscaling of instance
 groups for some specialized workload (e.g. batch processing or training of alghorithms).</p>
 <p>All mentioned is enabled by
 <a href="https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler">Cluster Autoscaler</a>,
 but how can Cluster Autoscaler know what ASG it&rsquo;s supposed to scale up when any
 nodes with such Kubernetes labels don&rsquo;t exist yet?</p>
-<p>Here&rsquo;s an easy answer: tags. This part is <a href="https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/FAQ.md#how-can-i-scale-a-node-group-to-0">well documented</a> but it sometimes it might
-be complicated to find the right piece of docs, right?</p>
+<p>Here&rsquo;s an easy answer: tags. This part is <a href="https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/FAQ.md#how-can-i-scale-a-node-group-to-0">well documented</a> but it sometimes might be complicated to find the right piece of docs, right?</p>
 <p>Long story short, if your nodes from the single ASG have some labels (<code>--node-labels</code> kubelet flag),
 always make sure that ASG has the same labels in the following format:</p>
 <pre><code class="language-terraform">    {
@@ -151,7 +150,7 @@ slightly lacking so you won&rsquo;t cause any harm by testing it before it reach
 <h2 id="wrap">Wrap</h2>
 <p>Last month was absolutely thrilling. We&rsquo;ve learned a lot of new things about EKS and Kubernetes
 itself and we&rsquo;re so happy that we can share them with you right away!
-Do you have more tips or are you having terrible times with some of mentioned? Just mention us
+Do you have more tips or are you having terrible times with something mentioned above? Just hit us up
 (<a href="https://twitter.com/MarekBartik">@MarekBartik</a> <a href="https://twitter.com/MstrsObserver">@MstrsObserver</a>)
 on Twitter!</p>
 
