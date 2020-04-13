@@ -35,10 +35,10 @@ controlled fashion. This works with all main stream applications,
 to name a few: Cluster Autoscaler, ALB Ingress Controller or even Gitlab CI runner for Kubernetes.
 It's all about supported SDK versions. [Here's the list.](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts-minimum-sdk.html)
 
-## Tag your ASGs properly for the maximum savings
+## Tag your ASGs properly for maximum savings
 
 EKS environment is well suited for scaling from zero. This comes handy for downscaling
-after working hours (for instance for preview environments) or upscaling of instance
+after working hours (e.g. preview environments) or upscaling of instance
 groups for some specialized workload (e.g. batch processing or training of alghorithms).
 
 All mentioned is enabled by
@@ -46,8 +46,7 @@ All mentioned is enabled by
 but how can Cluster Autoscaler know what ASG it's supposed to scale up when any
 nodes with such Kubernetes labels don't exist yet?
 
-Here's an easy answer: tags. This part is [well documented](https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/FAQ.md#how-can-i-scale-a-node-group-to-0) but it sometimes it might
-be complicated to find the right piece of docs, right?
+Here's an easy answer: tags. This part is [well documented](https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/FAQ.md#how-can-i-scale-a-node-group-to-0) but it sometimes might be complicated to find the right piece of docs, right?
 
 Long story short, if your nodes from the single ASG have some labels (`--node-labels` kubelet flag),
 always make sure that ASG has the same labels in the following format:
@@ -109,6 +108,6 @@ and if it fails it just continues with ASG `name-of-asg-with-on-demand`.
 ## Wrap
 Last month was absolutely thrilling. We've learned a lot of new things about EKS and Kubernetes
 itself and we're so happy that we can share them with you right away!
-Do you have more tips or are you having terrible times with some of mentioned? Just mention us
+Do you have more tips or are you having terrible times with something mentioned above? Just hit us up
 ([@MarekBartik](https://twitter.com/MarekBartik) [@MstrsObserver](https://twitter.com/MstrsObserver))
 on Twitter!
