@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>pipetail Blog</title>
-    <link>https://blog.pipetail.io/authors/marek-bartik/</link>
-    <description>Recent content on pipetail Blog</description>
+    <title>cloud on pipetail Blog</title>
+    <link>https://blog.pipetail.io/tags/cloud/</link>
+    <description>Recent content in cloud on pipetail Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>Copyright © 2020 pipetail. All rights reserved.</copyright>
     <lastBuildDate>Mon, 04 May 2020 07:00:00 +0100</lastBuildDate>
     
-	<atom:link href="https://blog.pipetail.io/authors/marek-bartik/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://blog.pipetail.io/tags/cloud/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
@@ -21,15 +21,6 @@
       <description>We had the chance to see quite a bit of clusters in our years of experience with kubernetes (both managed and unmanaged - on GCP, AWS and Azure), and we see some mistakes being repeated. No shame in that, we’ve done most of these too!
 I&#39;ll try to show the ones we see very often and talk a bit about how to fix them.
 resources - requests and limits This definitely deserves the most attention and first place in this list.</description>
-    </item>
-    
-    <item>
-      <title>GitLab Runner on EKS</title>
-      <link>https://blog.pipetail.io/posts/2020-03-05-gitlab-runner-on-eks/</link>
-      <pubDate>Thu, 05 Mar 2020 08:00:00 +0100</pubDate>
-      
-      <guid>https://blog.pipetail.io/posts/2020-03-05-gitlab-runner-on-eks/</guid>
-      <description>&lt;p&gt;GitLab-CI/CD is a great and powerful product for CI/CD pipelines. Hosted gitlab.com solution offers shared runners and some usage minutes based on your paid plan (even if the free tier). Though you might want to run your own runner in your private or public cloud. I will show how to run GitLab runner on AWS using terraform, Elastic Kubernetes Service and GitLab kubernetes integration.&lt;/p&gt;</description>
     </item>
     
   </channel>

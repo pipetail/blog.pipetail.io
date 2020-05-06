@@ -24,7 +24,7 @@
 <meta property="og:description" content="By Engineers. For Engineers." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://blog.pipetail.io/posts/" />
-<meta property="og:updated_time" content="2020-04-13T07:00:00+01:00" />
+<meta property="og:updated_time" content="2020-05-04T07:00:00+01:00" />
 <meta itemprop="name" content="Posts">
 <meta itemprop="description" content="By Engineers. For Engineers."><meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="Posts"/>
@@ -62,12 +62,29 @@
             <div class="col mb-3">
                 <div class="card h-100">
     
+    <a href="/posts/2020-05-04-most-common-mistakes-k8s/" class="d-block"><img data-src="/images/2020-05-04-cover_hu8d359bfc00f47b2cf9d94fc59b3ce11e_110208_700x450_resize_q75_box.jpg" class="card-img-top mx-auto d-block" alt="10 most common mistakes using kubernetes"><div class="card-body">
+            <h4 class="card-title">10 most common mistakes using kubernetes</h4>
+            <p class="card-text text-muted text-uppercase">May 4, 2020</p>
+            <div class="card-text">
+                We had the chance to see quite a bit of clusters in our years of experience with kubernetes (both managed and unmanaged - on GCP, AWS and Azure), and we see some mistakes being repeated. No shame in that, we’ve done most of these too!
+I'll try to show the ones we see very often and talk a bit about how to fix them.
+resources - requests and limits This definitely deserves the most attention and first place in this list.
+            </div>
+        </div>
+    </a>
+</div>
+
+            </div>
+        
+            <div class="col mb-3">
+                <div class="card h-100">
+    
     <a href="/posts/2020-04-13-more-eks-tips/" class="d-block"><img data-src="/images/2020-04-13-more-EKS-tips_huf02a6b4f2b12de994f5ca6e03c02d75b_138871_700x450_resize_box_2.png" class="card-img-top mx-auto d-block" alt="More EKS tips to make your life easier"><div class="card-body">
             <h4 class="card-title">More EKS tips to make your life easier</h4>
             <p class="card-text text-muted text-uppercase">April 13, 2020</p>
             <div class="card-text">
-                We&rsquo;ve spent most of the last month on implementing EKS. Surprisingly, we&rsquo;re always solving the same concerns no matter what project we&rsquo;re working on. Here&rsquo;s couple of tips for your EKS clusters!
-Skip kube2iam, go directly with IAM Roles for Service Accounts Kube2iam is amazing tool. I really like it and it helped me with granular control access in couple of projects. However, there&rsquo;s a better solution that is supported out of the box: IAM roles for services accounts.
+                We've spent most of the last month on implementing EKS. Surprisingly, we're always solving the same concerns no matter what project we're working on. Here's couple of tips for your EKS clusters!
+Skip kube2iam, go directly with IAM Roles for Service Accounts Kube2iam is amazing tool. I really like it and it helped me with granular control access in couple of projects. However, there's a better solution that is supported out of the box: IAM roles for services accounts.
             </div>
         </div>
     </a>
@@ -84,9 +101,9 @@ Skip kube2iam, go directly with IAM Roles for Service Accounts Kube2iam is amazi
             <div class="card-text">
                 <p>As you might already know, security is not something that a specialized department should
 be responsible for. Instead, we all should bear in mind that security matters and build
-secure solutions from the very beginning. Today we&rsquo;re gonna talk about some practices
-in the world of containerized apps and Kubernetess. So let&rsquo;s say we have some best practices
-for the containerized workloads. But how to enforce that? We&rsquo;ll tell you right away.</p>
+secure solutions from the very beginning. Today we're gonna talk about some practices
+in the world of containerized apps and Kubernetess. So let's say we have some best practices
+for the containerized workloads. But how to enforce that? We'll tell you right away.</p>
             </div>
         </div>
     </a>
@@ -119,8 +136,8 @@ for the containerized workloads. But how to enforce that? We&rsquo;ll tell you r
                 <p>There are customers where public internet access is no go. But
 at the same time you need to access your EC2 instances,
 right? How would you approach this? Usually, we use bastion hosts,
-that&rsquo;s basically a different name for jump host you can use
-to access internal resources. In AWS, you don&rsquo;t need to manage
+that's basically a different name for jump host you can use
+to access internal resources. In AWS, you don't need to manage
 such extra instances and take care of all the low-level configuration.
 Instead, you can leverage fully managed Session Manager from the
 AWS Systems Manager suite!</p>
@@ -138,9 +155,9 @@ AWS Systems Manager suite!</p>
             <h4 class="card-title">Applications are not easy, tracing is: context propagation</h4>
             <p class="card-text text-muted text-uppercase">February 17, 2020</p>
             <div class="card-text">
-                <p>A few weeks ago I&rsquo;ve published my <a href="https://blog.pipetail.io/posts/2020-02-09-opentelemetry-introduction/">introduction to the tracing with OpenTelemetry
+                <p>A few weeks ago I've published my <a href="https://blog.pipetail.io/posts/2020-02-09-opentelemetry-introduction/">introduction to the tracing with OpenTelemetry
 instrumentation</a>.
-I was trying to explain there that tracing has some value even in standalone applications. It was just a recommendation, but today we&rsquo;re gonna talk about scenarios where tracing
+I was trying to explain there that tracing has some value even in standalone applications. It was just a recommendation, but today we're gonna talk about scenarios where tracing
 is a must: distributed systems.</p>
             </div>
         </div>
@@ -157,7 +174,7 @@ is a must: distributed systems.</p>
             <p class="card-text text-muted text-uppercase">February 12, 2020</p>
             <div class="card-text">
                 <p>Are you using EKS managed worker
-pools? If you don&rsquo;t have any specific reasons for not using them, you should.
+pools? If you don't have any specific reasons for not using them, you should.
 It saves tons of time plus it boosts the &ldquo;managed Kubernetes&rdquo; feeling.
 However, this pretty new offering did not cover one specific use case:
 cluster with no Internet access.</p>
@@ -194,7 +211,7 @@ directly with OpenTelemetry and we can skip its ancestors.</p>
             <div class="card-text">
                 <p>At the moment, there are no doubts that transformation to the new
 architectural pattern, microservices architecture, is happening.
-Today, I don&rsquo;t want to emphasize that microservices architecture does
+Today, I don't want to emphasize that microservices architecture does
 not solve everything. This transformation is happening and my
 role here is to show you some possible ways how to minimize the struggle.</p>
             </div>

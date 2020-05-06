@@ -21,9 +21,9 @@
 <link rel="canonical" href="https://blog.pipetail.io/posts/2020-03-15-psp-on-eks/"><meta property="og:title" content="Getting started with PodSecurityPolicy on EKS" />
 <meta property="og:description" content="As you might already know, security is not something that a specialized department should
 be responsible for. Instead, we all should bear in mind that security matters and build
-secure solutions from the very beginning. Today we&rsquo;re gonna talk about some practices
-in the world of containerized apps and Kubernetess. So let&rsquo;s say we have some best practices
-for the containerized workloads. But how to enforce that? We&rsquo;ll tell you right away." />
+secure solutions from the very beginning. Today we&#39;re gonna talk about some practices
+in the world of containerized apps and Kubernetess. So let&#39;s say we have some best practices
+for the containerized workloads. But how to enforce that? We&#39;ll tell you right away." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://blog.pipetail.io/posts/2020-03-15-psp-on-eks/" />
 <meta property="og:image" content="https://blog.pipetail.io/images/2020-03-15-EKS-private-cluster.png" />
@@ -32,9 +32,9 @@ for the containerized workloads. But how to enforce that? We&rsquo;ll tell you r
 <meta itemprop="name" content="Getting started with PodSecurityPolicy on EKS">
 <meta itemprop="description" content="As you might already know, security is not something that a specialized department should
 be responsible for. Instead, we all should bear in mind that security matters and build
-secure solutions from the very beginning. Today we&rsquo;re gonna talk about some practices
-in the world of containerized apps and Kubernetess. So let&rsquo;s say we have some best practices
-for the containerized workloads. But how to enforce that? We&rsquo;ll tell you right away.">
+secure solutions from the very beginning. Today we&#39;re gonna talk about some practices
+in the world of containerized apps and Kubernetess. So let&#39;s say we have some best practices
+for the containerized workloads. But how to enforce that? We&#39;ll tell you right away.">
 <meta itemprop="datePublished" content="2020-03-15T07:00:00&#43;01:00" />
 <meta itemprop="dateModified" content="2020-03-15T07:00:00&#43;01:00" />
 <meta itemprop="wordCount" content="935">
@@ -48,9 +48,9 @@ for the containerized workloads. But how to enforce that? We&rsquo;ll tell you r
 <meta name="twitter:title" content="Getting started with PodSecurityPolicy on EKS"/>
 <meta name="twitter:description" content="As you might already know, security is not something that a specialized department should
 be responsible for. Instead, we all should bear in mind that security matters and build
-secure solutions from the very beginning. Today we&rsquo;re gonna talk about some practices
-in the world of containerized apps and Kubernetess. So let&rsquo;s say we have some best practices
-for the containerized workloads. But how to enforce that? We&rsquo;ll tell you right away."/>
+secure solutions from the very beginning. Today we&#39;re gonna talk about some practices
+in the world of containerized apps and Kubernetess. So let&#39;s say we have some best practices
+for the containerized workloads. But how to enforce that? We&#39;ll tell you right away."/>
 
 </head>
 <body>
@@ -87,18 +87,18 @@ for the containerized workloads. But how to enforce that? We&rsquo;ll tell you r
                         <div class="content">
                             <p>As you might already know, security is not something that a specialized department should
 be responsible for. Instead, we all should bear in mind that security matters and build
-secure solutions from the very beginning. Today we&rsquo;re gonna talk about some practices
-in the world of containerized apps and Kubernetess. So let&rsquo;s say we have some best practices
-for the containerized workloads. But how to enforce that? We&rsquo;ll tell you right away.</p>
+secure solutions from the very beginning. Today we're gonna talk about some practices
+in the world of containerized apps and Kubernetess. So let's say we have some best practices
+for the containerized workloads. But how to enforce that? We'll tell you right away.</p>
 <p>And the answer is actually pretty straightforward. Do you want to enforce some security policies?
 Use <a href="https://kubernetes.io/docs/concepts/policy/pod-security-policy/">Pod Security Policy resource</a>.
 In reality, Pod Security Policy is just an admission controller which is able to check if
 pods comply to assigned set of rules.</p>
 <p>For instance, we can check if pod is not running in privileged mode or we can also restrict
-the use of certain volumes types, this comes handy for example when you don&rsquo;t want to
+the use of certain volumes types, this comes handy for example when you don't want to
 allow access to host filesystem.</p>
 <p>So why do I even write this post? We have some specialized resource so we just create it
-and that&rsquo;s it, right? Well, it&rsquo;s not that easy. And that&rsquo;s why I wrote this article. Let&rsquo;s begin.</p>
+and that's it, right? Well, it's not that easy. And that's why I wrote this article. Let's begin.</p>
 <h2 id="key-principles">Key principles</h2>
 <p>As already mentioned, Pod Security Policy is just another Kubernetes resource.
 The following document contains a really simple policy that prohibits the run of
@@ -121,7 +121,7 @@ spec:
   - '*'
 </code></pre>
 <p>But when you apply this document with <code>kubectl</code>, it just does nothing.
-That&rsquo;s because PSP mechanism is deeply integrated with RBAC system.
+That's because PSP mechanism is deeply integrated with RBAC system.
 In order to use this policy, you need to authorize the respective accounts
 to use it first.</p>
 <h2 id="rbac-magic">RBAC magic</h2>
@@ -144,8 +144,8 @@ rules:
 <p>Now we need to bind this <code>ClusterRole</code> to the certain <code>ServiceAcccout</code>.
 Here I need to step in and add some context. Why are we talking about ServiceAccounts
 when the workload is created by some users from flesh and bones?</p>
-<p>The thing is that usually, we don&rsquo;t create pod resources by ourselves but
-we&rsquo;re using some controllers instead. You can check more details in the
+<p>The thing is that usually, we don't create pod resources by ourselves but
+we're using some controllers instead. You can check more details in the
 <a href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/">official documentation</a>. So the whole job is done by <em>someone else</em> hence
 we need to bind <code>ClusterRole</code> accordingly. To show you the whole picture,
 here are <code>ServiceAccount</code> and <code>Deployment</code> resources we want to use for our
@@ -198,7 +198,7 @@ subjects:
 <p>From now, we should be able to run our workload as long as it does not run
 in privileged mode. Sweet.</p>
 <h2 id="eks-specific-configuration">EKS-specific configuration</h2>
-<p>But let&rsquo;s talk about EKS. This offering has enabled PSP out of the box.
+<p>But let's talk about EKS. This offering has enabled PSP out of the box.
 Do you have any experience with EKS? If yes, you know then that you are able to
 create any workload with no restrictions.</p>
 <p>However, it does not mean that <em>policy engine</em> is not enabled. The reason is that
@@ -206,13 +206,13 @@ PSP is a pretty comprehensive topic so EKS comes with preconfigured policy
 bound to all authenticated users.</p>
 <p>The key elements are <code>PodSecurityPolicy</code> <code>eks.privileged</code> and
 <code>ClusterRoleBinding</code> <code>eks:podsecuritypolicy:authenticated</code>.</p>
-<p>What I&rsquo;m saying here is that in order to apply your own rules you need to delete those
+<p>What I'm saying here is that in order to apply your own rules you need to delete those
 resources and start on the green field.</p>
 <pre><code class="language-bash">kubectl delete podsecuritypolicy eks.privileged
 kubectl delete clusterrolebinding eks:podsecuritypolicy:authenticated
 </code></pre>
 <p>But when you do so, please be prepared for the following: no new pods can be created
-from now. You&rsquo;ll most likely get a similar error since we need at least
+from now. You'll most likely get a similar error since we need at least
 one policy in order to start any pod with Pod Security Policy enabled.</p>
 <pre><code>unable to validate against any pod security policy: []
 </code></pre>
@@ -223,25 +223,25 @@ I really like this <a href="https://aws.amazon.com/blogs/opensource/using-pod-se
 <h2 id="rbac-pitfalls">RBAC pitfalls</h2>
 <p>When applying ultra restrictive policies, time to time you might encounter situations when
 the pod starts even when it does not comply with the PodSecurityPolicy.
-From my experience, it&rsquo;s always caused by incorrectly configured RBAC.</p>
-<p>For instance, you&rsquo;ve allowed all verbs to all resources in the <code>extensions</code> API group
+From my experience, it's always caused by incorrectly configured RBAC.</p>
+<p>For instance, you've allowed all verbs to all resources in the <code>extensions</code> API group
 so now your <code>ServiceAccount</code> is assigned to all <code>PodSecurityPolicy</code> resources
-hence the restrictions don&rsquo;t work as intended.</p>
+hence the restrictions don't work as intended.</p>
 <blockquote>
 <p>Please also note that some resources are availabel in multiple api groups.
 For instance, <code>PodSecurityPolicy</code> can be in <code>policy</code> and <code>extensions</code> at the same time!
 Dangerous stuff 😀</p>
 </blockquote>
-<p>But don&rsquo;t worry, you can address such issues with <code>auth can-i</code> <a href="https://kubernetes.io/docs/reference/access-authn-authz/authorization/#checking-api-access">command</a>!</p>
+<p>But don't worry, you can address such issues with <code>auth can-i</code> <a href="https://kubernetes.io/docs/reference/access-authn-authz/authorization/#checking-api-access">command</a>!</p>
 <pre><code class="language-bash">kubectl auth can-i use podsecuritypolicy/example --namespace app-test --as app
 </code></pre>
 <h2 id="wrap">Wrap</h2>
 <p>Security really matters and you should not skip <code>PodSecurityPolicy</code>
-just because it&rsquo;s not as straightforward as other Kubernetes resources.
-Sure, this component can&rsquo;t save the whole world but it can help you with some
-basics. Moreover, it&rsquo;s no so complex as you could see in this post. Give it a shot!</p>
+just because it's not as straightforward as other Kubernetes resources.
+Sure, this component can't save the whole world but it can help you with some
+basics. Moreover, it's no so complex as you could see in this post. Give it a shot!</p>
 <p>Do you have any specific questions regarding PSP? Do not hesitate to reach us,
-we&rsquo;re always happy to help.</p>
+we're always happy to help.</p>
 <h2 id="additional-resources">Additional resources</h2>
 <ul>
 <li><a href="https://kubernetes.io/docs/concepts/policy/pod-security-policy/#policy-order">Policy order</a></li>
