@@ -18,9 +18,8 @@
       <pubDate>Mon, 04 May 2020 07:00:00 +0100</pubDate>
       
       <guid>https://blog.pipetail.io/posts/2020-05-04-most-common-mistakes-k8s/</guid>
-      <description>We had the chance to see quite a bit of clusters in our years of experience with kubernetes (both managed and unmanaged - on GCP, AWS and Azure), and we see some mistakes being repeated. No shame in that, we’ve done most of these too!
-I&#39;ll try to show the ones we see very often and talk a bit about how to fix them.
-resources - requests and limits This definitely deserves the most attention and first place in this list.</description>
+      <description>&lt;p&gt;We had the chance to see quite a bit of clusters in our years of experience with kubernetes (both managed and unmanaged - on GCP, AWS and Azure), and we see some mistakes being repeated. No shame in that, we’ve done most of these too!&lt;/p&gt;
+&lt;p&gt;I&#39;ll try to show the ones we see very often and talk a bit about how to fix them.&lt;/p&gt;</description>
     </item>
     
   </channel>

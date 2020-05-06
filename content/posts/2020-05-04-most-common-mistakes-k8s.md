@@ -18,6 +18,8 @@ We had the chance to see quite a bit of clusters in our years of experience with
 
 I'll try to show the ones we see very often and talk a bit about how to fix them.
 
+<!--more-->
+
 ## resources - requests and limits
 This definitely deserves the most attention and first place in this list.
 
