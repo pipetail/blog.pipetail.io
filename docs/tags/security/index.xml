@@ -7,10 +7,20 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>Copyright © 2020 pipetail. All rights reserved.</copyright>
-    <lastBuildDate>Mon, 13 Apr 2020 07:00:00 +0100</lastBuildDate>
+    <lastBuildDate>Mon, 04 May 2020 07:00:00 +0100</lastBuildDate>
     
 	<atom:link href="https://blog.pipetail.io/tags/security/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>10 most common mistakes using kubernetes</title>
+      <link>https://blog.pipetail.io/posts/2020-05-04-most-common-mistakes-k8s/</link>
+      <pubDate>Mon, 04 May 2020 07:00:00 +0100</pubDate>
+      
+      <guid>https://blog.pipetail.io/posts/2020-05-04-most-common-mistakes-k8s/</guid>
+      <description>&lt;p&gt;We had the chance to see quite a bit of clusters in our years of experience with kubernetes (both managed and unmanaged - on GCP, AWS and Azure), and we see some mistakes being repeated. No shame in that, we’ve done most of these too!&lt;/p&gt;
+&lt;p&gt;I&#39;ll try to show the ones we see very often and talk a bit about how to fix them.&lt;/p&gt;</description>
+    </item>
     
     <item>
       <title>More EKS tips to make your life easier</title>
@@ -18,8 +28,8 @@
       <pubDate>Mon, 13 Apr 2020 07:00:00 +0100</pubDate>
       
       <guid>https://blog.pipetail.io/posts/2020-04-13-more-eks-tips/</guid>
-      <description>We&amp;rsquo;ve spent most of the last month on implementing EKS. Surprisingly, we&amp;rsquo;re always solving the same concerns no matter what project we&amp;rsquo;re working on. Here&amp;rsquo;s couple of tips for your EKS clusters!
-Skip kube2iam, go directly with IAM Roles for Service Accounts Kube2iam is amazing tool. I really like it and it helped me with granular control access in couple of projects. However, there&amp;rsquo;s a better solution that is supported out of the box: IAM roles for services accounts.</description>
+      <description>We&#39;ve spent most of the last month on implementing EKS. Surprisingly, we&#39;re always solving the same concerns no matter what project we&#39;re working on. Here&#39;s couple of tips for your EKS clusters!
+Skip kube2iam, go directly with IAM Roles for Service Accounts Kube2iam is amazing tool. I really like it and it helped me with granular control access in couple of projects. However, there&#39;s a better solution that is supported out of the box: IAM roles for services accounts.</description>
     </item>
     
     <item>
@@ -30,9 +40,9 @@ Skip kube2iam, go directly with IAM Roles for Service Accounts Kube2iam is amazi
       <guid>https://blog.pipetail.io/posts/2020-03-15-psp-on-eks/</guid>
       <description>&lt;p&gt;As you might already know, security is not something that a specialized department should
 be responsible for. Instead, we all should bear in mind that security matters and build
-secure solutions from the very beginning. Today we&amp;rsquo;re gonna talk about some practices
-in the world of containerized apps and Kubernetess. So let&amp;rsquo;s say we have some best practices
-for the containerized workloads. But how to enforce that? We&amp;rsquo;ll tell you right away.&lt;/p&gt;</description>
+secure solutions from the very beginning. Today we&#39;re gonna talk about some practices
+in the world of containerized apps and Kubernetess. So let&#39;s say we have some best practices
+for the containerized workloads. But how to enforce that? We&#39;ll tell you right away.&lt;/p&gt;</description>
     </item>
     
   </channel>

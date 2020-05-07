@@ -18,8 +18,8 @@
       <pubDate>Mon, 13 Apr 2020 07:00:00 +0100</pubDate>
       
       <guid>https://blog.pipetail.io/posts/2020-04-13-more-eks-tips/</guid>
-      <description>We&amp;rsquo;ve spent most of the last month on implementing EKS. Surprisingly, we&amp;rsquo;re always solving the same concerns no matter what project we&amp;rsquo;re working on. Here&amp;rsquo;s couple of tips for your EKS clusters!
-Skip kube2iam, go directly with IAM Roles for Service Accounts Kube2iam is amazing tool. I really like it and it helped me with granular control access in couple of projects. However, there&amp;rsquo;s a better solution that is supported out of the box: IAM roles for services accounts.</description>
+      <description>We&#39;ve spent most of the last month on implementing EKS. Surprisingly, we&#39;re always solving the same concerns no matter what project we&#39;re working on. Here&#39;s couple of tips for your EKS clusters!
+Skip kube2iam, go directly with IAM Roles for Service Accounts Kube2iam is amazing tool. I really like it and it helped me with granular control access in couple of projects. However, there&#39;s a better solution that is supported out of the box: IAM roles for services accounts.</description>
     </item>
     
     <item>
@@ -30,9 +30,9 @@ Skip kube2iam, go directly with IAM Roles for Service Accounts Kube2iam is amazi
       <guid>https://blog.pipetail.io/posts/2020-03-15-psp-on-eks/</guid>
       <description>&lt;p&gt;As you might already know, security is not something that a specialized department should
 be responsible for. Instead, we all should bear in mind that security matters and build
-secure solutions from the very beginning. Today we&amp;rsquo;re gonna talk about some practices
-in the world of containerized apps and Kubernetess. So let&amp;rsquo;s say we have some best practices
-for the containerized workloads. But how to enforce that? We&amp;rsquo;ll tell you right away.&lt;/p&gt;</description>
+secure solutions from the very beginning. Today we&#39;re gonna talk about some practices
+in the world of containerized apps and Kubernetess. So let&#39;s say we have some best practices
+for the containerized workloads. But how to enforce that? We&#39;ll tell you right away.&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -51,7 +51,7 @@ for the containerized workloads. But how to enforce that? We&amp;rsquo;ll tell y
       
       <guid>https://blog.pipetail.io/posts/2020-02-12-eks-private-cluster/</guid>
       <description>&lt;p&gt;Are you using EKS managed worker
-pools? If you don&amp;rsquo;t have any specific reasons for not using them, you should.
+pools? If you don&#39;t have any specific reasons for not using them, you should.
 It saves tons of time plus it boosts the &amp;ldquo;managed Kubernetes&amp;rdquo; feeling.
 However, this pretty new offering did not cover one specific use case:
 cluster with no Internet access.&lt;/p&gt;</description>

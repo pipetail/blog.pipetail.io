@@ -83,20 +83,20 @@ directly with OpenTelemetry and we can skip its ancestors."/>
 What does it mean? Well, we can start instrumenting applications
 directly with OpenTelemetry and we can skip its ancestors.</p>
 <blockquote>
-<p>Ehmm. Instrumenting? Ancestors? C&rsquo;mon Stepan. What does it mean?</p>
+<p>Ehmm. Instrumenting? Ancestors? C'mon Stepan. What does it mean?</p>
 </blockquote>
 <p>My bad, let me step back and make it right. OpenTelemetry is pretty new project
 which <a href="https://opentelemetry.io/about/">merges OpenCensus and OpenTracing</a>
 projects together. Both projects had the same vision: make the observability
-of applications better with tracing. And now we&rsquo;re getting to the topic.
-What&rsquo;s the tracing? What does it mean?</p>
-<p>Tracing is basically a technique to record information about a program&rsquo;s execution.
+of applications better with tracing. And now we're getting to the topic.
+What's the tracing? What does it mean?</p>
+<p>Tracing is basically a technique to record information about a program's execution.
 It means that you can instrument your code with some library to actually
-capture what&rsquo;s happening when the application is processing something.
+capture what's happening when the application is processing something.
 Certain activities can be divided into spans, spans can also represent the
 hierarchy so the recorded frame (trace) can mimic all the application logic.</p>
-<p>The practical implications are obvious: when something&rsquo;s broken, you can identify
-the exact part of the program without staring into log files. Also, if you&rsquo;re
+<p>The practical implications are obvious: when something's broken, you can identify
+the exact part of the program without staring into log files. Also, if you're
 experiencing long latencies, you can use visualization of your traces to
 quickly find the part of the program responsible for such delays!</p>
 <p>Try to imagine that we put in place some parallelism and we instrument it
@@ -108,14 +108,14 @@ with OpenTelemetry, this is the result:</p>
     </a>
 </figure>
 
-<p>With tracing, you have absolute visibility on what&rsquo;s your application is doing.</p>
+<p>With tracing, you have absolute visibility on what's your application is doing.</p>
 <h2 id="not-so-deep-dive-into-golang">(not so) deep dive into Golang</h2>
 <p>Previous examples come from <a href="https://lightstep.com/">LightStep</a>,
-it&rsquo;s basically managed service for the collecting and visualizing spans from the applications.
-But perhaps you don&rsquo;t want to use third party service for
+it's basically managed service for the collecting and visualizing spans from the applications.
+But perhaps you don't want to use third party service for
 the local development as your only role is to actually instrument it somehow with
-tracing. With OpenTelemetry it&rsquo;s no problem at all cause it&rsquo;s designed to be modular!</p>
-<p>So let&rsquo;s just start with dummy exporter which is pushing spans to stdout.</p>
+tracing. With OpenTelemetry it's no problem at all cause it's designed to be modular!</p>
+<p>So let's just start with dummy exporter which is pushing spans to stdout.</p>
 <pre><code class="language-go">package main
 
 import (
@@ -183,9 +183,9 @@ this is what we get in the console:</p>
 }
 </code></pre>
 <h2 id="change-the-exporter-profit">Change the exporter. Profit.</h2>
-<p>Right, that&rsquo;s very interesting. But that&rsquo;s not something you want to use
-in the production I guess. What&rsquo;s the added value, right?
-And here we can leverage the modularity I was talking about. Let&rsquo;s say
+<p>Right, that's very interesting. But that's not something you want to use
+in the production I guess. What's the added value, right?
+And here we can leverage the modularity I was talking about. Let's say
 we want to use LightStep (and I really recommend this tool!),
 first of all, we need to prepare a new function to set the global
 trace provider:</p>
@@ -253,15 +253,15 @@ of tracing exporters. Also, I wanted to articulate that it really makes
 sense to use tracing even on a small scale. If you are doing local development,
 you can use all-in-one Jaeger installation or you can leverage free tier of
 some SaaS such as <a href="https://lightstep.com/">LightStep</a>.</p>
-<p>There&rsquo;s no good or bad solution for tracing,the key takeaway here is:</p>
+<p>There's no good or bad solution for tracing,the key takeaway here is:</p>
 <blockquote>
 <p>do not underestimate tracing, do not operate your applications with zero visibility.
 Everyone can benefit from tracing. Operations, Developers. Everyone. Use tracing!</p>
 </blockquote>
-<p><strong>Next time</strong> I&rsquo;d like to cover context propagation between services and some basic tagging of spans.
+<p><strong>Next time</strong> I'd like to cover context propagation between services and some basic tagging of spans.
 Especially the propagation is really exciting topic, looking forward to sharing with you more insights.</p>
-<p>PS I&rsquo;ll have an ignite talk about OpenTelemetry at <a href="https://www.devopsdays.cz/">DevOps Days Prague 2020</a>.
-If you&rsquo;re attending this event, feel free to reach me and let&rsquo;s discuss this topic.</p>
+<p>PS I'll have an ignite talk about OpenTelemetry at <a href="https://www.devopsdays.cz/">DevOps Days Prague 2020</a>.
+If you're attending this event, feel free to reach me and let's discuss this topic.</p>
                             <ul class="authors list-inline"><li class="list-inline-item mr-3">
                     <div class="media author"><a href="/authors/stepan-vrany/" class="mr-3">
                                     <picture>
