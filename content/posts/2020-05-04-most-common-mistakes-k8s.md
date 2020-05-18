@@ -46,11 +46,11 @@ Burstable (more likely to get OOMkilled more often):
 ```yaml
     resources:
       requests:
-        memory: "64Mi"
-        cpu: "250m"
-      limits:
         memory: "128Mi"
         cpu: "500m"
+      limits:
+        memory: "256Mi"
+        cpu: 2
 ```
 
 Guaranteed:
@@ -58,10 +58,10 @@ Guaranteed:
     resources:
       requests:
         memory: "128Mi"
-        cpu: "500m"
+        cpu: 2
       limits:
         memory: "128Mi"
-        cpu: "500m"
+        cpu: 2
 ```
 
 So what can help you when setting resources?
