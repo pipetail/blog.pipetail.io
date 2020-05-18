@@ -94,20 +94,20 @@ I&#39;ll try to show the ones we see very often and talk a bit about how to fix 
 <p>Burstable (more likely to get OOMkilled more often):</p>
 <pre><code class="language-yaml">    resources:
       requests:
-        memory: &quot;64Mi&quot;
-        cpu: &quot;250m&quot;
-      limits:
         memory: &quot;128Mi&quot;
         cpu: &quot;500m&quot;
+      limits:
+        memory: &quot;256Mi&quot;
+        cpu: 2
 </code></pre>
 <p>Guaranteed:</p>
 <pre><code class="language-yaml">    resources:
       requests:
         memory: &quot;128Mi&quot;
-        cpu: &quot;500m&quot;
+        cpu: 2
       limits:
         memory: &quot;128Mi&quot;
-        cpu: &quot;500m&quot;
+        cpu: 2
 </code></pre>
 <p>So what can help you when setting resources?</p>
 <p>You can see the current cpu and memory usage of pods (and containers in them) using <em>metrics-server</em>. Chances are, you are already running it. Simply run these:</p>
