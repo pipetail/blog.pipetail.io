@@ -7,10 +7,19 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>Copyright © 2020 pipetail. All rights reserved.</copyright>
-    <lastBuildDate>Mon, 04 May 2020 07:00:00 +0100</lastBuildDate>
+    <lastBuildDate>Mon, 13 Jul 2020 10:00:00 +0100</lastBuildDate>
     
 	<atom:link href="https://blog.pipetail.io/authors/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title></title>
+      <link>https://blog.pipetail.io/authors/stepan-vrany/</link>
+      <pubDate>Mon, 13 Jul 2020 10:00:00 +0100</pubDate>
+      
+      <guid>https://blog.pipetail.io/authors/stepan-vrany/</guid>
+      <description>I&amp;rsquo;m Stepan, I started with automation back in 2010 as a technician in servers factory. Then, I moved to the consulting role in Hewlett Packard Enterprise. I spent in that factory for almost 7 years, I&amp;rsquo;ve learned there how to automate almost every deployment at any scale. Also, I got in touch with the platforms there. In 2018 it was about the time to move on and explore the real purpose of stuff I was implementing there.</description>
+    </item>
     
     <item>
       <title></title>
@@ -18,19 +27,10 @@
       <pubDate>Mon, 04 May 2020 07:00:00 +0100</pubDate>
       
       <guid>https://blog.pipetail.io/authors/marek-bartik/</guid>
-      <description>I&#39;m Marek, I&#39;m a NoOps/NoCode enthusiast. Started as a C++ programmer while doing masters in Computer Systems and Networks.
+      <description>I&amp;rsquo;m Marek, I&amp;rsquo;m a NoOps/NoCode enthusiast. Started as a C++ programmer while doing masters in Computer Systems and Networks.
 Growing up in the SysAdmin era, I quickly realized communication and collaboration is the key.
 Nowadays I focus on Cloud Architecting, microservices and Continuous Everything to solve business problems, not technical ones.
-I&#39;m passionate about traveling, minimalist, DevOps and Cloud Native.</description>
-    </item>
-    
-    <item>
-      <title></title>
-      <link>https://blog.pipetail.io/authors/stepan-vrany/</link>
-      <pubDate>Mon, 13 Apr 2020 07:00:00 +0100</pubDate>
-      
-      <guid>https://blog.pipetail.io/authors/stepan-vrany/</guid>
-      <description>I&#39;m Stepan, I started with automation back in 2010 as a technician in servers factory. Then, I moved to the consulting role in Hewlett Packard Enterprise. I spent in that factory for almost 7 years, I&#39;ve learned there how to automate almost every deployment at any scale. Also, I got in touch with the platforms there. In 2018 it was about the time to move on and explore the real purpose of stuff I was implementing there.</description>
+I&amp;rsquo;m passionate about traveling, minimalist, DevOps and Cloud Native.</description>
     </item>
     
   </channel>

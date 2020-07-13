@@ -22,8 +22,8 @@
 <meta property="og:description" content="There are customers where public internet access is no go. But
 at the same time you need to access your EC2 instances,
 right? How would you approach this? Usually, we use bastion hosts,
-that&#39;s basically a different name for jump host you can use
-to access internal resources. In AWS, you don&#39;t need to manage
+that&rsquo;s basically a different name for jump host you can use
+to access internal resources. In AWS, you don&rsquo;t need to manage
 such extra instances and take care of all the low-level configuration.
 Instead, you can leverage fully managed Session Manager from the
 AWS Systems Manager suite!" />
@@ -36,8 +36,8 @@ AWS Systems Manager suite!" />
 <meta itemprop="description" content="There are customers where public internet access is no go. But
 at the same time you need to access your EC2 instances,
 right? How would you approach this? Usually, we use bastion hosts,
-that&#39;s basically a different name for jump host you can use
-to access internal resources. In AWS, you don&#39;t need to manage
+that&rsquo;s basically a different name for jump host you can use
+to access internal resources. In AWS, you don&rsquo;t need to manage
 such extra instances and take care of all the low-level configuration.
 Instead, you can leverage fully managed Session Manager from the
 AWS Systems Manager suite!">
@@ -55,8 +55,8 @@ AWS Systems Manager suite!">
 <meta name="twitter:description" content="There are customers where public internet access is no go. But
 at the same time you need to access your EC2 instances,
 right? How would you approach this? Usually, we use bastion hosts,
-that&#39;s basically a different name for jump host you can use
-to access internal resources. In AWS, you don&#39;t need to manage
+that&rsquo;s basically a different name for jump host you can use
+to access internal resources. In AWS, you don&rsquo;t need to manage
 such extra instances and take care of all the low-level configuration.
 Instead, you can leverage fully managed Session Manager from the
 AWS Systems Manager suite!"/>
@@ -97,19 +97,19 @@ AWS Systems Manager suite!"/>
                             <p>There are customers where public internet access is no go. But
 at the same time you need to access your EC2 instances,
 right? How would you approach this? Usually, we use bastion hosts,
-that's basically a different name for jump host you can use
-to access internal resources. In AWS, you don't need to manage
+that&rsquo;s basically a different name for jump host you can use
+to access internal resources. In AWS, you don&rsquo;t need to manage
 such extra instances and take care of all the low-level configuration.
 Instead, you can leverage fully managed Session Manager from the
 AWS Systems Manager suite!</p>
 <h2 id="before-you-start">Before you start</h2>
 <p>First, you need to make sure that your systems have SSM Agent installed.
-There's <a href="https://docs.aws.amazon.com/systems-manager/latest/userguide/ssm-agent.html">decent documentation available</a>
+There&rsquo;s <a href="https://docs.aws.amazon.com/systems-manager/latest/userguide/ssm-agent.html">decent documentation available</a>
 but if you are using official AMI, you can skip this since SSM Agent
 is already pre-installed.</p>
-<p>Also, your instances need proper IAM permissions. And that's actually
+<p>Also, your instances need proper IAM permissions. And that&rsquo;s actually
 pretty simple task, just attach AWS managed policy
-<code>AmazonSSMManagedInstanceCore</code> to your instances and that's it!
+<code>AmazonSSMManagedInstanceCore</code> to your instances and that&rsquo;s it!
 Alternatively, we can just copy&amp;paste the content of this
 managed role to the existing user-managed role.
 Both scenarios work well.</p>
@@ -172,7 +172,7 @@ in the System Manager.</p>
     </a>
 </figure>
 
-<p>And you can even start a new session from here. It'll open a
+<p>And you can even start a new session from here. It&rsquo;ll open a
 new window with web-based terminal.</p>
 <figure class="figure">
     <a href="/images/2020-02-24-amazon-ssm-session-manager-02.png" class="d-block" data-toggle="lightbox" data-gallery="post-gallery">
@@ -182,14 +182,14 @@ new window with web-based terminal.</p>
 </figure>
 
 <p>However, it does not feel right for day-to-day operations 😂.
-Let's connect there directly from the workstation.</p>
+Let&rsquo;s connect there directly from the workstation.</p>
 <h2 id="just-one-more-step-">Just one more step &hellip;</h2>
-<p>It's just ssh, right? So we're almost ready,
+<p>It&rsquo;s just ssh, right? So we&rsquo;re almost ready,
 we just need to quickly prepare our local
 workstation by installing Session Manager plugin.
 This plugin is available for all major platforms, just copy&amp;paste
 a few lines from the <a href="https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html">documentation</a>
-and that's pretty much it.</p>
+and that&rsquo;s pretty much it.</p>
 <pre><code class="language-bash">curl &quot;https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb&quot; -o &quot;session-manager-plugin.deb&quot;
 sudo dpkg -i session-manager-plugin.deb
 </code></pre>
@@ -200,11 +200,11 @@ so shh command knows how to handle hosts starting with
     ProxyCommand sh -c &quot;aws ssm start-session --target %h --document-name AWS-StartSSHSession --parameters 'portNumber=%p'&quot;
 </code></pre>
 <h2 id="good-old-ssh">Good old SSH</h2>
-<p>From now it's really straightforward. Get your instance id and
+<p>From now it&rsquo;s really straightforward. Get your instance id and
 open the SSH session.</p>
 <pre><code class="language-bash">ssh ubuntu@i-0182d91e85d69cf00
 </code></pre>
-<p>Yeah, it's that simple. We can treat it as good old SSH
+<p>Yeah, it&rsquo;s that simple. We can treat it as good old SSH
 from here. No strings attached.</p>
 <figure class="figure">
     <a href="/images/2020-02-24-amazon-ssm-session-manager-03.png" class="d-block" data-toggle="lightbox" data-gallery="post-gallery">
@@ -216,7 +216,7 @@ from here. No strings attached.</p>
 <h2 id="key-advantages-of-session-manager-service">Key advantages of Session Manager service</h2>
 <p>The obvious was already mentioned: no need to manage own EC2
 instances for bastion hosts.</p>
-<p>But there's more of it. You can even control access to the instances
+<p>But there&rsquo;s more of it. You can even control access to the instances
 with IAM! User with the following policy attached can access
 all three instances mentioned in the <code>Resource</code> property. As always,
 <a href="https://docs.aws.amazon.com/systems-manager/latest/userguide/getting-started-restrict-access-examples.html">everything is documented</a> so suit
@@ -250,11 +250,11 @@ yourself.</p>
 <p>And last but not least, you can review all the open session and you can even inspect the history. This will come handy in case of any audit 😏.
 From this perspective, AWS Systems Manager Session Manager is even
 more secure than traditional setups with bastion hosts (of course,
-I'm not talking about over-engineered configurations).</p>
+I&rsquo;m not talking about over-engineered configurations).</p>
 <h2 id="wrap">Wrap</h2>
-<p>Apparently, there's no need to stick with traditional bastion hosts,
+<p>Apparently, there&rsquo;s no need to stick with traditional bastion hosts,
 AWS System Manager Session Manager can do all the job. Moreover,
-you can granularly control SSH access via IAM. That's actually,
+you can granularly control SSH access via IAM. That&rsquo;s actually,
 at least from my point of view, the most powerful feature.</p>
 <p><strong>Say bye-bye to your jump hosts!</strong></p>
                             <ul class="authors list-inline"><li class="list-inline-item mr-3">

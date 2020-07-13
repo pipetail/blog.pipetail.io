@@ -19,16 +19,16 @@
 
 
 <link rel="canonical" href="https://blog.pipetail.io/posts/2020-04-13-more-eks-tips/"><meta property="og:title" content="More EKS tips to make your life easier" />
-<meta property="og:description" content="We&#39;ve spent most of the last month on implementing EKS. Surprisingly, we&#39;re always solving the same concerns no matter what project we&#39;re working on. Here&#39;s couple of tips for your EKS clusters!
-Skip kube2iam, go directly with IAM Roles for Service Accounts Kube2iam is amazing tool. I really like it and it helped me with granular control access in couple of projects. However, there&#39;s a better solution that is supported out of the box: IAM roles for services accounts." />
+<meta property="og:description" content="We&rsquo;ve spent most of the last month on implementing EKS. Surprisingly, we&rsquo;re always solving the same concerns no matter what project we&rsquo;re working on. Here&rsquo;s couple of tips for your EKS clusters!
+Skip kube2iam, go directly with IAM Roles for Service Accounts Kube2iam is amazing tool. I really like it and it helped me with granular control access in couple of projects. However, there&rsquo;s a better solution that is supported out of the box: IAM roles for services accounts." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://blog.pipetail.io/posts/2020-04-13-more-eks-tips/" />
 <meta property="og:image" content="https://blog.pipetail.io/images/2020-04-13-more-EKS-tips.png" />
 <meta property="article:published_time" content="2020-04-13T07:00:00+01:00" />
 <meta property="article:modified_time" content="2020-04-13T07:00:00+01:00" />
 <meta itemprop="name" content="More EKS tips to make your life easier">
-<meta itemprop="description" content="We&#39;ve spent most of the last month on implementing EKS. Surprisingly, we&#39;re always solving the same concerns no matter what project we&#39;re working on. Here&#39;s couple of tips for your EKS clusters!
-Skip kube2iam, go directly with IAM Roles for Service Accounts Kube2iam is amazing tool. I really like it and it helped me with granular control access in couple of projects. However, there&#39;s a better solution that is supported out of the box: IAM roles for services accounts.">
+<meta itemprop="description" content="We&rsquo;ve spent most of the last month on implementing EKS. Surprisingly, we&rsquo;re always solving the same concerns no matter what project we&rsquo;re working on. Here&rsquo;s couple of tips for your EKS clusters!
+Skip kube2iam, go directly with IAM Roles for Service Accounts Kube2iam is amazing tool. I really like it and it helped me with granular control access in couple of projects. However, there&rsquo;s a better solution that is supported out of the box: IAM roles for services accounts.">
 <meta itemprop="datePublished" content="2020-04-13T07:00:00&#43;01:00" />
 <meta itemprop="dateModified" content="2020-04-13T07:00:00&#43;01:00" />
 <meta itemprop="wordCount" content="714">
@@ -40,8 +40,8 @@ Skip kube2iam, go directly with IAM Roles for Service Accounts Kube2iam is amazi
 <meta name="twitter:image" content="https://blog.pipetail.io/images/2020-04-13-more-EKS-tips.png"/>
 
 <meta name="twitter:title" content="More EKS tips to make your life easier"/>
-<meta name="twitter:description" content="We&#39;ve spent most of the last month on implementing EKS. Surprisingly, we&#39;re always solving the same concerns no matter what project we&#39;re working on. Here&#39;s couple of tips for your EKS clusters!
-Skip kube2iam, go directly with IAM Roles for Service Accounts Kube2iam is amazing tool. I really like it and it helped me with granular control access in couple of projects. However, there&#39;s a better solution that is supported out of the box: IAM roles for services accounts."/>
+<meta name="twitter:description" content="We&rsquo;ve spent most of the last month on implementing EKS. Surprisingly, we&rsquo;re always solving the same concerns no matter what project we&rsquo;re working on. Here&rsquo;s couple of tips for your EKS clusters!
+Skip kube2iam, go directly with IAM Roles for Service Accounts Kube2iam is amazing tool. I really like it and it helped me with granular control access in couple of projects. However, there&rsquo;s a better solution that is supported out of the box: IAM roles for services accounts."/>
 
 </head>
 <body>
@@ -76,32 +76,32 @@ Skip kube2iam, go directly with IAM Roles for Service Accounts Kube2iam is amazi
                         <h2 class="mb-3">More EKS tips to make your life easier</h2>
 
                         <div class="content">
-                            <p>We've spent most of the last month on implementing EKS. Surprisingly, we're always solving the same
-concerns no matter what project we're working on. Here's couple of tips for your EKS clusters!</p>
+                            <p>We&rsquo;ve spent most of the last month on implementing EKS. Surprisingly, we&rsquo;re always solving the same
+concerns no matter what project we&rsquo;re working on. Here&rsquo;s couple of tips for your EKS clusters!</p>
 <h2 id="skip-kube2iam-go-directly-with--iam-roles-for-service-accounts">Skip kube2iam, go directly with  IAM Roles for Service Accounts</h2>
 <p>Kube2iam is amazing tool. I really like it and it helped me with granular control
-access in couple of projects. However, there's a better solution that is
+access in couple of projects. However, there&rsquo;s a better solution that is
 supported out of the box: <a href="https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html">IAM roles for services accounts</a>.</p>
 <blockquote>
-<p>Why is it better? We're practically removing one moving part and that's IMO always good.</p>
+<p>Why is it better? We&rsquo;re practically removing one moving part and that&rsquo;s IMO always good.</p>
 </blockquote>
-<p>In essence, we just need to create a new identity provider in the IAM console and that's pretty much it.
+<p>In essence, we just need to create a new identity provider in the IAM console and that&rsquo;s pretty much it.
 Then, EKS control plane is mutating all the pods that are using ServiceAccount with
 <code>eks.amazonaws.com/role-arn</code> annotation.</p>
 <p>With all the configuration supplied by the mutating webhook AWS SDK now knows how to
 obtain credentials to AWS so your application can interact with AWS API in strictly
 controlled fashion. This works with all main stream applications,
 to name a few: Cluster Autoscaler, ALB Ingress Controller or even Gitlab CI runner for Kubernetes.
-It's all about supported SDK versions. <a href="https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts-minimum-sdk.html">Here's the list.</a></p>
+It&rsquo;s all about supported SDK versions. <a href="https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts-minimum-sdk.html">Here&rsquo;s the list.</a></p>
 <h2 id="tag-your-asgs-properly-for-maximum-savings">Tag your ASGs properly for maximum savings</h2>
 <p>EKS environment is well suited for scaling from zero. This comes handy for downscaling
 after working hours (e.g. preview environments) or upscaling of instance
 groups for some specialized workload (e.g. batch processing or training of alghorithms).</p>
 <p>All mentioned is enabled by
 <a href="https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler">Cluster Autoscaler</a>,
-but how can Cluster Autoscaler know what ASG it's supposed to scale up when any
-nodes with such Kubernetes labels don't exist yet?</p>
-<p>Here's an easy answer: tags. This part is <a href="https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/FAQ.md#how-can-i-scale-a-node-group-to-0">well documented</a> but it sometimes might be complicated to find the right piece of docs, right?</p>
+but how can Cluster Autoscaler know what ASG it&rsquo;s supposed to scale up when any
+nodes with such Kubernetes labels don&rsquo;t exist yet?</p>
+<p>Here&rsquo;s an easy answer: tags. This part is <a href="https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/FAQ.md#how-can-i-scale-a-node-group-to-0">well documented</a> but it sometimes might be complicated to find the right piece of docs, right?</p>
 <p>Long story short, if your nodes from the single ASG have some labels (<code>--node-labels</code> kubelet flag),
 always make sure that ASG has the same labels in the following format:</p>
 <pre><code class="language-terraform">    {
@@ -115,15 +115,15 @@ schedule workload with <code>nodeSelector</code> specified.</p>
 <h2 id="try-to-experiment-with-cluster-autoscaler-priority-expander">Try to experiment with Cluster Autoscaler priority expander</h2>
 <p>Did you know that Cluster Autoscaler has a functionality called expanders that can
 change the way how Cluster Autoscaler behaves? It was sort of a new information,
-we've found this last week while implementing setup for some lower priority jobs.</p>
-<p>Again, we'll rather use some story to get you into this topic. So try to imagine
+we&rsquo;ve found this last week while implementing setup for some lower priority jobs.</p>
+<p>Again, we&rsquo;ll rather use some story to get you into this topic. So try to imagine
 that you have some lower priority jobs that are not really critical for your application.
 So in this case it does not really make sense to pay for 99.something uptime and we can
 use some less reliable spot instances with lower price.</p>
 <p>But when we are requesting spot instances, the result is always unknown due to nature of it
-so it's absolutely fine. Now I need to return to the part where I was telling you about
-low priority jobs. They are low priority, that's still valid. But I need them eventually,
-I can't wait for a week till my request will be fulfilled. So what's the process here?</p>
+so it&rsquo;s absolutely fine. Now I need to return to the part where I was telling you about
+low priority jobs. They are low priority, that&rsquo;s still valid. But I need them eventually,
+I can&rsquo;t wait for a week till my request will be fulfilled. So what&rsquo;s the process here?</p>
 <p><strong><a href="https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler/expander/priority">Priority exander!</a></strong> With this beast enabled you can cover such edge cases.</p>
 <p>All you need is start Cluster Autoscaler with <code>--expander=priority</code> and create a new ConfigMap
 in the same namespace where the Cluster Autoscaler runs.</p>
@@ -142,14 +142,14 @@ data:
 <p>Now, cluster autoscaler will try to scale up ASG <code>name-of-asg-with-spot</code> first
 and if it fails it just continues with ASG <code>name-of-asg-with-on-demand</code>.</p>
 <blockquote>
-<p>From our personal experience, it's also a good idea to experiment with <code>--max-node-provision-time</code>
+<p>From our personal experience, it&rsquo;s also a good idea to experiment with <code>--max-node-provision-time</code>
 flag a bit. By default it waits 15 minutes but this might be too long in some cases.
 And one additional tip, always do some PoC for your use cases. Documentation is
-slightly lacking so you won't cause any harm by testing it before it reaches production 😏</p>
+slightly lacking so you won&rsquo;t cause any harm by testing it before it reaches production 😏</p>
 </blockquote>
 <h2 id="wrap">Wrap</h2>
-<p>Last month was absolutely thrilling. We've learned a lot of new things about EKS and Kubernetes
-itself and we're so happy that we can share them with you right away!
+<p>Last month was absolutely thrilling. We&rsquo;ve learned a lot of new things about EKS and Kubernetes
+itself and we&rsquo;re so happy that we can share them with you right away!
 Do you have more tips or are you having terrible times with something mentioned above? Just hit us up
 (<a href="https://twitter.com/MarekBartik">@MarekBartik</a> <a href="https://twitter.com/MstrsObserver">@MstrsObserver</a>)
 on Twitter!</p>

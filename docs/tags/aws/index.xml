@@ -19,7 +19,7 @@
       
       <guid>https://blog.pipetail.io/posts/2020-05-04-most-common-mistakes-k8s/</guid>
       <description>&lt;p&gt;We had the chance to see quite a bit of clusters in our years of experience with kubernetes (both managed and unmanaged - on GCP, AWS and Azure), and we see some mistakes being repeated. No shame in that, we’ve done most of these too!&lt;/p&gt;
-&lt;p&gt;I&#39;ll try to show the ones we see very often and talk a bit about how to fix them.&lt;/p&gt;</description>
+&lt;p&gt;I&amp;rsquo;ll try to show the ones we see very often and talk a bit about how to fix them.&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -28,8 +28,8 @@
       <pubDate>Mon, 13 Apr 2020 07:00:00 +0100</pubDate>
       
       <guid>https://blog.pipetail.io/posts/2020-04-13-more-eks-tips/</guid>
-      <description>We&#39;ve spent most of the last month on implementing EKS. Surprisingly, we&#39;re always solving the same concerns no matter what project we&#39;re working on. Here&#39;s couple of tips for your EKS clusters!
-Skip kube2iam, go directly with IAM Roles for Service Accounts Kube2iam is amazing tool. I really like it and it helped me with granular control access in couple of projects. However, there&#39;s a better solution that is supported out of the box: IAM roles for services accounts.</description>
+      <description>We&amp;rsquo;ve spent most of the last month on implementing EKS. Surprisingly, we&amp;rsquo;re always solving the same concerns no matter what project we&amp;rsquo;re working on. Here&amp;rsquo;s couple of tips for your EKS clusters!
+Skip kube2iam, go directly with IAM Roles for Service Accounts Kube2iam is amazing tool. I really like it and it helped me with granular control access in couple of projects. However, there&amp;rsquo;s a better solution that is supported out of the box: IAM roles for services accounts.</description>
     </item>
     
     <item>
@@ -40,9 +40,9 @@ Skip kube2iam, go directly with IAM Roles for Service Accounts Kube2iam is amazi
       <guid>https://blog.pipetail.io/posts/2020-03-15-psp-on-eks/</guid>
       <description>&lt;p&gt;As you might already know, security is not something that a specialized department should
 be responsible for. Instead, we all should bear in mind that security matters and build
-secure solutions from the very beginning. Today we&#39;re gonna talk about some practices
-in the world of containerized apps and Kubernetess. So let&#39;s say we have some best practices
-for the containerized workloads. But how to enforce that? We&#39;ll tell you right away.&lt;/p&gt;</description>
+secure solutions from the very beginning. Today we&amp;rsquo;re gonna talk about some practices
+in the world of containerized apps and Kubernetess. So let&amp;rsquo;s say we have some best practices
+for the containerized workloads. But how to enforce that? We&amp;rsquo;ll tell you right away.&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -63,8 +63,8 @@ for the containerized workloads. But how to enforce that? We&#39;ll tell you rig
       <description>&lt;p&gt;There are customers where public internet access is no go. But
 at the same time you need to access your EC2 instances,
 right? How would you approach this? Usually, we use bastion hosts,
-that&#39;s basically a different name for jump host you can use
-to access internal resources. In AWS, you don&#39;t need to manage
+that&amp;rsquo;s basically a different name for jump host you can use
+to access internal resources. In AWS, you don&amp;rsquo;t need to manage
 such extra instances and take care of all the low-level configuration.
 Instead, you can leverage fully managed Session Manager from the
 AWS Systems Manager suite!&lt;/p&gt;</description>
@@ -77,7 +77,7 @@ AWS Systems Manager suite!&lt;/p&gt;</description>
       
       <guid>https://blog.pipetail.io/posts/2020-02-12-eks-private-cluster/</guid>
       <description>&lt;p&gt;Are you using EKS managed worker
-pools? If you don&#39;t have any specific reasons for not using them, you should.
+pools? If you don&amp;rsquo;t have any specific reasons for not using them, you should.
 It saves tons of time plus it boosts the &amp;ldquo;managed Kubernetes&amp;rdquo; feeling.
 However, this pretty new offering did not cover one specific use case:
 cluster with no Internet access.&lt;/p&gt;</description>

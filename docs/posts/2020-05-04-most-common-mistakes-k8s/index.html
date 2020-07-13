@@ -20,7 +20,7 @@
 
 <link rel="canonical" href="https://blog.pipetail.io/posts/2020-05-04-most-common-mistakes-k8s/"><meta property="og:title" content="10 most common mistakes using kubernetes" />
 <meta property="og:description" content="We had the chance to see quite a bit of clusters in our years of experience with kubernetes (both managed and unmanaged - on GCP, AWS and Azure), and we see some mistakes being repeated. No shame in that, we’ve done most of these too!
-I&#39;ll try to show the ones we see very often and talk a bit about how to fix them." />
+I&rsquo;ll try to show the ones we see very often and talk a bit about how to fix them." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://blog.pipetail.io/posts/2020-05-04-most-common-mistakes-k8s/" />
 <meta property="og:image" content="https://blog.pipetail.io/images/2020-05-04-cover.jpg" />
@@ -28,7 +28,7 @@ I&#39;ll try to show the ones we see very often and talk a bit about how to fix 
 <meta property="article:modified_time" content="2020-05-04T07:00:00+01:00" />
 <meta itemprop="name" content="10 most common mistakes using kubernetes">
 <meta itemprop="description" content="We had the chance to see quite a bit of clusters in our years of experience with kubernetes (both managed and unmanaged - on GCP, AWS and Azure), and we see some mistakes being repeated. No shame in that, we’ve done most of these too!
-I&#39;ll try to show the ones we see very often and talk a bit about how to fix them.">
+I&rsquo;ll try to show the ones we see very often and talk a bit about how to fix them.">
 <meta itemprop="datePublished" content="2020-05-04T07:00:00&#43;01:00" />
 <meta itemprop="dateModified" content="2020-05-04T07:00:00&#43;01:00" />
 <meta itemprop="wordCount" content="2397">
@@ -41,7 +41,7 @@ I&#39;ll try to show the ones we see very often and talk a bit about how to fix 
 
 <meta name="twitter:title" content="10 most common mistakes using kubernetes"/>
 <meta name="twitter:description" content="We had the chance to see quite a bit of clusters in our years of experience with kubernetes (both managed and unmanaged - on GCP, AWS and Azure), and we see some mistakes being repeated. No shame in that, we’ve done most of these too!
-I&#39;ll try to show the ones we see very often and talk a bit about how to fix them."/>
+I&rsquo;ll try to show the ones we see very often and talk a bit about how to fix them."/>
 
 </head>
 <body>
@@ -77,20 +77,20 @@ I&#39;ll try to show the ones we see very often and talk a bit about how to fix 
 
                         <div class="content">
                             <p>We had the chance to see quite a bit of clusters in our years of experience with kubernetes (both managed and unmanaged - on GCP, AWS and Azure), and we see some mistakes being repeated. No shame in that, we’ve done most of these too!</p>
-<p>I'll try to show the ones we see very often and talk a bit about how to fix them.</p>
+<p>I&rsquo;ll try to show the ones we see very often and talk a bit about how to fix them.</p>
 <h2 id="resources---requests-and-limits">resources - requests and limits</h2>
 <p>This definitely deserves the most attention and first place in this list.</p>
 <p>CPU request are usually either <strong>not set</strong> or <strong>set very low</strong> (so that we can fit a lot of pods on each node) and nodes are thus overcommited. In time of high demand the CPUs of the node are fully utilized and our workload is getting only “what it had requested” and gets <strong>CPU throttled</strong>, causing increased application latency, timeouts, etc.</p>
-<p>BestEffort (please don't):</p>
+<p>BestEffort (please don&rsquo;t):</p>
 <pre><code class="language-yaml">    resources: {}
 </code></pre>
-<p>very low cpu (please don't):</p>
+<p>very low cpu (please don&rsquo;t):</p>
 <pre><code class="language-yaml">    resources:
       requests:
         cpu: &quot;1m&quot;
 </code></pre>
 <p>On the other hand, having a CPU limit can unnecessarily throttle pods even if the node’s CPU is not fully utilized which again can cause increased latency. There is a an open discussion around <em>CPU CFS quota</em> in linux kernel and cpu throttling based on set cpu limits and turning off the CFS quota. CPU limits can cause more problems than they solve. See more in the link below.</p>
-<p>Memory overcommiting can get you in more trouble. Reaching a CPU limit results in throttling, reaching memory limit will get your pod killed. Ever seen <strong>OOMkill</strong>? Yep, that's the one we are talking about. Want to minimize how often it can happen? Don’t overcommit your memory and use Guaranteed QoS (Quality of Service) setting memory request equal to limit like in the example below. Read more about the topic <a href="https://www.slideshare.net/try_except_/optimizing-kubernetes-resource-requestslimits-for-costefficiency-and-latency-highload">in Henning Jacobs&rsquo; (Zalando) presentation</a>.</p>
+<p>Memory overcommiting can get you in more trouble. Reaching a CPU limit results in throttling, reaching memory limit will get your pod killed. Ever seen <strong>OOMkill</strong>? Yep, that&rsquo;s the one we are talking about. Want to minimize how often it can happen? Don’t overcommit your memory and use Guaranteed QoS (Quality of Service) setting memory request equal to limit like in the example below. Read more about the topic <a href="https://www.slideshare.net/try_except_/optimizing-kubernetes-resource-requestslimits-for-costefficiency-and-latency-highload">in Henning Jacobs&rsquo; (Zalando) presentation</a>.</p>
 <p>Burstable (more likely to get OOMkilled more often):</p>
 <pre><code class="language-yaml">    resources:
       requests:
@@ -121,14 +121,14 @@ kubectl top nodes
 <h2 id="liveness-and-readiness-probes">liveness and readiness probes</h2>
 <p>By default there are no liveness and readiness probes specified. And sometimes it stays that way&hellip;</p>
 <p>But how else would your service get restarted when there is an unrecoverable error? How does a loadbalancer know a specific pod can start handling traffic? Or handle more traffic?</p>
-<p>People usually don't know the difference between these two.</p>
+<p>People usually don&rsquo;t know the difference between these two.</p>
 <ul>
 <li>Liveness probe restarts your pod if the probe fails</li>
 <li>Readiness probe disconnects on fail the failing pod from the kubernetes service (you can check this in <code>kubectl get endpoints</code>) and no more traffic is being sent to it until the probe succeeds again</li>
 </ul>
 <p>and <strong>BOTH RUN DURING THE WHOLE POD LIFECYCLE</strong>. This is important.</p>
-<p>People often think that readiness probes run only at the start to tell when the pod is <strong>Ready</strong> and can start servicing traffic. But that's just one of its use cases.</p>
-<p>The other one is to tell if during a pod's life the pod becomes <strong>too hot</strong> handling too much traffic (or an expensive computation) so that we don't <em>send her more work to do</em> and let her <em>cool down</em>, then the readiness probe succeeds and <strong>we start sending in more traffic again</strong>. In this case (when failing readiness probe) failing also liveness probe would be very counterproductive. <strong>Why would you restart a pod that is healthy and doing a lot of work?</strong></p>
+<p>People often think that readiness probes run only at the start to tell when the pod is <strong>Ready</strong> and can start servicing traffic. But that&rsquo;s just one of its use cases.</p>
+<p>The other one is to tell if during a pod&rsquo;s life the pod becomes <strong>too hot</strong> handling too much traffic (or an expensive computation) so that we don&rsquo;t <em>send her more work to do</em> and let her <em>cool down</em>, then the readiness probe succeeds and <strong>we start sending in more traffic again</strong>. In this case (when failing readiness probe) failing also liveness probe would be very counterproductive. <strong>Why would you restart a pod that is healthy and doing a lot of work?</strong></p>
 <p>Sometimes not having either probe defined is better than having them defined wrong. As mentioned above, if <strong>liveness probe is equal to readiness probe</strong>, you are in a big trouble. You might want to start with defining <a href="https://twitter.com/sszuecs/status/1175803113204269059">only the readiness probe alone</a> as <a href="https://srcco.de/posts/kubernetes-liveness-probes-are-dangerous.html">liveness probes are dangerous</a>.</p>
 <p>Do not fail either of the probes if any of your shared dependencies is down, it would cause <strong>cascading failure</strong> of all the pods. You are <a href="https://blog.colinbreck.com/kubernetes-liveness-and-readiness-probes-how-to-avoid-shooting-yourself-in-the-foot/">shooting yourself in the foot</a>.</p>
 <h2 id="loadbalancer-for-every-http-service">LoadBalancer for every http service</h2>
@@ -142,7 +142,7 @@ kubectl top nodes
 <p>Scaling-in (removing a node from the cluster) is always harder. Imagine you have a stateful pod (with persistent volume attached) and as <strong>persistent volumes</strong> are usually resources that <strong>belong to a specific availability zone</strong> and are not replicated in the region, your custom autoscaler removes a node with this pod on it and scheduler cannot schedule it onto a different node as it is very limited by the only availability zone with your persistent disk in it. Pod is again stuck in Pending state.</p>
 <p>The community is widely using <a href="https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler"><strong>cluster-autoscaler</strong></a> which runs in your cluster and is integrated with most major public cloud vendors APIs, understands all these constraints and would scale-out in the mentioned cases. It will also figure out if it can gracefully scale-in without affecting any constraints we have set and saves you money on compute.</p>
 <h2 id="not-using-the-power-of-iamrbac">Not using the power of IAM/RBAC</h2>
-<p>Don't use IAM Users with permanent secrets for <em>machines and applications</em> rather than generating temporary ones using roles and service accounts.</p>
+<p>Don&rsquo;t use IAM Users with permanent secrets for <em>machines and applications</em> rather than generating temporary ones using roles and service accounts.</p>
 <p>We see it often - hardcoding access and secret keys in application configuration, never rotating the secrets when you have Cloud IAM at hand. Use IAM Roles and service accounts instead of users where suitable.</p>
 <figure class="figure">
     <a href="/images/2020-05-04-everywhere.jpg" class="d-block" data-toggle="lightbox" data-gallery="post-gallery">
@@ -160,11 +160,11 @@ metadata:
   name: my-serviceaccount
   namespace: default
 </code></pre>
-<p>One annotation. That wasn't that hard, no?</p>
+<p>One annotation. That wasn&rsquo;t that hard, no?</p>
 <p>Also don’t give the service accounts or instance profiles <code>admin</code> and <code>cluster-admin</code> permissions when they don’t need it. That is a bit harder, especially in k8s RBAC, but still worth the effort.</p>
 <h2 id="self-anti-affinities-for-pods">self anti-affinities for pods</h2>
-<p>Running e.g. 3 pod replicas of some deployment, node goes down and all the replicas with it. Huh? All the replicas were running on one node? Wasn't Kubernetes supposed to be magical and provide HA?!</p>
-<p>You can't expect kubernetes scheduler to enforce anti-affinites for your pods. You have to define them explicitly.</p>
+<p>Running e.g. 3 pod replicas of some deployment, node goes down and all the replicas with it. Huh? All the replicas were running on one node? Wasn&rsquo;t Kubernetes supposed to be magical and provide HA?!</p>
+<p>You can&rsquo;t expect kubernetes scheduler to enforce anti-affinites for your pods. You have to define them explicitly.</p>
 <pre><code class="language-yaml">// omitted for brevity
       labels:
         app: zk
@@ -180,7 +180,7 @@ metadata:
                     - zk
               topologyKey: &quot;kubernetes.io/hostname&quot;
 </code></pre>
-<p>That's it. This will make sure the pods will be scheduled to different nodes (this is being checked only at scheduling time, not at execution time, hence the <code>requiredDuringSchedulingIgnoredDuringExecution</code>).</p>
+<p>That&rsquo;s it. This will make sure the pods will be scheduled to different nodes (this is being checked only at scheduling time, not at execution time, hence the <code>requiredDuringSchedulingIgnoredDuringExecution</code>).</p>
 <p>We are talking about podAntiAffinity on different node names - <code>topologyKey: &quot;kubernetes.io/hostname&quot;</code> - not different availability zones. If you really need proper HA, dig a bit deeper in this topic.</p>
 <h2 id="no-poddisruptionbudget">no poddisruptionbudget</h2>
 <p>You run production workload on kubernetes. Your nodes &amp; cluster have to be upgraded, or decommissioned, from time to time. PodDisruptionBudget (pdb) is sort of an API for service guarantees between cluster-administrators and cluster-users.</p>
@@ -195,7 +195,7 @@ spec:
     matchLabels:
       app: zookeeper
 </code></pre>
-<p>With this as a cluster-user you tell the cluster-administrators: &ldquo;hey, I have this zookeeper service here and no matter what you have to do, I'd like having at least 2 replicas always available&rdquo;.</p>
+<p>With this as a cluster-user you tell the cluster-administrators: &ldquo;hey, I have this zookeeper service here and no matter what you have to do, I&rsquo;d like having at least 2 replicas always available&rdquo;.</p>
 <p>I talked about this topic more in-depth <a href="https://blog.marekbartik.com/posts/2018-06-29_kubernetes-in-production-poddisruptionbudget/">here in this blogpost</a>.</p>
 <h2 id="more-tenants-or-envs-in-shared-cluster">more tenants or envs in shared cluster</h2>
 <p>Kubernetes <strong>namespaces don’t provide any strong isolation</strong>.</p>
@@ -217,14 +217,14 @@ spec:
 <h2 id="pet-clusters--stressing-the-control-plane-too-much">pet clusters + stressing the control plane too much</h2>
 <p>You went from calling your servers <a href="https://twitter.com/vorobiev_cloud"><em>Anton</em></a>, <em>HAL9000</em> and <em>Colossus</em> to having generated random ids for your nodes but you started to call your cluster by a name?</p>
 <p>You know how you started with a Proof Of Concept with Kubernetes, named the cluster “testing” and STILL use it in production and everybody is scared to touch it? (true story)</p>
-<p>Pet clusters are not fun and you might want to consider deleting your cluster from time to time, <strong>practice Disaster Recovery</strong> and take care of your control plane. Being afraid of touching the control plane is not a good sign. <em>Etcd</em>&lsquo;s dead? Well, you got a big problem.</p>
+<p>Pet clusters are not fun and you might want to consider deleting your cluster from time to time, <strong>practice Disaster Recovery</strong> and take care of your control plane. Being afraid of touching the control plane is not a good sign. <em>Etcd</em>&rsquo;s dead? Well, you got a big problem.</p>
 <p>On the other hand, touching it too much is no good either. When with time the <strong>control plane becomes slow</strong>, chances are, you are either creating a lot of objects without ever rotating them (very common when using helm with default settings which does not rotate its state in configmaps/secrets and you end up having thousands of objects in control plane) or you constantly scrape and edit tons of things from kube-api (for autoscaling, cicd, monitoring, logs from events, controllers, etc.).</p>
 <p>Also, check your managed kubernetes offering “SLAs”/SLOs and guarantees. A vendor might guarantee <strong>availability of control plane</strong> (or its subcomponents) but not p99 latency of the requests you send to it. In other words, you might do <code>kubectl get nodes</code> and get correct answer in 10 minutes and that still does not violate the service guarantee.</p>
 <h2 id="bonus-using-latest-tag">bonus: using latest tag</h2>
 <p>This one is a classic. I feel like lately I don’t see this very often as a lot of us got burned too many times and we stopped using <code>:latest</code> and started to pin the versions. Yay!</p>
 <p><a href="https://aws.amazon.com/about-aws/whats-new/2019/07/amazon-ecr-now-supports-immutable-image-tags/">ECR has a great feature of tag immutability</a>, definitely worth checking out.</p>
 <h2 id="summary">summary</h2>
-<p>Don't expect that everything works automagically - Kubernetes is not a silver bullet. A bad app will be <a href="https://twitter.com/sadserver/status/1032704897500598272?s=20">bad app even on kubernetes</a> (possible even worse than bad, actually). If you are not careful, you can end up with a lot of complexity, stressed and slow control plane and no DR strategy. Don't expect out-of-box multi-tenancy and high availability. Invest some time in making your app cloud native.</p>
+<p>Don&rsquo;t expect that everything works automagically - Kubernetes is not a silver bullet. A bad app will be <a href="https://twitter.com/sadserver/status/1032704897500598272?s=20">bad app even on kubernetes</a> (possible even worse than bad, actually). If you are not careful, you can end up with a lot of complexity, stressed and slow control plane and no DR strategy. Don&rsquo;t expect out-of-box multi-tenancy and high availability. Invest some time in making your app cloud native.</p>
 <p>Check how we others got burned in this great <a href="https://k8s.af/">failure stories compilation</a> by Henning.</p>
 <p>Do you see different mistakes being made? Just hit us up
 (<a href="https://twitter.com/MarekBartik">@MarekBartik</a> <a href="https://twitter.com/MstrsObserver">@MstrsObserver</a>)
