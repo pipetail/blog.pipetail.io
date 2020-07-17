@@ -7,10 +7,22 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>Copyright © 2020 pipetail. All rights reserved.</copyright>
-    <lastBuildDate>Mon, 13 Jul 2020 10:00:00 +0100</lastBuildDate>
+    <lastBuildDate>Fri, 17 Jul 2020 10:00:00 +0100</lastBuildDate>
     
 	<atom:link href="https://blog.pipetail.io/tags/kubernetes/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>How would I proceed with Kubernetes deployments?</title>
+      <link>https://blog.pipetail.io/posts/2020-07-17-helm-free-deployment/</link>
+      <pubDate>Fri, 17 Jul 2020 10:00:00 +0100</pubDate>
+      
+      <guid>https://blog.pipetail.io/posts/2020-07-17-helm-free-deployment/</guid>
+      <description>&lt;p&gt;Last time I&amp;rsquo;ve written a few words about the &lt;a href=&#34;https://blog.pipetail.io/posts/2020-07-13-helmfile-basics/&#34;&gt;orchestration of
+Helm deployments&lt;/a&gt;. I&amp;rsquo;ve mentioned
+there that I&amp;rsquo;m not so big fan of Helm in terms of deployment of
+applications. That&amp;rsquo;s 100% true, but do I have any other alternatives?&lt;/p&gt;</description>
+    </item>
     
     <item>
       <title>Helmfile basics: get your Helm flow organized</title>

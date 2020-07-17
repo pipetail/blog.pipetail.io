@@ -4,41 +4,51 @@
   
   <url>
     <loc>https://blog.pipetail.io/</loc>
-    <lastmod>2020-07-13T10:00:00+01:00</lastmod>
+    <lastmod>2020-07-17T10:00:00+01:00</lastmod>
   </url>
   
   <url>
     <loc>https://blog.pipetail.io/authors/stepan-vrany/</loc>
-    <lastmod>2020-07-13T10:00:00+01:00</lastmod>
+    <lastmod>2020-07-17T10:00:00+01:00</lastmod>
   </url>
   
   <url>
     <loc>https://blog.pipetail.io/authors/</loc>
-    <lastmod>2020-07-13T10:00:00+01:00</lastmod>
+    <lastmod>2020-07-17T10:00:00+01:00</lastmod>
   </url>
   
   <url>
     <loc>https://blog.pipetail.io/tags/helm/</loc>
-    <lastmod>2020-07-13T10:00:00+01:00</lastmod>
+    <lastmod>2020-07-17T10:00:00+01:00</lastmod>
   </url>
   
   <url>
-    <loc>https://blog.pipetail.io/posts/2020-07-13-helmfile-basics/</loc>
-    <lastmod>2020-07-13T10:00:00+01:00</lastmod>
+    <loc>https://blog.pipetail.io/posts/2020-07-17-helm-free-deployment/</loc>
+    <lastmod>2020-07-17T10:00:00+01:00</lastmod>
   </url>
   
   <url>
     <loc>https://blog.pipetail.io/tags/kubernetes/</loc>
-    <lastmod>2020-07-13T10:00:00+01:00</lastmod>
+    <lastmod>2020-07-17T10:00:00+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.pipetail.io/tags/kustomize/</loc>
+    <lastmod>2020-07-17T10:00:00+01:00</lastmod>
   </url>
   
   <url>
     <loc>https://blog.pipetail.io/posts/</loc>
-    <lastmod>2020-07-13T10:00:00+01:00</lastmod>
+    <lastmod>2020-07-17T10:00:00+01:00</lastmod>
   </url>
   
   <url>
     <loc>https://blog.pipetail.io/tags/</loc>
+    <lastmod>2020-07-17T10:00:00+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.pipetail.io/posts/2020-07-13-helmfile-basics/</loc>
     <lastmod>2020-07-13T10:00:00+01:00</lastmod>
   </url>
   
