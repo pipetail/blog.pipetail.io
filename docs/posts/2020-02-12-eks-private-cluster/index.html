@@ -35,14 +35,15 @@ pools? If you don&rsquo;t have any specific reasons for not using them, you shou
 It saves tons of time plus it boosts the &ldquo;managed Kubernetes&rdquo; feeling.
 However, this pretty new offering did not cover one specific use case:
 cluster with no Internet access.">
-<meta itemprop="datePublished" content="2020-02-12T08:00:00&#43;01:00" />
-<meta itemprop="dateModified" content="2020-02-12T08:00:00&#43;01:00" />
+<meta itemprop="datePublished" content="2020-02-12T08:00:00+01:00" />
+<meta itemprop="dateModified" content="2020-02-12T08:00:00+01:00" />
 <meta itemprop="wordCount" content="1214">
 <meta itemprop="image" content="https://blog.pipetail.io/images/2020-02-12-EKS-private-cluster-title.png">
 
 
 
-<meta itemprop="keywords" content="aws,kubernetes,eks," /><meta name="twitter:card" content="summary_large_image"/>
+<meta itemprop="keywords" content="aws,kubernetes,eks," />
+<meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:image" content="https://blog.pipetail.io/images/2020-02-12-EKS-private-cluster-title.png"/>
 
 <meta name="twitter:title" content="More complicated EKS scenarios: EKS managed worker nodes without internet access"/>
@@ -252,7 +253,7 @@ resource &quot;aws_vpc_endpoint&quot; &quot;ecr_dkr&quot; {
 </code></pre>
 <p><strong>Endpoint for s3 API</strong></p>
 <p>In this part, we&rsquo;re associating s3 private gateway with our private
-subnets&rsquo; routing tables.
+subnets' routing tables.
 <a href="https://docs.aws.amazon.com/vpc/latest/userguide/vpce-gateway.html">See more details in the documentation</a>.
 We need this API as images are stored in S3 buckets. So when it&rsquo;s not enabled,
 nodes won&rsquo;t be able to start essential services (pods).</p>

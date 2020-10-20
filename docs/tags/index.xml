@@ -7,15 +7,11 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>Copyright © 2020 pipetail. All rights reserved.</copyright>
-    <lastBuildDate>Fri, 17 Jul 2020 10:00:00 +0100</lastBuildDate>
-    
-	<atom:link href="https://blog.pipetail.io/tags/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <lastBuildDate>Tue, 20 Oct 2020 08:00:00 +0100</lastBuildDate><atom:link href="https://blog.pipetail.io/tags/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>helm</title>
       <link>https://blog.pipetail.io/tags/helm/</link>
-      <pubDate>Fri, 17 Jul 2020 10:00:00 +0100</pubDate>
+      <pubDate>Tue, 20 Oct 2020 08:00:00 +0100</pubDate>
       
       <guid>https://blog.pipetail.io/tags/helm/</guid>
       <description></description>
@@ -24,7 +20,7 @@
     <item>
       <title>kubernetes</title>
       <link>https://blog.pipetail.io/tags/kubernetes/</link>
-      <pubDate>Fri, 17 Jul 2020 10:00:00 +0100</pubDate>
+      <pubDate>Tue, 20 Oct 2020 08:00:00 +0100</pubDate>
       
       <guid>https://blog.pipetail.io/tags/kubernetes/</guid>
       <description></description>

@@ -29,14 +29,15 @@ I&rsquo;ll try to show the ones we see very often and talk a bit about how to fi
 <meta itemprop="name" content="10 most common mistakes using kubernetes">
 <meta itemprop="description" content="We had the chance to see quite a bit of clusters in our years of experience with kubernetes (both managed and unmanaged - on GCP, AWS and Azure), and we see some mistakes being repeated. No shame in that, we’ve done most of these too!
 I&rsquo;ll try to show the ones we see very often and talk a bit about how to fix them.">
-<meta itemprop="datePublished" content="2020-05-04T07:00:00&#43;01:00" />
-<meta itemprop="dateModified" content="2020-05-04T07:00:00&#43;01:00" />
+<meta itemprop="datePublished" content="2020-05-04T07:00:00+01:00" />
+<meta itemprop="dateModified" content="2020-05-04T07:00:00+01:00" />
 <meta itemprop="wordCount" content="2397">
 <meta itemprop="image" content="https://blog.pipetail.io/images/2020-05-04-cover.jpg">
 
 
 
-<meta itemprop="keywords" content="aws,cloud,kubernetes,security," /><meta name="twitter:card" content="summary_large_image"/>
+<meta itemprop="keywords" content="aws,cloud,kubernetes,security," />
+<meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:image" content="https://blog.pipetail.io/images/2020-05-04-cover.jpg"/>
 
 <meta name="twitter:title" content="10 most common mistakes using kubernetes"/>
@@ -90,7 +91,7 @@ I&rsquo;ll try to show the ones we see very often and talk a bit about how to fi
         cpu: &quot;1m&quot;
 </code></pre>
 <p>On the other hand, having a CPU limit can unnecessarily throttle pods even if the node’s CPU is not fully utilized which again can cause increased latency. There is a an open discussion around <em>CPU CFS quota</em> in linux kernel and cpu throttling based on set cpu limits and turning off the CFS quota. CPU limits can cause more problems than they solve. See more in the link below.</p>
-<p>Memory overcommiting can get you in more trouble. Reaching a CPU limit results in throttling, reaching memory limit will get your pod killed. Ever seen <strong>OOMkill</strong>? Yep, that&rsquo;s the one we are talking about. Want to minimize how often it can happen? Don’t overcommit your memory and use Guaranteed QoS (Quality of Service) setting memory request equal to limit like in the example below. Read more about the topic <a href="https://www.slideshare.net/try_except_/optimizing-kubernetes-resource-requestslimits-for-costefficiency-and-latency-highload">in Henning Jacobs&rsquo; (Zalando) presentation</a>.</p>
+<p>Memory overcommiting can get you in more trouble. Reaching a CPU limit results in throttling, reaching memory limit will get your pod killed. Ever seen <strong>OOMkill</strong>? Yep, that&rsquo;s the one we are talking about. Want to minimize how often it can happen? Don’t overcommit your memory and use Guaranteed QoS (Quality of Service) setting memory request equal to limit like in the example below. Read more about the topic <a href="https://www.slideshare.net/try_except_/optimizing-kubernetes-resource-requestslimits-for-costefficiency-and-latency-highload">in Henning Jacobs' (Zalando) presentation</a>.</p>
 <p>Burstable (more likely to get OOMkilled more often):</p>
 <pre><code class="language-yaml">    resources:
       requests:

@@ -7,11 +7,7 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>Copyright © 2020 pipetail. All rights reserved.</copyright>
-    <lastBuildDate>Mon, 04 May 2020 07:00:00 +0100</lastBuildDate>
-    
-	<atom:link href="https://blog.pipetail.io/tags/security/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <lastBuildDate>Mon, 04 May 2020 07:00:00 +0100</lastBuildDate><atom:link href="https://blog.pipetail.io/tags/security/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>10 most common mistakes using kubernetes</title>
       <link>https://blog.pipetail.io/posts/2020-05-04-most-common-mistakes-k8s/</link>

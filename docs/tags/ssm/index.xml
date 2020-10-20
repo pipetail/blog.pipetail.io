@@ -7,11 +7,7 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>Copyright © 2020 pipetail. All rights reserved.</copyright>
-    <lastBuildDate>Mon, 24 Feb 2020 07:00:00 +0100</lastBuildDate>
-    
-	<atom:link href="https://blog.pipetail.io/tags/ssm/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <lastBuildDate>Mon, 24 Feb 2020 07:00:00 +0100</lastBuildDate><atom:link href="https://blog.pipetail.io/tags/ssm/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>AWS Systems Manager Session Manager: bye bye bastion hosts!</title>
       <link>https://blog.pipetail.io/posts/2020-02-24-amazon-ssm-session-manager/</link>
