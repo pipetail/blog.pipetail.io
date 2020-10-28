@@ -10,4 +10,4 @@ Growing up in the SysAdmin era, I quickly realized communication and collaborati
 
 Nowadays I focus on Cloud Architecting, microservices and Continuous Everything to solve business problems, not technical ones.
 
-I'm passionate about traveling, minimalist, DevOps and Cloud Native.
+I'm passionate about traveling, minimalism, DevOps and Cloud Native.
