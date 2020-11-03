@@ -7,7 +7,43 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>Copyright © 2020 pipetail. All rights reserved.</copyright>
-    <lastBuildDate>Tue, 20 Oct 2020 08:00:00 +0100</lastBuildDate><atom:link href="https://blog.pipetail.io/tags/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 29 Oct 2020 07:00:00 +0100</lastBuildDate><atom:link href="https://blog.pipetail.io/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>aws</title>
+      <link>https://blog.pipetail.io/tags/aws/</link>
+      <pubDate>Thu, 29 Oct 2020 07:00:00 +0100</pubDate>
+      
+      <guid>https://blog.pipetail.io/tags/aws/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>cloud</title>
+      <link>https://blog.pipetail.io/tags/cloud/</link>
+      <pubDate>Thu, 29 Oct 2020 07:00:00 +0100</pubDate>
+      
+      <guid>https://blog.pipetail.io/tags/cloud/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>security</title>
+      <link>https://blog.pipetail.io/tags/security/</link>
+      <pubDate>Thu, 29 Oct 2020 07:00:00 +0100</pubDate>
+      
+      <guid>https://blog.pipetail.io/tags/security/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>terraform</title>
+      <link>https://blog.pipetail.io/tags/terraform/</link>
+      <pubDate>Thu, 29 Oct 2020 07:00:00 +0100</pubDate>
+      
+      <guid>https://blog.pipetail.io/tags/terraform/</guid>
+      <description></description>
+    </item>
+    
     <item>
       <title>helm</title>
       <link>https://blog.pipetail.io/tags/helm/</link>
@@ -32,33 +68,6 @@
       <pubDate>Fri, 17 Jul 2020 10:00:00 +0100</pubDate>
       
       <guid>https://blog.pipetail.io/tags/kustomize/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>aws</title>
-      <link>https://blog.pipetail.io/tags/aws/</link>
-      <pubDate>Mon, 04 May 2020 07:00:00 +0100</pubDate>
-      
-      <guid>https://blog.pipetail.io/tags/aws/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>cloud</title>
-      <link>https://blog.pipetail.io/tags/cloud/</link>
-      <pubDate>Mon, 04 May 2020 07:00:00 +0100</pubDate>
-      
-      <guid>https://blog.pipetail.io/tags/cloud/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>security</title>
-      <link>https://blog.pipetail.io/tags/security/</link>
-      <pubDate>Mon, 04 May 2020 07:00:00 +0100</pubDate>
-      
-      <guid>https://blog.pipetail.io/tags/security/</guid>
       <description></description>
     </item>
     
