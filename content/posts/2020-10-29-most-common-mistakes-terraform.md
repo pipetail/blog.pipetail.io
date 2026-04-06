@@ -116,7 +116,7 @@ You might have a version pinned in your pipeline and the same version on your lo
 
 ### Version Constraints
 
-Sometimes when working with an older state and hcl configs and using the newest binary you'll run in super weird errors -- not like the one above that clearly states the problem -- due to the **lack of backward compatibility** and you'll spend a lot of time debugging a simple binary version mistmach.
+Sometimes when working with an older state and hcl configs and using the newest binary you'll run in super weird errors -- not like the one above that clearly states the problem -- due to the **lack of backward compatibility** and you'll spend a lot of time debugging a simple binary version mismatch.
 
 Oh, and working on multiple codebases with different terraform versions? Nightmare.
 
