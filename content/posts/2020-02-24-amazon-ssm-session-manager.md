@@ -1,5 +1,6 @@
 ---
 title: "AWS Systems Manager Session Manager: bye bye bastion hosts!"
+description: "Replace bastion hosts with AWS SSM Session Manager for SSH access to private EC2 instances using IAM-based access control and session logging."
 date: 2020-02-24T07:00:00+01:00
 draft: false
 images:

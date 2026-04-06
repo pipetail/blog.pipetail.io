@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link rel="shortcut icon" href="favicon.ico" type="image/x-icon"><title>10 most common mistakes using kubernetes&nbsp;&ndash;&nbsp;pipetail Blog</title><meta name="description" content="By Engineers. For Engineers."><meta name="author" content="marek-bartik">
+<link rel="shortcut icon" href="favicon.ico" type="image/x-icon"><title>10 most common mistakes using kubernetes&nbsp;&ndash;&nbsp;pipetail Blog</title><meta name="description" content="Common Kubernetes mistakes: missing resource limits, misconfigured probes, no ingress controller, wrong autoscaling, weak RBAC, missing anti-affinity and PDBs."><meta name="author" content="marek-bartik">
 
 
     
@@ -20,16 +20,14 @@
 
 
 <link rel="canonical" href="https://blog.pipetail.io/posts/2020-05-04-most-common-mistakes-k8s/"><meta property="og:title" content="10 most common mistakes using kubernetes" />
-<meta property="og:description" content="We had the chance to see quite a bit of clusters in our years of experience with kubernetes (both managed and unmanaged - on GCP, AWS and Azure), and we see some mistakes being repeated. No shame in that, we’ve done most of these too!
-I&rsquo;ll try to show the ones we see very often and talk a bit about how to fix them." />
+<meta property="og:description" content="Common Kubernetes mistakes: missing resource limits, misconfigured probes, no ingress controller, wrong autoscaling, weak RBAC, missing anti-affinity and PDBs." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://blog.pipetail.io/posts/2020-05-04-most-common-mistakes-k8s/" />
 <meta property="og:image" content="https://blog.pipetail.io/images/2020-05-04-cover.jpg" />
 <meta property="article:published_time" content="2020-05-04T07:00:00+01:00" />
 <meta property="article:modified_time" content="2020-05-04T07:00:00+01:00" />
 <meta itemprop="name" content="10 most common mistakes using kubernetes">
-<meta itemprop="description" content="We had the chance to see quite a bit of clusters in our years of experience with kubernetes (both managed and unmanaged - on GCP, AWS and Azure), and we see some mistakes being repeated. No shame in that, we’ve done most of these too!
-I&rsquo;ll try to show the ones we see very often and talk a bit about how to fix them.">
+<meta itemprop="description" content="Common Kubernetes mistakes: missing resource limits, misconfigured probes, no ingress controller, wrong autoscaling, weak RBAC, missing anti-affinity and PDBs.">
 <meta itemprop="datePublished" content="2020-05-04T07:00:00+01:00" />
 <meta itemprop="dateModified" content="2020-05-04T07:00:00+01:00" />
 <meta itemprop="wordCount" content="2397">
@@ -42,8 +40,7 @@ I&rsquo;ll try to show the ones we see very often and talk a bit about how to fi
 <meta name="twitter:image" content="https://blog.pipetail.io/images/2020-05-04-cover.jpg"/>
 
 <meta name="twitter:title" content="10 most common mistakes using kubernetes"/>
-<meta name="twitter:description" content="We had the chance to see quite a bit of clusters in our years of experience with kubernetes (both managed and unmanaged - on GCP, AWS and Azure), and we see some mistakes being repeated. No shame in that, we’ve done most of these too!
-I&rsquo;ll try to show the ones we see very often and talk a bit about how to fix them."/>
+<meta name="twitter:description" content="Common Kubernetes mistakes: missing resource limits, misconfigured probes, no ingress controller, wrong autoscaling, weak RBAC, missing anti-affinity and PDBs."/>
 
 </head>
 <body>

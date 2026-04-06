@@ -1,0 +1,30 @@
+# pipetail Blog
+
+> By Engineers. For Engineers. Technical blog covering Kubernetes, Terraform, AWS, Helm, and cloud-native infrastructure.
+
+## Posts
+
+- [10 most common mistakes using terraform](https://blog.pipetail.io/posts/2020-10-29-most-common-mistakes-terraform/): 10 Terraform anti-patterns including local state, plaintext secrets, version mismatches, unpinned modules, missing docs, non-modular code, and poor directory structure.
+- [Improve visibility in Helm workflows with Werf!](https://blog.pipetail.io/posts/2020-10-20-werf/): Using Werf to add real-time deployment tailing and live pod status visibility to Helm workflows.
+- [How would I proceed with Kubernetes deployments?](https://blog.pipetail.io/posts/2020-07-17-helm-free-deployment/): Alternatives to Helm using Kustomize overlays and Kapp for ordered deployments with automatic garbage collection.
+- [Helmfile basics: get your Helm flow organized](https://blog.pipetail.io/posts/2020-07-13-helmfile-basics/): Orchestrating multiple Helm releases with Helmfile using label selectors, environment overrides, and SOPS-encrypted secrets.
+- [10 most common mistakes using kubernetes](https://blog.pipetail.io/posts/2020-05-04-most-common-mistakes-k8s/): 10 common Kubernetes mistakes covering resource limits, probes, ingress, autoscaling, RBAC, pod anti-affinity, PDBs, and namespace isolation.
+- [More EKS tips to make your life easier](https://blog.pipetail.io/posts/2020-04-13-more-eks-tips/): EKS tips on IAM Roles for Service Accounts, Cluster Autoscaler scale-from-zero with ASG tags, and spot instance priority expander.
+- [Getting started with PodSecurityPolicy on EKS](https://blog.pipetail.io/posts/2020-03-15-psp-on-eks/): Implementing PodSecurityPolicy on EKS with RBAC integration and the eks.privileged policy gotcha.
+- [GitLab Runner on EKS](https://blog.pipetail.io/posts/2020-03-05-gitlab-runner-on-eks/): Setting up self-hosted GitLab Runner on AWS EKS using Terraform and GitLab Kubernetes integration.
+- [AWS Systems Manager Session Manager: bye bye bastion hosts!](https://blog.pipetail.io/posts/2020-02-24-amazon-ssm-session-manager/): Replacing bastion hosts with AWS SSM Session Manager for SSH access to private EC2 instances with IAM-based access control.
+- [Applications are not easy, tracing is: context propagation](https://blog.pipetail.io/posts/2020-02-14-opentelemtry-context-propagation/): OpenTelemetry context propagation across microservices using W3C Traceparent headers in Go.
+- [More complicated EKS scenarios: EKS managed worker nodes without internet access](https://blog.pipetail.io/posts/2020-02-12-eks-private-cluster/): Running EKS managed nodes in a fully private VPC using VPC PrivateLink endpoints for ECR, EC2, and S3.
+- [Applications are not easy, tracing is: a brief introduction to OpenTelemetry](https://blog.pipetail.io/posts/2020-02-09-opentelemetry-introduction/): Introduction to distributed tracing with OpenTelemetry in Go, from stdout exporters to LightStep integration.
+- [DAPR: introduction to Distributed Application Runtime](https://blog.pipetail.io/posts/2020-01-29-dapr-introduction/): Building microservices with DAPR sidecars on Kubernetes, demonstrating pub/sub messaging with NATS in Go and Vue.
+
+## Authors
+
+- [Marek Bartik](https://blog.pipetail.io/authors/marek-bartik/)
+- [Stepan Vrany](https://blog.pipetail.io/authors/stepan-vrany/)
+
+## Optional
+
+- Website: https://pipetail.io
+- GitHub: https://github.com/pipetail
+- RSS: https://blog.pipetail.io/index.xml

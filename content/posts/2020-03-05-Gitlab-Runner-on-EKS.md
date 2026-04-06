@@ -1,5 +1,6 @@
 ---
 title: "GitLab Runner on EKS"
+description: "Step-by-step guide to running a self-hosted GitLab Runner on AWS EKS using Terraform and GitLab Kubernetes integration."
 date: 2020-03-05T08:00:00+01:00
 draft: false
 images:

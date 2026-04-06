@@ -1,5 +1,6 @@
 ---
 title: "Helmfile basics: get your Helm flow organized"
+description: "Getting started with Helmfile to orchestrate multiple Helm releases using label selectors, environment overrides, and SOPS-encrypted secrets."
 date: 2020-07-13T10:00:00+01:00
 draft: false
 images:

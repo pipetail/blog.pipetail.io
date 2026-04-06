@@ -1,5 +1,6 @@
 ---
 title: "DAPR: introduction to Distributed Application Runtime"
+description: "Building microservices with DAPR sidecars on Kubernetes: pub/sub messaging with NATS, state management, and service invocation in Go and Vue."
 date: 2020-01-29T20:00:00+01:00
 draft: false
 images:
