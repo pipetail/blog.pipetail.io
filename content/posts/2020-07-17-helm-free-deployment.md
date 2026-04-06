@@ -1,5 +1,6 @@
 ---
 title: "How would I proceed with Kubernetes deployments?"
+description: "Alternatives to Helm for Kubernetes deployments using Kustomize overlays for templating and Kapp for ordered apply with automatic garbage collection."
 date: 2020-07-17T10:00:00+01:00
 draft: false
 images:

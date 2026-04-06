@@ -1,5 +1,6 @@
 ---
 title: "Applications are not easy, tracing is: a brief introduction to OpenTelemetry"
+description: "Introduction to distributed tracing with OpenTelemetry in Go, from basic stdout exporters to production-ready LightStep integration."
 date: 2020-02-09T10:00:00+01:00
 draft: false
 images:

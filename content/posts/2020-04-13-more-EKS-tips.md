@@ -1,5 +1,6 @@
 ---
 title: "More EKS tips to make your life easier"
+description: "Practical EKS tips: IAM Roles for Service Accounts instead of kube2iam, Cluster Autoscaler scale-from-zero with ASG tags, and spot instance priority expander."
 date: 2020-04-13T07:00:00+01:00
 draft: false
 images:

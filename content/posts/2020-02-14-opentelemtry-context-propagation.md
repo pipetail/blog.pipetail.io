@@ -1,5 +1,6 @@
 ---
 title: "Applications are not easy, tracing is: context propagation"
+description: "How to propagate trace context across microservices with OpenTelemetry using W3C Traceparent headers in Go."
 date: 2020-02-17T19:00:00+01:00
 draft: false
 images:

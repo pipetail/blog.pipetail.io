@@ -1,5 +1,6 @@
 ---
 title: "10 most common mistakes using kubernetes"
+description: "Common Kubernetes mistakes: missing resource limits, misconfigured probes, no ingress controller, wrong autoscaling, weak RBAC, missing anti-affinity and PDBs."
 date: 2020-05-04T07:00:00+01:00
 draft: false
 images:

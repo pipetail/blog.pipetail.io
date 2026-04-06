@@ -1,5 +1,6 @@
 ---
 title: "More complicated EKS scenarios: EKS managed worker nodes without internet access"
+description: "Setting up EKS managed nodes in a fully private VPC with no internet using VPC PrivateLink endpoints for ECR, EC2, and S3."
 date: 2020-02-12T08:00:00+01:00
 draft: false
 images:

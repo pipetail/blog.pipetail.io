@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link rel="shortcut icon" href="favicon.ico" type="image/x-icon"><title>10 most common mistakes using terraform&nbsp;&ndash;&nbsp;pipetail Blog</title><meta name="description" content="By Engineers. For Engineers."><meta name="author" content="marek-bartik">
+<link rel="shortcut icon" href="favicon.ico" type="image/x-icon"><title>10 most common mistakes using terraform&nbsp;&ndash;&nbsp;pipetail Blog</title><meta name="description" content="Common Terraform anti-patterns and how to fix them: remote state, secret management, version pinning, modules, documentation, and directory structure."><meta name="author" content="marek-bartik">
 
 
     
@@ -20,18 +20,14 @@
 
 
 <link rel="canonical" href="https://blog.pipetail.io/posts/2020-10-29-most-common-mistakes-terraform/"><meta property="og:title" content="10 most common mistakes using terraform" />
-<meta property="og:description" content="We had the chance to see quite a bit of infrastructures in our years of experience with AWS, GCP and Azure and we see some mistakes being repeated. No shame in that, we’ve done most of these too!
-I’ll try to show the ones we see very often and talk a bit about how to fix them.
-BTW we did a blogpost about &ldquo;10 most common mistakes using kubernetes&rdquo;" />
+<meta property="og:description" content="Common Terraform anti-patterns and how to fix them: remote state, secret management, version pinning, modules, documentation, and directory structure." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://blog.pipetail.io/posts/2020-10-29-most-common-mistakes-terraform/" />
 <meta property="og:image" content="https://blog.pipetail.io/images/2020-05-04-cover.jpg" />
 <meta property="article:published_time" content="2020-10-29T07:00:00+01:00" />
 <meta property="article:modified_time" content="2020-10-29T07:00:00+01:00" />
 <meta itemprop="name" content="10 most common mistakes using terraform">
-<meta itemprop="description" content="We had the chance to see quite a bit of infrastructures in our years of experience with AWS, GCP and Azure and we see some mistakes being repeated. No shame in that, we’ve done most of these too!
-I’ll try to show the ones we see very often and talk a bit about how to fix them.
-BTW we did a blogpost about &ldquo;10 most common mistakes using kubernetes&rdquo;">
+<meta itemprop="description" content="Common Terraform anti-patterns and how to fix them: remote state, secret management, version pinning, modules, documentation, and directory structure.">
 <meta itemprop="datePublished" content="2020-10-29T07:00:00+01:00" />
 <meta itemprop="dateModified" content="2020-10-29T07:00:00+01:00" />
 <meta itemprop="wordCount" content="2749">
@@ -44,9 +40,7 @@ BTW we did a blogpost about &ldquo;10 most common mistakes using kubernetes&rdqu
 <meta name="twitter:image" content="https://blog.pipetail.io/images/2020-05-04-cover.jpg"/>
 
 <meta name="twitter:title" content="10 most common mistakes using terraform"/>
-<meta name="twitter:description" content="We had the chance to see quite a bit of infrastructures in our years of experience with AWS, GCP and Azure and we see some mistakes being repeated. No shame in that, we’ve done most of these too!
-I’ll try to show the ones we see very often and talk a bit about how to fix them.
-BTW we did a blogpost about &ldquo;10 most common mistakes using kubernetes&rdquo;"/>
+<meta name="twitter:description" content="Common Terraform anti-patterns and how to fix them: remote state, secret management, version pinning, modules, documentation, and directory structure."/>
 
 </head>
 <body>
