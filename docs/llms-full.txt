@@ -1,0 +1,3221 @@
+# pipetail Blog
+
+> By Engineers. For Engineers.
+
+---
+
+# 10 most common mistakes using terraform
+
+> Common Terraform anti-patterns and how to fix them: remote state, secret management, version pinning, modules, documentation, and directory structure.
+
+Published 2020-10-29 by Marek Bartik. Source: https://blog.pipetail.io/posts/2020-10-29-most-common-mistakes-terraform/
+
+We had the chance to see quite a bit of infrastructures in our years of experience with AWS, GCP and Azure and we see some mistakes being repeated. No shame in that, we’ve done most of these too!
+
+I’ll try to show the ones we see very often and talk a bit about how to fix them.
+
+BTW we did a blogpost about ["10 most common mistakes using kubernetes"](/posts/2020-05-04-most-common-mistakes-k8s/)
+
+## 1. using local state
+Terraform state is stored by default in a local file named `terraform.tfstate`, but it can also be stored remotely, which [works better in a team environment](https://www.terraform.io/docs/state/index.html).
+
+Terraform uses this local state to create plans and make changes to your infrastructure. Prior to any operation, Terraform does a **refresh to update the state** with the real infrastructure.
+
+When working with **Terraform in a team**, use of a local file makes Terraform usage complicated since each user must make sure they always have the **latest state data** before running Terraform and make sure that **nobody else runs Terraform at the same time**.
+
+With **remote state**, Terraform writes the state data to a remote data store, which can then be shared between all members of a team. Terraform supports storing state in *Terraform Cloud, HashiCorp Consul, Amazon S3, Azure Blob Storage, Google Cloud Storage, Alibaba Cloud OSS*, and more.
+
+Remote state is a feature of **backends**. Configuring and using remote backends is easy and you can get started with remote state quickly. If you then want to **migrate back** to using local state, backends make that easy as well.
+
+An example of a remote backend in S3 with explicit **DynamoDB locking**:
+```hcl
+terraform {
+  backend "s3" {
+    bucket         = "my-terraform-tfstate"
+    key            = "prod"
+    region         = "us-east-1"
+    dynamodb_table = "terraform_locks"
+    encrypt        = true
+  }
+}
+```
+
+Super easy, no? Don't commit your `terraform.tfstate` to your git repo and use your vendor's object storage.
+
+## 2. secrets in plaintext
+Do you have secrets in `terraform.tfvars` or anywhere else in your `*.tfvars`? Or even in the `*.tf` files themselves? Are they commited to your repo?
+
+Are you aware that `terraform.tfstate` might contain some secrets too? (See the previous tip why to use remote backend anyway).
+
+First, make sure to use a good [.gitignore for terraform](https://github.com/github/gitignore/blob/master/Terraform.gitignore) projects.
+
+Second, make sure there are no plaintext sensitive values in any of your unencrypted files.
+
+But how do you do that? You can choose from two approaches:
+
+- encrypt the secrets and version them along with the configuration
+- store the secrets externally and pull them only when needed
+
+### encrypted secrets in version control
+
+We usually advocate for the first approach as it is easier to use something like `mozilla/sops` CLI tool to encrypt and decrypt yaml/json values. Using sops is super awesome because it:
+
+- integrates with managed cloud KMS (Key Management Service to manage your cryptography keys and delegate access to them and rotate/revoke them when needed)
+- encrypts only json/yaml values, NOT keys and that makes Code Review so much smoother!
+- is supported by `terragrunt`
+- keeps your secrets versioned too in the same codebase and makes it easier to handle change management
+
+Unfortunately sops still does not support HCL but there are [some ways around this](https://github.com/mozilla/sops/issues/292).
+
+an example of encrypted yaml:
+```yaml
+myapp1: ENC[AES256_GCM,data:Tr7o=,iv:1=,aad:No=,tag:k=]
+app2:
+    db:
+        user: ENC[AES256_GCM,data:CwE4O1s=,iv:2k=,aad:o=,tag:w==]
+        password: ENC[AES256_GCM,data:p673w==,iv:YY=,aad:UQ=,tag:A=]
+    # private key for secret operations in app2
+    key: |-
+        ENC[AES256_GCM,data:Ea3kL5O5U8=,iv:DM=,aad:FKA=,tag:EA==]
+an_array:
+- ENC[AES256_GCM,data:v8jQ=,iv:HBE=,aad:21c=,tag:gA==]
+- ENC[AES256_GCM,data:X10=,iv:o8=,aad:CQ=,tag:Hw==]
+- ENC[AES256_GCM,data:KN=,iv:160=,aad:fI4=,tag:tNw==]
+sops:
+    kms:
+    # ... redacted for brevity ...
+```
+
+### external secrets management
+
+The second approach where you use some external system (like *GitHub Secrets, GitLab CI/CD environment variables, HashiCorp Vault, AWS Secrets Manager*, etc.) to manage your secrets is a bit more:
+
+- **complex** - pulling secrets (with auth) in pipeline and local dev
+- **pricy** - for the external solution costs
+
+and has the disadvantage of **not having the secrets versioned** along with the others assets.
+
+But this approach definitely has its place too, especially in bigger corporations!
+
+And anything is better really than having your sensitive values in plaintext somewhere!
+
+## 3. terraform binary version mismatch
+Have you ever seen this annoying error?
+
+```
+Error: state snapshot was created by Terraform v0.12.29,
+  which is newer than current v0.12.20; upgrade to
+  Terraform v0.12.29 or greater to work with this state
+```
+
+You might have a version pinned in your pipeline and the same version on your local machine. Somebody from the team upgrades their terraform binary to the newest version and applies locally - **now the pipeline is broken** and everybody else from the team has to upgrade to the newest version as well.
+
+### Version Constraints
+
+Sometimes when working with an older state and hcl configs and using the newest binary you'll run in super weird errors -- not like the one above that clearly states the problem -- due to the **lack of backward compatibility** and you'll spend a lot of time debugging a simple binary version mismatch.
+
+Oh, and working on multiple codebases with different terraform versions? Nightmare.
+
+Make sure to set **Version Constraints**:
+
+```hcl
+terraform {
+  required_version = "~> 0.12.29"
+}
+```
+
+to let the users know that this codebase/module should be used with terraform `>= 0.12.29` but `< 0.13` like in this case, or use other operators to enforce some other [Version Constraints](https://www.terraform.io/docs/configuration/version-constraints.html).
+
+and get a nicer error like this one:
+```
+Error: Unsupported Terraform Core version
+
+  on providers.tf line 20, in terraform:
+  20:   required_version = "~> 0.12.29"
+
+This configuration does not support Terraform version 0.12.28. To proceed,
+either choose another supported Terraform version or update this version
+constraint. Version constraints are normally set for good reason, so updating
+the constraint may lead to other errors or unexpected behavior.
+```
+
+This is going to work only with things like `terraform validate` but not with `terraform plan`.
+
+### tfenv
+To better manage terraform binaries locally I'd recommend a great little tool [tfenv](https://github.com/tfutils/tfenv) which makes it super easy to install old and new terraform versions and switch between them.
+
+```bash
+$ tfenv install 0.12.28
+Installing Terraform v0.12.28
+Downloading release tarball from https://releases.hashicorp.com/terraform/0.12.28/terraform_0.12.28_darwin_amd64.zip
+##################################################################################################################################################################### 100.0%
+Downloading SHA hash file from https://releases.hashicorp.com/terraform/0.12.28/terraform_0.12.28_SHA256SUMS
+Unable to verify OpenPGP signature unless logged into keybase and following hashicorp
+Archive:  tfenv_download.s80lUU/terraform_0.12.28_darwin_amd64.zip
+  inflating: /usr/local/Cellar/tfenv/2.0.0/versions/0.12.28/terraform
+Installation of terraform v0.12.28 successful. To make this your default version, run 'tfenv use 0.12.28'
+$ tfenv use 0.12.28
+Switching default version to v0.12.28
+Switching completed
+$ tfenv list
+  0.13.4
+  0.12.29
+* 0.12.28 (set by /usr/local/Cellar/tfenv/2.0.0/version)
+  0.11.9
+```
+
+Done!
+## 4. not pinning modules and providers versions
+Similar issue to the previous one is not pinning versions of modules and providers.
+
+Save yourselves some headaches when solving mismatches between different local and remote versions of an unpinned external terraform module and providers. Same as using `:latest` image tag with docker - you are **playing with fire**.
+
+Pin each version in the terraform configuration and **make the upgrades explicit** and visible in the versioned code to better handle the process of upgrades.
+
+```
+module "vpc" {
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "2.47.0"
+
+  # all the other things
+}
+
+terraform {
+  required_version = ">= 0.12.9, != 0.13.0"
+
+  required_providers {
+    aws        = ">= 2.55.0"
+    local      = ">= 1.4"
+    null       = ">= 2.1"
+    template   = ">= 2.1"
+    random     = ">= 2.1"
+    kubernetes = ">= 1.11.1"
+  }
+}
+```
+
+## 5. missing docs
+Please document your stuff.
+
+Terraform's `HCL` makes it easy to **add comments** alongside your configuration:
+
+```hcl
+  # When this issue https://github.com/hashicorp/terraform/issues/xxxx gets resolved
+  # we can define our blabla in a more bleble way
+  escalation_message = lookup(each.value, "escalation_message", null)
+```
+
+it also makes it easy to **document your variables** (parameters of your infrastructure) and **outputs**:
+```hcl
+variable "cloudsql_disk_size_gb" {
+  type    = number
+  default = 256
+
+  description = "Size of the Cloud SQL disk, in GB."
+}
+
+output "cluster_certificate_authority_data" {
+  description = "Nested attribute containing certificate-authority-data for your cluster. This is the base64 encoded certificate data required to communicate with your cluster."
+  value       = element(concat(aws_eks_cluster.this[*].certificate_authority[0].data, list("")), 0)
+}
+```
+
+Then using something like [`terraform-docs`](https://github.com/terraform-docs/terraform-docs) you can generate simple docs in markdown!
+
+```bash
+terraform-docs markdown . > README.md
+```
+
+Now your terraform codebase is much better documented and easier for onboarding in it. And it was super simple to do it!
+
+## 6. not running terraform fmt
+The `terraform fmt` command is used to rewrite Terraform configuration files to a canonical format and style. This command applies a subset of the [Terraform language style conventions](https://www.terraform.io/docs/configuration/style.html), along with other minor adjustments for readability.
+
+Run this command (ideally in a [pre-commit hook](https://pre-commit.com/)) so that all the added/changed terraform configuration is always formatted correctly **before it gets versioned in git** (afterwards its harder to use things like git blame if there is somebody else formatting the code for you all the time).
+
+it could look something like this ([credit to Anton Babenko](https://github.com/antonbabenko/pre-commit-terraform)):
+```yaml
+repos:
+- repo: git://github.com/antonbabenko/pre-commit-terraform
+  rev: v1.43.0
+  hooks:
+    - id: terraform_fmt
+    - id: terraform_docs
+```
+
+then just go ahead and every time you git commit a change in any terraform file, it will get **automatically formatted** (forces you to re-add and commit again) and generates the docs for you.
+
+You might want to use pre-commit hooks for **linting yaml, json, bash** and all the other stuff that typically come with terraform codebases.
+
+## 7. non-modular modules
+Terraform does not support a **folder layout** to structure your project, meaning: you can't use simply organize your `*.tf` files in subfolders in one shared terraform state.
+
+For this reason some people just go ahead and create modules that are not:
+
+- modular
+- reusable
+- readable
+- doing one thing
+- easily changed
+
+an example usually goes like this:
+```hcl
+module "dns" {
+  source = "./dns"
+
+  dns_zones = var.dns_zones
+  dns_records = merge(
+    var.dns_records,
+    {
+      # some other stuff
+    },
+  )
+}
+```
+
+with all the zones and records **resources dumped into the module folder**.
+
+Then somebody comes in with request for a new environment and you just create an instance of this module in, **having to rewrite half of the module** to support a new environment but also be compatible with the old one. Things become even **less readable**.
+
+**Cost of change** rapidly increases.
+
+Then the infrastructure complexity grows -- so much more you have to split the terraform state (or the whole codebase) in two. Then you have to split the `dns` module in two as well. Welcome to hell.
+
+Be very careful about using modules in this non-modular and not-reusable way and make sure nobody tries to reuse that module somewhere else in the codebase to **avoid future refactoring**.
+
+## 8. not using module registry
+Are you writing your own modules for everything?
+
+There's a great [terraform registry](https://registry.terraform.io/browse/modules) with all open-sourced community modules. Chances are they already support everything you need and if not - submit a github issue or a PR with the desired functionality!
+
+There is no need to write everything yourself and maintain it unless you *really* need it!
+
+If your module is unique or better than an existing one, make sure to **give back to the OSS community**! :)
+
+## 9. too big / too small terraform state
+You can come to a point when the terraform state is *too big* - meaning refreshing it takes a lot of time or the **blast radius** is too big (deleting by mistake a small part of a system vs. deleting everything).
+
+What do you do? You **split the terraform state** in "half". Hopefully you split it considering some org/service boundaries and not per resource-type (see tip `#10`).
+
+But **don't get crazy about splitting everything in smaller and smaller states**! With more and more states you need more complexity and support of tooling for all the `plan` & `apply` pipeline stages and resolving dependencies between states.
+
+With one state terraform takes cares of computing all dependencies (in which order to create resources) and applying changes in order as one transaction and not much can go wrong (except for the mighty `terraform destroy`). Switching from one state to multiple, you have to **ensure all of it yourselves**.
+
+Splitting the state simply comes with its trade-offs.
+
+## 10. bad directory structure / non-org structure
+I see very often that people tend to organize terraform codebases based of the resource-type rather than org or service-level boundaries. E.g.
+
+resource-type layout:
+```
+terraform
+├── cloudfront
+│   └── main.tf
+├── dns
+│   └── main.tf
+├── eks
+│   └── main.tf
+└── iam
+    └── main.tf
+```
+
+vs.
+
+service-level layout:
+```
+terraform
+├── client
+│   └── main.tf
+├── generator
+│   └── main.tf
+└── recommender
+    └── main.tf
+```
+
+The resource-type (first exhibit) makes little sense as it allows the "non-modular" modules (see tip `#7`) anti-pattern to happen and it will create a **lot of issues down the road** when the infrastructure or organization grows and terraform state or codebase needs to be split to pass on the ownership to more people & teams.
+
+The service-level layout much better **isolates dependencies** between its resources inside of a single terraform state.
+
+Organize the terraform configuration in a manner that better copies the corporate structure (teams & services) to **avoid huge future refactoring**.
+
+## bonus: going crazy with for-each, modules, dynamic blocks to fight little boilerplate!
+If you write widely-used modules you end up using quite complex configuration using advanced terraform features like conditional creation with `count` or `for-each`, `dynamic` blocks and built-in functions for data transformation.
+
+All these things make the configuration hard to read and change. But if you essentially do that so the users of your modules can easily provision a complex infrastructure with a **simple API** (the variables of your module), it is reasonable to push the complexity to your module so that the end users have a nice simple module instantiation and **great UX**.
+
+Consider this example:
+```hcl
+module "elb_http" {
+  source  = "terraform-aws-modules/alb/aws"
+  version = "~> 5.0"
+
+  load_balancer_type = "network"
+  internal           = false
+
+  name    = "nlb-example"
+  vpc_id  = module.vpc.vpc_id
+  subnets = slice(module.vpc.public_subnets, 0, 2)
+
+  http_tcp_listeners = [
+    {
+      port               = 80
+      protocol           = "TCP"
+      target_group_index = 0
+    },
+    {
+      port               = 443
+      protocol           = "TCP"
+      target_group_index = 1
+    },
+  ]
+
+  target_groups = [
+    {
+      name_prefix          = "nginx-"
+      backend_protocol     = "TCP"
+      backend_port         = 32080
+      target_type          = "instance"
+      deregistration_delay = 10
+      proxy_protocol_v2    = true
+      health_check = {
+        enabled             = true
+        interval            = 30
+        path                = "/healthz"
+        port                = "traffic-port"
+        healthy_threshold   = 3
+        unhealthy_threshold = 3
+        timeout             = 6
+        protocol            = "HTTP"
+      }
+      stickiness = {
+        enabled = false
+        type    = "lb_cookie"
+      }
+    },
+    {
+      name_prefix       = "nginx-"
+      backend_protocol  = "TCP"
+      backend_port      = 32443
+      target_type       = "instance"
+      proxy_protocol_v2 = true
+      health_check = {
+        enabled             = true
+        interval            = 30
+        path                = "/healthz"
+        port                = "traffic-port"
+        healthy_threshold   = 3
+        unhealthy_threshold = 3
+        timeout             = 10
+        protocol            = "HTTPS"
+      }
+      stickiness = {
+        enabled = false
+        type    = "lb_cookie"
+      }
+    },
+  ]
+}
+}
+```
+
+Isn't it neat to just think about a loadbalancer as a config of its frontend & backend ports and protocol and the routing between them, its healthchecks and some other basic configuration, having some **best practices enforced** inside of the module itself?
+
+this is a very small example of how the actual implementation looks like:
+```hcl
+...
+resource "aws_lb_target_group" "main" {
+  count = var.create_lb ? length(var.target_groups) : 0
+  name        = lookup(var.target_groups[count.index], "name", null)
+  protocol    = lookup(var.target_groups[count.index], "backend_protocol", null) != null ? upper(lookup(var.target_groups[count.index], "backend_protocol")) : null
+ ...
+  dynamic "health_check" {
+    for_each = length(keys(lookup(var.target_groups[count.index], "health_check", {}))) == 0 ? [] : [lookup(var.target_groups[count.index], "health_check", {})]
+    ...
+  }
+...
+  # Host header condition
+  dynamic "condition" {
+    for_each = [
+      for condition_rule in var.https_listener_rules[count.index].conditions :
+      condition_rule
+      if length(lookup(condition_rule, "host_headers", [])) > 0
+    ]
+```
+Looks a bit scary, no?
+
+It reminds me of something.
+<figure><img src="/images/2020-10-29/frontendbackend.jpg">
+</figure>
+
+
+This is a **great abstraction** because it has to look pretty and simple on the front and it is fine that the underlying layer is very scary. But still this thing allows to configure about everything you'll ever need!
+
+What is the problem then?
+
+Well the problem is **when you are not writing a widely-used module** or not writing a module at all and leak all of these horrible-to-read advanced terraform features in the root configuration just because you wanted to find out how `for-each` works or you wanted to get rid of that one extra boilerplate line of config so you built this horrible monster.
+
+Keep your "code" DRY, but [not at the expense of simplicity](https://www.contenthere.net/2014/09/too-dry-anti-pattern.html).
+There is nothing wrong about a bit of boilerplate and clean flat configuration that is easy to read and change!
+
+## summary
+Infrastructure as Code and terraform are fairly new. There is still a lot to be done to find out best practices, improve linting, testing and collaboration on terraform codebases. It is easy to mess up and create a lot of complexity that is hard to change. Don’t expect that everything will work automagically. Play with it, experiment, seek to constantly learn more about it and collaborate with the OSS community.
+
+Do you see different mistakes being made? Just hit us up
+([@MarekBartik](https://twitter.com/MarekBartik) [@MstrsObserver](https://twitter.com/MstrsObserver))
+on Twitter!
+
+
+
+---
+
+# Improve visibility in Helm workflows with Werf!
+
+> How Werf adds real-time deployment tailing and live pod status to Helm workflows, replacing blind waits with actionable feedback.
+
+Published 2020-10-20 by Stepan Vrany. Source: https://blog.pipetail.io/posts/2020-10-20-werf/
+
+
+What's the most annoying thing about Helm workflows? There's literally no visibility
+during the deployment process. Do you have some migration (Helm) hook that's failing?
+Helm will tell you that one of the hooks failed but all the kubectling is up to. 
+
+And that's just fine, Helm is too complex even without some live tailing of the deployment process.
+
+## The current state
+This article did not come out from the blue. We were searching for such a solution for some
+time already. A few customers deploy huge Helm charts and failing components are a huge pain.
+Especially when you are using flags like --atomic or --wait. Some stuff is not ready and your
+only chance is to fetch status with Kubectl. 
+
+All mentioned is even more painful when we try to do all the stuff from pipelines.
+The pipeline got stuck for 20 minutes. What next? What are the options here?
+
+## Pile of shell
+This is our evergreen. You can fix all the problems of the 21st century by throwing in
+hundreds or thousands of lines of Shell code. But is it reliable? And if so, is someone
+else in your team able to introduce any change to the code? Enough about Shell,
+I can talk about this hours and hours. But you get the idea, right?  Let's move forward.
+
+## Specialized tool: Werf
+All the struggle inspired me to the massive crawling of GitHub. And I've come in just in time.
+There's a pretty stable tool Werf developed by [Flant](https://flant.com/) for
+Continuous Delivery tasks. But by some coincidence, they're introducing Helm 3 support right now!
+
+All you need to do is just prepend werf in front of the existing command. This is the result:
+
+<figure><img src="/images/2020-10-20/werf-01.gif">
+</figure>
+
+
+## Not so fast
+Demonstrated features are in alpha right now. So feel free to use it with some caution.
+This should, however, change in the following month when Helm 3 feature will be
+transferred to the stable channel. Can't wait! This piece of the puzzle was fundamentally
+missing for past years.
+
+## Links
+
+- https://werf.io/
+- https://github.com/werf/werf
+- https://github.com/werf/kubedog this tools was not mentioned in the article but it's really important part of Werf. Check it!
+
+
+
+---
+
+# How would I proceed with Kubernetes deployments?
+
+> Alternatives to Helm for Kubernetes deployments using Kustomize overlays for templating and Kapp for ordered apply with automatic garbage collection.
+
+Published 2020-07-17 by Stepan Vrany. Source: https://blog.pipetail.io/posts/2020-07-17-helm-free-deployment/
+
+
+Last time I've written a few words about the [orchestration of
+Helm deployments](https://blog.pipetail.io/posts/2020-07-13-helmfile-basics/). I've mentioned
+there that I'm not so big fan of Helm in terms of deployment of
+applications. That's 100% true, but do I have any other alternatives?
+Sure, be my  guest. In this article I'm going to show you world of
+template-free customizations and single-purpose deployment tools!
+
+## Template-free customization with Kustomize
+
+When I first saw Kustomize, I was using Helm everyday so any 
+different approach seemed to be odd, but  after thousands and thousands
+of written Helm templates I came back I could clearly see the benefits there.
+
+I don't want to bother you with the lesson of philosophy so let's start
+with simple example. Let's say that I want to deploy simple
+Kubernetes Deployment with some dummy image, here it is:
+
+### Basic project structure without Kustomize
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  labels:
+    app.kubernetes.io/name: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: backend
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: backend
+    spec:
+      containers:
+      - name: backend
+        image: backend:version1234
+        ports:
+        - containerPort: 80
+```
+
+We also want to expose it to the internet so it would be great to have
+some `Service` and `Ingress`:
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+spec:
+  selector:
+    app.kubernetes.io/name: backend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+```
+
+```yaml
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: backend
+spec:
+  rules:
+  - host: backend.pipetail.io
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: backend
+          servicePort: 80
+```
+
+So this is the structure of our application:
+
+```bash
+.
+├── deployment.yaml
+├── ingress.yaml
+└── service.yaml
+```
+
+We can deploy it with `kubectl apply`, we can adjust the image tag
+if needed and I don't hesitate to say that this solution will be
+the best for such simple stack.
+
+But it get's a bit more complicated when we wan't to deploy the
+same stack to more environments.
+
+### Adding kustomization manifest
+
+So in our hypothetical case we're gonna deploy the same app to two different environments,
+development and production. The only difference is labeling: `pipetail.io/environment: development`
+and `pipetail.io/environment: production`. To use the same manifests,
+we need to create a kustomization file `kustomization.yaml` first:
+
+```yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- deployment.yaml
+- service.yaml
+- ingress.yaml
+```
+
+The result is directory with following contents:
+
+```bash
+.
+├── deployment.yaml
+├── ingress.yaml
+├── kustomization.yaml
+└── service.yaml
+```
+
+We've basically just created something that is called `base`. Now we can put
+these files to some more complex structure and continue with overlays!
+
+### Production overlay
+
+Regarding the more complex structure, here it is:
+
+```bash
+.
+├── bases
+│   └── backend
+│       ├── deployment.yaml
+│       ├── ingress.yaml
+│       ├── kustomization.yaml
+│       └── service.yaml
+└── environments
+    ├── development
+    │   └── backend
+    └── production
+        └── backend
+```
+
+All four YAML files were moved to `bases/backend` directory. You can choose
+arbitrary name, personally I always prefer something obvious. Moreover,
+you're gonna find the similar structure in the majority of tutorials.
+
+Anyway, now let's create a new kustomization file `environments/production/backend/kustomization.yaml`
+and let's try to use the base created before with slightly  different labels.
+
+```yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- ../../../bases/backend/
+commonLabels:
+  pipetail.io/environment: production
+```
+
+That's it. Now we can try to build the manifests for the production environment:
+
+```bash
+kustomize build environments/production/backend/
+```
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    pipetail.io/environment: production
+  name: backend
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app.kubernetes.io/name: backend
+    pipetail.io/environment: production
+...
+```
+
+And that's pretty much it. You can check the
+[official documentation](https://kubernetes-sigs.github.io/kustomize/api-reference/)
+and see the list of basic transformers. However, this is how the overlays work.
+You can go even further and consider this overlay as a base and build another overlay... 
+but don't try to be too clever. It can get messy even with template-free engine :D.
+
+### More complicated operations
+Now we just need to clarify some more complicated matter. Do you remember that `Ingress` object?
+It has hard-coded `host` property, But we certainly don't want the same name for both environments.
+How can we proceed here with template-free matter?
+
+**option 1: remove ingress from the base**
+
+```bash
+.
+├── bases
+│   └── backend
+│       ├── deployment.yaml
+│       ├── kustomization.yaml
+│       └── service.yaml
+└── environments
+    ├── development
+    │   └── backend
+    │       ├── ingress.yaml
+    │       └── kustomization.yaml
+    └── production
+        └── backend
+            ├── ingress.yaml
+            └── kustomization.yaml
+```
+
+Kustomization in overlays will then contain reference to the local `ingress.yaml` file:
+
+```yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- ../../../bases/backend/
+- ingress.yaml
+commonLabels:
+  pipetail.io/environment: production
+```
+
+**option 2: JSON patch**
+
+But if the amount of changes that we want to make in the whole resource is not so
+big, we can just simply replace one bit of information without the repetition.
+
+This is the `kustomization.yaml` in the overlay:
+
+```yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- ../../../bases/backend/
+commonLabels:
+  pipetail.io/environment: production
+patches:
+- path: patch-ingress.yaml
+  target:
+    group: networking.k8s.io
+    version: v1beta1
+    kind: Ingress
+    name: backend
+```
+
+and this is the patch refered in the kustomization file:
+
+```yaml
+- op: replace
+  path: /spec/rules/0/host
+  value: production.backend.pipetail.io
+```
+
+Let's just quickly check that everything works as expected.
+
+```bash
+kustomize build environments/production/backend/
+```
+
+```yaml
+...
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  labels:
+    pipetail.io/environment: production
+  name: backend
+spec:
+  rules:
+  - host: production.backend.pipetail.io
+    http:
+      paths:
+      - backend:
+          serviceName: backend
+          servicePort: 80
+        path: /
+```
+
+### My favorite parts of Kustomize
+
+It's pretty obvious that Kustomize can handle pretty much all the common use cases.
+I really don't want to show all the capabilities here because it's matter more
+for some book than for a single blog post. Here I just want to name a few features
+that I consider as really nice:
+
+- With [images](https://kubernetes-sigs.github.io/kustomize/api-reference/kustomization/images/) I don't
+have to edit images in the Kubernetes manifests. I usually use some dummy (but descriptive)
+image names so I can easily change the it the kustomization file.
+
+    ```yaml
+    images:
+    - name: backend
+      newName: 123456789123.dkr.ecr.eu-central-1.amazonaws.com/deployment
+      newTag: 322fe7d0
+    ```
+
+- [configMapGenerator](https://kubernetes-sigs.github.io/kustomize/api-reference/kustomization/configmapgenerator/)
+really helps with creation of configmaps, I don't have to struggle with indentation
+in the ConfigMap and I can refer files directly
+
+- Kustomize is also easily extensible with plugins.
+While native Go plugins are a bit hard to work with, simple
+[exec plugin](https://kubernetes-sigs.github.io/kustomize/guides/plugins/execpluginguidedexample/)
+can be done in a matter of minutes. I use this for secrets management when
+I encrypt secrets with [SOPS](https://github.com/mozilla/sops) and simple wrapper
+written in Go is then decrypting them.
+
+- And last but not least, Kustomize is adding hash to ConfigMap names automatically.
+And last but not least, Kustomize is adding hash to ConfigMap names automatically.
+It means that edits in ConfigMaps trigger restart of pods (in Helm we usually
+use annotations with hashes for the same purpose).
+
+## Single-purpose tool for deployment
+
+Templating is only one part of Helm, right? The other part is management of the releases.
+It's particularly useful when we need to upsert resources in the given order or
+perform garbage collection.
+
+All mentioned can be covered with [Kapp](https://github.com/k14s/kapp) from the K14s project.
+Let's check how the most important features work in Kapp.
+
+### Apply ordering
+
+Applying Kubernetes in the specific order is actually pretty common requirement.
+It's mainly used for the migrations together with Kubernetes `Jobs`. In Kapp,
+this behaviour can be controlled with `kapp.k14s.io/change-group` and
+`kapp.k14s.io/change-rule` annotations. So let's create a model scenario
+for this specific requirement.
+
+```yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: backend-migrations
+  annotations:
+    kapp.k14s.io/change-group: "apps.pipetail.io/db-migrations"
+spec:
+  template:
+    spec:
+      containers:
+      - name: backend-migrations
+        image: backend:version1234
+        command: ["app", "migrate", "--force"]
+      restartPolicy: Never
+  backoffLimit: 0
+```
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  labels:
+    app.kubernetes.io/name: backend
+  annotations:
+    kapp.k14s.io/change-group: "apps.pipetail.io/deployment"
+    kapp.k14s.io/change-rule: "upsert after upserting apps.pipetail.io/db-migrations"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: backend
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: backend
+    spec:
+      containers:
+      - name: backend
+        image: backend:version1234
+        ports:
+        - containerPort: 80
+```
+
+Note the change rule in the Deployment:
+
+```yaml
+kapp.k14s.io/change-rule: "upsert after upserting apps.pipetail.io/db-migrations"
+```
+
+Here we are saying to Kapp that we want deploy a new version of the Deployment manifest
+after the migrations run successfully. Let's test this scenario with previously created
+resources!
+
+<figure><img src="/images/2020-07-17/ILy72qO8aw.gif">
+</figure>
+
+
+## garbage collection
+
+What if we delete ingress from our stack? Will Kapp delete them from cluster?
+
+<figure><img src="/images/2020-07-17/gMxY1lp88a.gif">
+</figure>
+
+
+It's a yes! Kapp can handle even this highly demanded requirement.
+
+## Wrap
+
+Hey, I'm not telling you to stop using Helm. I'm just showing you that Internet
+is full of tools that can help you with the similar matter. So if you're not so
+happy with Helm, you can take a look around and choose some different tool that
+does the job.
+
+There are Jsonnet, [Tanka](https://github.com/grafana/tanka) and a lot of different
+tools. Some of them can handle multiple tasks, some of them are single-purpose as Kapp.
+
+But don't forget that one tool does not necessarily cover all the requirements.
+The key is always composition.
+
+
+
+---
+
+# Helmfile basics: get your Helm flow organized
+
+> Getting started with Helmfile to orchestrate multiple Helm releases using label selectors, environment overrides, and SOPS-encrypted secrets.
+
+Published 2020-07-13 by Stepan Vrany. Source: https://blog.pipetail.io/posts/2020-07-13-helmfile-basics/
+
+There are no doubts that Helm is extremely popular tool,
+perhaps the most popular tool in the whole Kubernetes ecosystem.
+But are there any ways how to streamline deployments of complex applications?
+I'm not big fan of Helm when it comes to delivery of applications.
+When used with inappropriate amount of vigilance, it can generate a huge mess (technical debt).
+I've seen this couple of times in different places,
+a good example is huge Helm release used for all the services.
+
+This might be working for smaller applications, but when you grow and
+adding more services, this can become a **major blocker** of your deployment
+velocity:
+
+- you always need to collect information for all the services so you are able to populate Helm values properly
+- when using `--atomic` flag, unimportant small application can break and revert the whole deployment
+- bigger release means longer execution time of the deployment (more things can go wrong in that time period)
+- small change in monolithic Helm chart might cause butterfly effect
+
+That's not complete list of course. But yeah, that's the reality, Helm is here and it won't go away any time soon.
+So let's try to come with some solution!
+
+## How we got here
+
+First we need to think about how we got here. Why do we use monolithic Helm charts?
+I'd say it's mainly due to fear of repetition while installing components of the
+application (services). That's a good point, when installing application
+with 10 services, we essentially need to run `helm upgrade` ten times.
+
+Or we can create all-in-one chart that simplifies this a bit. Or we can create
+all-in-one chart that simplifies this a bit. Alternatively we can create an envelope
+chart and use separate charts for all the applications.
+
+So this is how we got here. All the stuff that I've mentioned before applies here.
+
+## Enter the Helmfile
+
+A few weeks ago I've discovered Helmfile which is basically wrapper for Helm that
+can simplify installation of multiple charts. But there's a difference:
+Helmfile does not combine everything to the single Helm release.
+
+Let's check quick and dirty example of Helmfile for the application composed from
+two services. 
+
+```yaml
+helmDefaults:
+  atomic: true
+  wait: true
+  timeout: 3600
+releases:
+
+  - name: backend
+    namespace: backend-production
+    createNamespace: true
+    labels:
+      app: backend
+    chart: ./charts/backend
+    missingFileHandler: Error
+    set:
+      - name: image.tag
+        value: {{ env "BACKEND_VERSION" }}
+    values:
+      - "./environments/{{ .Environment.Name }}/backend-values.yaml"
+      - "./environments/{{ .Environment.Name }}/values.yaml"
+    secrets:
+      - "environments/{{ .Environment.Name }}/backend-secrets.enc.yaml"
+      - "environments/{{ .Environment.Name }}/secrets.enc.yaml"
+
+  - name: frontend
+    namespace: frontend-production
+    createNamespace: true
+    labels:
+      app: frontend
+    chart: ./charts/frontend
+    missingFileHandler: Error
+    set:
+      - name: image.tag
+        value: {{ env "FRONTEND_VERSION" }}
+    values:
+      - "./environments/{{ .Environment.Name }}/frontend-values.yaml"
+      - "./environments/{{ .Environment.Name }}/values.yaml"
+    secrets:
+      - "environments/{{ .Environment.Name }}/frontend-secrets.enc.yaml"
+      - "environments/{{ .Environment.Name }}/secrets.enc.yaml"
+
+environments:
+  default:
+  production:
+```
+
+You can see a couple of things there:
+
+- global flags for Helm can be defined there
+- releases can be installed to different namespaces
+- helmfile somehow distinguishes between values and secrets (we will talk about this later on)
+- Helmfile is able to handle different environments
+- releases can have labels
+- we can even use environment variables!
+
+Now, let's go through some basic features that can simplify deployment process.
+I'm gonna create extra topic for each feature that I find interesting for this purpose.
+
+### Labels
+
+There are situations when we want to install all the releases at the same time.
+Deployment to production is not one of them. But let's go back to the valid situations.
+How about review environments? That's a good example, right? In such case, you
+can simple run `helmfile apply`.
+
+```bash
+helmfile apply
+```
+
+End of story. Now we have Helm releases `backend` in the namespace `backend-production`
+and `frontend` in the namespace `frontend-production`.
+
+Now let's focus on the production scenario when we want to install only on release at time.
+
+```bash
+helmfile --environment production --selector app=backend diff
+```
+
+This command installs only one release: `backend` to the namespace `backend-production`.
+
+### Environments
+
+In the previous sections you may notice `--environment` flag. That's Helmfile internal
+functionality that introduces some templating functions directly to the `helmfile.yaml`
+specification.
+
+With this feature you can load different values for different environments:
+
+```yaml
+    values:
+      - "./environments/{{ .Environment.Name }}/backend-values.yaml"
+      - "./environments/{{ .Environment.Name }}/values.yaml"
+```
+
+And guess what, you can use it even for namespaces:
+
+```yaml
+releases:
+  - name: backend
+    namespace: backend-{{ .Environment.Name }}
+```
+
+With this feature we just need to create a good directory structure and that's it: 
+
+```bash
+.
+├── charts
+│   ├── backend
+│   └── frontend
+├── environments
+│   ├── default
+│   │   ├── backend-secrets.enc.yaml
+│   │   ├── backend-values.yaml
+│   │   ├── secrets.enc.yaml
+│   │   └── values.yaml
+│   └── production
+│       ├── backend-secrets.enc.yaml
+│       ├── backend-values.yaml
+│       ├── secrets.enc.yaml
+│       └── values.yaml
+├── helmfile.yaml
+└── README.md
+```
+
+### Environment variables
+The typical use case for environment variables is updating of service versions.
+In Kubernetes terminology we're basically switching images.
+
+Traditionally we process the version in the orchestration tool and then we
+provide it as `--set` flag to Helm. With Helmfile, you can skip this
+part and you can use environment variables as the reference directly in
+helmfile.yaml.
+
+```yaml
+    set:
+      - name: image.tag
+        value: {{ env "BACKEND_VERSION" }}
+```
+
+This feature is rather for machines (automation engines) but still I find
+this as a really useful one.
+
+### Secrets management
+
+Helmfile integrates with [Helm secrets plugin](https://github.com/zendesk/helm-secrets) for Helm.
+With this plugin you have an ability to store encrypted secrets in git
+repository using [SOPS](https://github.com/mozilla/sops) tool from Mozilla engineering team.
+
+I don't want to go soo deep to SOPS internals but here are the key takeaways:
+- secrets can be encrypted with managed solutions like AWS KMS or GCP KMS
+- SOPS is encrypting values only, this means that keys are visible and you can see the context while doing reviews for changes
+
+Here's the example for the second takeaway:
+
+```yaml
+global:
+    secrets:
+        GLOBAL_SECRET: ENC[AES256_GCM,data:LuHVrAE6nkFH,iv:EHm8cPw8dfaHQSyqN0YKEpK/53gv1ljL5zYWACqUP2E=,tag:Rx9bcfZ3XCJph50wWKYAew==,type:str]
+```
+
+Now let's just connect this SOPS stuff with Helmfile. All you need to know is
+that Helmfile is handling decryption process and then it merges secrets with values.
+
+All you need to know is that Helmfile is handling decryption process and then it merges secrets with values. There's no magic there, all you need to do is refer values as usual:
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Release.Name }}
+type: Opaque
+data:
+  {{- range $key, $value := .Values.global.secrets }}
+  {{ $key }}: {{ $value | b64enc | quote }}
+  {{- end }}
+```
+
+## Wrap
+Is it all you can do with Helmfile? Hell no! Helmfile has a lot of features
+that I did not cover in this blog post. However I was mainly focusing on
+release cycle of applications with Helm so that's why I've named here only few features.
+
+Let's wrap this blog post with my advice: try to create not so complex Helm charts
+and if you need to compose more things together, use rather some orchestration tool
+without adding more complexity to charts. Helmfile can serve you well
+for this purpose and it also does not create any lock-in so you can switch
+back to plain Helm anytime.
+
+
+
+
+---
+
+# 10 most common mistakes using kubernetes
+
+> Common Kubernetes mistakes: missing resource limits, misconfigured probes, no ingress controller, wrong autoscaling, weak RBAC, missing anti-affinity and PDBs.
+
+Published 2020-05-04 by Marek Bartik. Source: https://blog.pipetail.io/posts/2020-05-04-most-common-mistakes-k8s/
+
+
+
+We had the chance to see quite a bit of clusters in our years of experience with kubernetes (both managed and unmanaged - on GCP, AWS and Azure), and we see some mistakes being repeated. No shame in that, we’ve done most of these too!
+
+I'll try to show the ones we see very often and talk a bit about how to fix them.
+
+## resources - requests and limits
+This definitely deserves the most attention and first place in this list.
+
+CPU request are usually either **not set** or **set very low** (so that we can fit a lot of pods on each node) and nodes are thus overcommited. In time of high demand the CPUs of the node are fully utilized and our workload is getting only “what it had requested” and gets **CPU throttled**, causing increased application latency, timeouts, etc.
+
+BestEffort (please don't):
+```yaml
+    resources: {}
+```
+
+very low cpu (please don't):
+```yaml
+    resources:
+      requests:
+        cpu: "1m"
+```
+
+On the other hand, having a CPU limit can unnecessarily throttle pods even if the node’s CPU is not fully utilized which again can cause increased latency. There is a an open discussion around *CPU CFS quota* in linux kernel and cpu throttling based on set cpu limits and turning off the CFS quota. CPU limits can cause more problems than they solve. See more in the link below.
+
+Memory overcommiting can get you in more trouble. Reaching a CPU limit results in throttling, reaching memory limit will get your pod killed. Ever seen **OOMkill**? Yep, that's the one we are talking about. Want to minimize how often it can happen? Don’t overcommit your memory and use Guaranteed QoS (Quality of Service) setting memory request equal to limit like in the example below. Read more about the topic [in Henning Jacobs' (Zalando) presentation](https://www.slideshare.net/try_except_/optimizing-kubernetes-resource-requestslimits-for-costefficiency-and-latency-highload).
+
+
+Burstable (more likely to get OOMkilled more often):
+```yaml
+    resources:
+      requests:
+        memory: "128Mi"
+        cpu: "500m"
+      limits:
+        memory: "256Mi"
+        cpu: 2
+```
+
+Guaranteed:
+```yaml
+    resources:
+      requests:
+        memory: "128Mi"
+        cpu: 2
+      limits:
+        memory: "128Mi"
+        cpu: 2
+```
+
+So what can help you when setting resources?
+
+You can see the current cpu and memory usage of pods (and containers in them) using *metrics-server*. Chances are, you are already running it. Simply run these:
+```sh
+kubectl top pods
+kubectl top pods --containers
+kubectl top nodes
+```
+
+However these show just the current usage. That is great to get the rough idea about the numbers but you end up wanting to see these **usage metrics in time** (to answer questions like: what was the cpu usage in peak, yesterday morning, etc.). For that, you can use *Prometheus*, *DataDog* and many others. They just ingest the metrics from metrics-server and store them, then you can query & graph them.
+
+
+[VerticalPodAutoscaler](https://cloud.google.com/kubernetes-engine/docs/concepts/verticalpodautoscaler) can help you **automate away** this manual process - looking at cpu/mem usage in time and setting new requests and limits based on that all over again.
+
+Utilizing effectively your compute is not an easy task. It is like playing tetris all the time. If you find yourself paying a lot for compute while having low average utilization (say ~10%), you might want to check AWS Fargate or Virtual Kubelet based products that leverage more of a serverless/pay-per-usage billing model that might be cheaper for you.
+
+## liveness and readiness probes
+By default there are no liveness and readiness probes specified. And sometimes it stays that way...
+
+But how else would your service get restarted when there is an unrecoverable error? How does a loadbalancer know a specific pod can start handling traffic? Or handle more traffic?
+
+People usually don't know the difference between these two.
+- Liveness probe restarts your pod if the probe fails
+- Readiness probe disconnects on fail the failing pod from the kubernetes service (you can check this in `kubectl get endpoints`) and no more traffic is being sent to it until the probe succeeds again
+
+and **BOTH RUN DURING THE WHOLE POD LIFECYCLE**. This is important.
+
+People often think that readiness probes run only at the start to tell when the pod is **Ready** and can start servicing traffic. But that's just one of its use cases.
+
+The other one is to tell if during a pod's life the pod becomes **too hot** handling too much traffic (or an expensive computation) so that we don't *send her more work to do* and let her *cool down*, then the readiness probe succeeds and **we start sending in more traffic again**. In this case (when failing readiness probe) failing also liveness probe would be very counterproductive. **Why would you restart a pod that is healthy and doing a lot of work?**
+
+Sometimes not having either probe defined is better than having them defined wrong. As mentioned above, if **liveness probe is equal to readiness probe**, you are in a big trouble. You might want to start with defining [only the readiness probe alone](https://twitter.com/sszuecs/status/1175803113204269059) as [liveness probes are dangerous](https://srcco.de/posts/kubernetes-liveness-probes-are-dangerous.html).
+
+Do not fail either of the probes if any of your shared dependencies is down, it would cause **cascading failure** of all the pods. You are [shooting yourself in the foot](https://blog.colinbreck.com/kubernetes-liveness-and-readiness-probes-how-to-avoid-shooting-yourself-in-the-foot/).
+
+## LoadBalancer for every http service
+Chances are you have more http services in your cluster which you’d like to expose to the outside world.
+
+If you expose kubernetes service as a `type: LoadBalancer`, its controller (vendor specific) will provision and reconciliate an external LoadBalancer (not necessarily L7 loadbalancer, more likely an L4 lb) and those resources might get expensive (external static ipv4 address, compute, per-second pricing…) as you create many of them.
+
+In that case, sharing one external loadbalancer might make more sense and you expose your services as `type: NodePort`. Or yet better, deploying something like **nginx-ingress-controller** (or *traefik*) being the single *NodePort* endpoint exposed to the external loadbalancer and routing the traffic in the cluster based on kubernetes **ingress** resources.
+
+The other in-cluster (micro)services that talk to each other can talk through **ClusterIP** services and out-of-box dns service discovery. Be careful about not using their public DNS/IPs as it could affect their latency and cloud cost.
+
+## non-kubernetes-aware cluster autoscaling
+When adding and removing nodes to/from the cluster, you shouldn’t consider some simple metrics like a cpu utilization of those nodes. When scheduling pods, you decide based on a lot of **scheduling constraints** like pod & node affinities, taints and tolerations, resource requests, QoS, etc. Having an external autoscaler that does not understand these constraints might be troublesome.
+
+Imagine there is a new pod to be scheduled but all of the CPU available is requested and pod is **stuck in Pending state**. External autoscaler sees the average CPU currently used (not requested) and won’t scale out (will not add another node). The pod won’t be scheduled.
+
+Scaling-in (removing a node from the cluster) is always harder. Imagine you have a stateful pod (with persistent volume attached) and as **persistent volumes** are usually resources that **belong to a specific availability zone** and are not replicated in the region, your custom autoscaler removes a node with this pod on it and scheduler cannot schedule it onto a different node as it is very limited by the only availability zone with your persistent disk in it. Pod is again stuck in Pending state.
+
+The community is widely using [**cluster-autoscaler**](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler) which runs in your cluster and is integrated with most major public cloud vendors APIs, understands all these constraints and would scale-out in the mentioned cases. It will also figure out if it can gracefully scale-in without affecting any constraints we have set and saves you money on compute.
+
+## Not using the power of IAM/RBAC
+Don't use IAM Users with permanent secrets for *machines and applications* rather than generating temporary ones using roles and service accounts.
+
+We see it often - hardcoding access and secret keys in application configuration, never rotating the secrets when you have Cloud IAM at hand. Use IAM Roles and service accounts instead of users where suitable.
+
+<figure><img src="/images/2020-05-04-everywhere.jpg">
+</figure>
+
+
+Skip kube2iam, go directly with IAM Roles for Service Accounts as described in [this blogpost by Štěpán Vraný](https://blog.pipetail.io/posts/2020-04-13-more-eks-tips/).
+
+```yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/my-app-role
+  name: my-serviceaccount
+  namespace: default
+```
+
+One annotation. That wasn't that hard, no?
+
+Also don’t give the service accounts or instance profiles `admin` and `cluster-admin` permissions when they don’t need it. That is a bit harder, especially in k8s RBAC, but still worth the effort.
+
+## self anti-affinities for pods
+Running e.g. 3 pod replicas of some deployment, node goes down and all the replicas with it. Huh? All the replicas were running on one node? Wasn't Kubernetes supposed to be magical and provide HA?!
+
+You can't expect kubernetes scheduler to enforce anti-affinites for your pods. You have to define them explicitly.
+
+```yaml
+// omitted for brevity
+      labels:
+        app: zk
+// omitted for brevity
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: "app"
+                    operator: In
+                    values:
+                    - zk
+              topologyKey: "kubernetes.io/hostname"
+```
+
+That's it. This will make sure the pods will be scheduled to different nodes (this is being checked only at scheduling time, not at execution time, hence the `requiredDuringSchedulingIgnoredDuringExecution`).
+
+We are talking about podAntiAffinity on different node names - `topologyKey: "kubernetes.io/hostname"` - not different availability zones. If you really need proper HA, dig a bit deeper in this topic.
+
+## no poddisruptionbudget
+You run production workload on kubernetes. Your nodes & cluster have to be upgraded, or decommissioned, from time to time. PodDisruptionBudget (pdb) is sort of an API for service guarantees between cluster-administrators and cluster-users.
+
+
+Make sure to create `pdb` to avoid unnecessary service outages due to draining nodes.
+```yaml
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: zk-pdb
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: zookeeper
+```
+
+With this as a cluster-user you tell the cluster-administrators: "hey, I have this zookeeper service here and no matter what you have to do, I'd like having at least 2 replicas always available".
+
+I talked about this topic more in-depth [here in this blogpost](https://blog.marekbartik.com/posts/2018-06-29_kubernetes-in-production-poddisruptionbudget/).
+
+## more tenants or envs in shared cluster
+Kubernetes **namespaces don’t provide any strong isolation**.
+
+People seem to expect if they separated non-prod workload to one namespace and prod to prod namespace, one **workload won’t ever affect the other**. It is possible to achieve some level of fairness - resource requests and limits, quotas, priorityClasses - and isolation - affinities, tolerations, taints (or nodeselectors) - to “physically” separate the workload in data plane but that separation is quite **complex**.
+
+If you need to have both types of workloads in the same cluster, you’ll have to bear the complexity. If you don’t need it and having **another cluster** is relatively cheap for you (like in public cloud), put it in different cluster to achieve much stronger level of isolation.
+
+## externalTrafficPolicy: Cluster
+Seeing this very often, all traffic is routed inside the cluster to a NodePort service which has, by default, `externalTrafficPolicy: Cluster`. That means the *NodePort* is opened on every node in the cluster so that you can use any of them to communicate with the desired service (set of pods).
+
+<figure><img src="/images/2020-05-04-externaltrafficpolicy.png">
+</figure>
+
+
+More often than not the actual pods that are targeted with the NodePort service **run only on a subset of those nodes**. That means if I talk to a node which does not have the pod running it will forward the traffic to a different node, causing **additional network hop** and increased latency (if the nodes are in different AZs/datacenters, the latency can be quite high and there is additional egress cost to it).
+
+Setting `externalTrafficPolicy: Local` on the kubernetes service won’t open that NodePort on every Node, but only on the nodes where the pods are actually running. If you use an external loadbalancer which is healthchecking its endpoints (like *AWS ELB* does) it will start to **send the traffic only to those nodes** where it is supposed to go, improving your latency, compute overhead, egress bill and sanity.
+
+Chances are, you have something like *traefik* or *nginx-ingress-controller* being exposed as NodePort (or LoadBalancer, which uses NodePort too) to handle your ingress http traffic routing and this setting can greatly reduce the latency on such requests.
+
+
+great blogpost that goes more in depth about [externalTrafficPolicy and their trade-offs here](https://www.asykim.com/blog/deep-dive-into-kubernetes-external-traffic-policies).
+
+## pet clusters + stressing the control plane too much
+You went from calling your servers [*Anton*](https://twitter.com/vorobiev_cloud), *HAL9000* and *Colossus* to having generated random ids for your nodes but you started to call your cluster by a name?
+
+You know how you started with a Proof Of Concept with Kubernetes, named the cluster “testing” and STILL use it in production and everybody is scared to touch it? (true story)
+
+Pet clusters are not fun and you might want to consider deleting your cluster from time to time, **practice Disaster Recovery** and take care of your control plane. Being afraid of touching the control plane is not a good sign. *Etcd*'s dead? Well, you got a big problem.
+
+On the other hand, touching it too much is no good either. When with time the **control plane becomes slow**, chances are, you are either creating a lot of objects without ever rotating them (very common when using helm with default settings which does not rotate its state in configmaps/secrets and you end up having thousands of objects in control plane) or you constantly scrape and edit tons of things from kube-api (for autoscaling, cicd, monitoring, logs from events, controllers, etc.).
+
+Also, check your managed kubernetes offering “SLAs”/SLOs and guarantees. A vendor might guarantee **availability of control plane** (or its subcomponents) but not p99 latency of the requests you send to it. In other words, you might do `kubectl get nodes` and get correct answer in 10 minutes and that still does not violate the service guarantee.
+
+## bonus: using latest tag
+This one is a classic. I feel like lately I don’t see this very often as a lot of us got burned too many times and we stopped using `:latest` and started to pin the versions. Yay!
+
+[ECR has a great feature of tag immutability](https://aws.amazon.com/about-aws/whats-new/2019/07/amazon-ecr-now-supports-immutable-image-tags/), definitely worth checking out.
+
+## summary
+Don't expect that everything works automagically - Kubernetes is not a silver bullet. A bad app will be [bad app even on kubernetes](https://twitter.com/sadserver/status/1032704897500598272?s=20) (possible even worse than bad, actually). If you are not careful, you can end up with a lot of complexity, stressed and slow control plane and no DR strategy. Don't expect out-of-box multi-tenancy and high availability. Invest some time in making your app cloud native.
+
+Check how we others got burned in this great [failure stories compilation](https://k8s.af/) by Henning.
+
+Do you see different mistakes being made? Just hit us up
+([@MarekBartik](https://twitter.com/MarekBartik) [@MstrsObserver](https://twitter.com/MstrsObserver))
+on Twitter!
+
+
+
+---
+
+# More EKS tips to make your life easier
+
+> Practical EKS tips: IAM Roles for Service Accounts instead of kube2iam, Cluster Autoscaler scale-from-zero with ASG tags, and spot instance priority expander.
+
+Published 2020-04-13 by Stepan Vrany. Source: https://blog.pipetail.io/posts/2020-04-13-more-eks-tips/
+
+
+We've spent most of the last month on implementing EKS. Surprisingly, we're always solving the same
+concerns no matter what project we're working on. Here's couple of tips for your EKS clusters!
+
+## Skip kube2iam, go directly with  IAM Roles for Service Accounts
+
+Kube2iam is amazing tool. I really like it and it helped me with granular control
+access in couple of projects. However, there's a better solution that is
+supported out of the box: [IAM roles for services accounts](https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html).
+
+> Why is it better? We're practically removing one moving part and that's IMO always good.
+
+In essence, we just need to create a new identity provider in the IAM console and that's pretty much it. 
+Then, EKS control plane is mutating all the pods that are using ServiceAccount with 
+`eks.amazonaws.com/role-arn` annotation.
+
+With all the configuration supplied by the mutating webhook AWS SDK now knows how to
+obtain credentials to AWS so your application can interact with AWS API in strictly
+controlled fashion. This works with all main stream applications, 
+to name a few: Cluster Autoscaler, ALB Ingress Controller or even Gitlab CI runner for Kubernetes.
+It's all about supported SDK versions. [Here's the list.](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts-minimum-sdk.html)
+
+## Tag your ASGs properly for maximum savings
+
+EKS environment is well suited for scaling from zero. This comes handy for downscaling
+after working hours (e.g. preview environments) or upscaling of instance
+groups for some specialized workload (e.g. batch processing or training of alghorithms).
+
+All mentioned is enabled by
+[Cluster Autoscaler](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler),
+but how can Cluster Autoscaler know what ASG it's supposed to scale up when any
+nodes with such Kubernetes labels don't exist yet?
+
+Here's an easy answer: tags. This part is [well documented](https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/FAQ.md#how-can-i-scale-a-node-group-to-0) but it sometimes might be complicated to find the right piece of docs, right?
+
+Long story short, if your nodes from the single ASG have some labels (`--node-labels` kubelet flag),
+always make sure that ASG has the same labels in the following format:
+
+```terraform
+    {
+      key                 = "k8s.io/cluster-autoscaler/node-template/label/role"
+      value               = "some-random-label"
+      propagate_at_launch = true
+    }
+```
+
+With those tags assigned Cluster Autoscaler knows which ASG it is supposed to spin up when we
+schedule workload with `nodeSelector` specified.
+
+## Try to experiment with Cluster Autoscaler priority expander
+
+Did you know that Cluster Autoscaler has a functionality called expanders that can
+change the way how Cluster Autoscaler behaves? It was sort of a new information,
+we've found this last week while implementing setup for some lower priority jobs.
+
+Again, we'll rather use some story to get you into this topic. So try to imagine
+that you have some lower priority jobs that are not really critical for your application.
+So in this case it does not really make sense to pay for 99.something uptime and we can
+use some less reliable spot instances with lower price.
+
+But when we are requesting spot instances, the result is always unknown due to nature of it
+so it's absolutely fine. Now I need to return to the part where I was telling you about
+low priority jobs. They are low priority, that's still valid. But I need them eventually,
+I can't wait for a week till my request will be fulfilled. So what's the process here?
+
+**[Priority exander!](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler/expander/priority)** With this beast enabled you can cover such edge cases. 
+
+All you need is start Cluster Autoscaler with `--expander=priority` and create a new ConfigMap
+in the same namespace where the Cluster Autoscaler runs.
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-autoscaler-priority-expander
+  namespace: kube-system
+data:
+  priorities: |-
+    10: 
+      - name-of-asg-with-on-demand.*
+    50: 
+      - name-of-asg-with-spot.*
+```
+
+Now, cluster autoscaler will try to scale up ASG `name-of-asg-with-spot` first
+and if it fails it just continues with ASG `name-of-asg-with-on-demand`.
+
+> From our personal experience, it's also a good idea to experiment with `--max-node-provision-time`
+> flag a bit. By default it waits 15 minutes but this might be too long in some cases.
+> And one additional tip, always do some PoC for your use cases. Documentation is
+> slightly lacking so you won't cause any harm by testing it before it reaches production 😏
+
+## Wrap
+Last month was absolutely thrilling. We've learned a lot of new things about EKS and Kubernetes
+itself and we're so happy that we can share them with you right away!
+Do you have more tips or are you having terrible times with something mentioned above? Just hit us up
+([@MarekBartik](https://twitter.com/MarekBartik) [@MstrsObserver](https://twitter.com/MstrsObserver))
+on Twitter!
+
+
+---
+
+# Getting started with PodSecurityPolicy on EKS
+
+> How to implement PodSecurityPolicy on Amazon EKS with proper RBAC bindings and why you must delete the default eks.privileged policy first.
+
+Published 2020-03-15 by Stepan Vrany. Source: https://blog.pipetail.io/posts/2020-03-15-psp-on-eks/
+
+As you might already know, security is not something that a specialized department should
+be responsible for. Instead, we all should bear in mind that security matters and build
+secure solutions from the very beginning. Today we're gonna talk about some practices
+in the world of containerized apps and Kubernetess. So let's say we have some best practices
+for the containerized workloads. But how to enforce that? We'll tell you right away.
+And the answer is actually pretty straightforward. Do you want to enforce some security policies?
+Use [Pod Security Policy resource](https://kubernetes.io/docs/concepts/policy/pod-security-policy/).
+In reality, Pod Security Policy is just an admission controller which is able to check if
+pods comply to assigned set of rules.
+
+For instance, we can check if pod is not running in privileged mode or we can also restrict
+the use of certain volumes types, this comes handy for example when you don't want to
+allow access to host filesystem.
+
+So why do I even write this post? We have some specialized resource so we just create it
+and that's it, right? Well, it's not that easy. And that's why I wrote this article. Let's begin.
+
+## Key principles
+
+As already mentioned, Pod Security Policy is just another Kubernetes resource.
+The following document contains a really simple policy that prohibits the run of
+privileged containers. 
+
+```yaml
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: example
+spec:
+  privileged: false
+  seLinux:
+    rule: RunAsAny
+  supplementalGroups:
+    rule: RunAsAny
+  runAsUser:
+    rule: RunAsAny
+  fsGroup:
+    rule: RunAsAny
+  volumes:
+  - '*'
+```
+
+But when you apply this document with `kubectl`, it just does nothing.
+That's because PSP mechanism is deeply integrated with RBAC system.
+In order to use this policy, you need to authorize the respective accounts
+to use it first.
+
+## RBAC magic
+
+So this is the basic ClusterRole which authorizes the use of verb `use` on
+the PSP created before.
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: psp:example
+rules:
+- apiGroups:
+    - policy
+  resources:
+    - podsecuritypolicies
+  verbs:
+    - use
+  resourceNames:
+  - example
+```
+
+Now we need to bind this `ClusterRole` to the certain `ServiceAcccout`.
+Here I need to step in and add some context. Why are we talking about ServiceAccounts
+when the workload is created by some users from flesh and bones?
+
+The thing is that usually, we don't create pod resources by ourselves but
+we're using some controllers instead. You can check more details in the
+[official documentation](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/). So the whole job is done by *someone else* hence
+we need to bind `ClusterRole` accordingly. To show you the whole picture,
+here are `ServiceAccount` and `Deployment` resources we want to use for our
+workload.
+
+```yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: app
+  namespace: app-test
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+  namespace: app-test
+  labels:
+    app: app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app
+  template:
+    metadata:
+      labels:
+        app: app
+    spec:
+      serviceAccountName: app
+      containers:
+      - name: app
+        image: mycustomnamespace/app:v1.0.0
+        ports:
+        - containerPort: 80
+```
+
+Now we know that `ServiceAccount` `app` lives in the `app-test` `Namespace` so
+we can create a suitable `ClusterRoleBinding`.
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: psp:example:app:app-test
+roleRef:
+  kind: ClusterRole
+  name: psp:example
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+- kind: ServiceAccount
+  name: app
+  namespace: app-test
+```
+
+From now, we should be able to run our workload as long as it does not run
+in privileged mode. Sweet.
+
+## EKS-specific configuration
+
+But let's talk about EKS. This offering has enabled PSP out of the box.
+Do you have any experience with EKS? If yes, you know then that you are able to
+create any workload with no restrictions. 
+
+However, it does not mean that *policy engine* is not enabled. The reason is that
+PSP is a pretty comprehensive topic so EKS comes with preconfigured policy
+bound to all authenticated users.
+
+The key elements are `PodSecurityPolicy` `eks.privileged` and
+`ClusterRoleBinding` `eks:podsecuritypolicy:authenticated`.
+
+What I'm saying here is that in order to apply your own rules you need to delete those
+resources and start on the green field.
+
+```bash
+kubectl delete podsecuritypolicy eks.privileged
+kubectl delete clusterrolebinding eks:podsecuritypolicy:authenticated
+```
+
+But when you do so, please be prepared for the following: no new pods can be created
+from now. You'll most likely get a similar error since we need at least
+one policy in order to start any pod with Pod Security Policy enabled.
+
+```
+unable to validate against any pod security policy: []
+```
+
+> All mentioned is already documented by Amazon, personally
+> I really like this [blog post](https://aws.amazon.com/blogs/opensource/using-pod-security-policies-amazon-eks-clusters/) with a step-by-step guide.
+
+## RBAC pitfalls
+When applying ultra restrictive policies, time to time you might encounter situations when
+the pod starts even when it does not comply with the PodSecurityPolicy.
+From my experience, it's always caused by incorrectly configured RBAC.
+
+For instance, you've allowed all verbs to all resources in the `extensions` API group
+so now your `ServiceAccount` is assigned to all `PodSecurityPolicy` resources
+hence the restrictions don't work as intended.
+
+> Please also note that some resources are availabel in multiple api groups.
+> For instance, `PodSecurityPolicy` can be in `policy` and `extensions` at the same time!
+> Dangerous stuff 😀
+
+But don't worry, you can address such issues with `auth can-i` [command](https://kubernetes.io/docs/reference/access-authn-authz/authorization/#checking-api-access)!
+
+```bash
+kubectl auth can-i use podsecuritypolicy/example --namespace app-test --as app
+```
+
+## Wrap
+Security really matters and you should not skip `PodSecurityPolicy`
+just because it's not as straightforward as other Kubernetes resources.
+Sure, this component can't save the whole world but it can help you with some
+basics. Moreover, it's no so complex as you could see in this post. Give it a shot!
+
+Do you have any specific questions regarding PSP? Do not hesitate to reach us,
+we're always happy to help.
+
+## Additional resources
+
+- [Policy order](https://kubernetes.io/docs/concepts/policy/pod-security-policy/#policy-order)
+- [EKS step-by-step guide for PSP](https://aws.amazon.com/blogs/opensource/using-pod-security-policies-amazon-eks-clusters/)
+- [EKS documentation for PSP](https://docs.aws.amazon.com/eks/latest/userguide/pod-security-policy.html)
+- [Docker best practices](https://snyk.io/blog/10-docker-image-security-best-practices/), see the section about least privileged user
+- [Kubernetes security context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
+- [Checking API access with Kubectl](https://kubernetes.io/docs/reference/access-authn-authz/authorization/#checking-api-access)
+
+
+---
+
+# GitLab Runner on EKS
+
+> Step-by-step guide to running a self-hosted GitLab Runner on AWS EKS using Terraform and GitLab Kubernetes integration.
+
+Published 2020-03-05 by Marek Bartik. Source: https://blog.pipetail.io/posts/2020-03-05-gitlab-runner-on-eks/
+
+
+GitLab-CI/CD is a great and powerful product for CI/CD pipelines. Hosted gitlab.com solution offers shared runners and some usage minutes based on your paid plan (even if the free tier). Though you might want to run your own runner in your private or public cloud. I will show how to run GitLab runner on AWS using terraform, Elastic Kubernetes Service and GitLab kubernetes integration.
+## When not to use shared runners
+Shared runners can be very slow and you are limited to "CI pipeline minutes" per month based on your [paid plan](https://about.gitlab.com/pricing/). You could always buy extra minutes but if you run a lot of pipelines, things might get expensive.
+
+Another reason not to use shared runners can be **security concerns**. Processing sensitive data might be a no-go for a lot of corporations.
+
+Luckily GitLab allows using **self-hosted gitlab runners**! You can run a single Go binary on a variety of OSes. GitLab runners have the concept of [executors](https://docs.gitlab.com/runner/executors/README.html#compatibility-chart), currently supported executors are:
+
+- shell
+- Docker
+- Docker Machine
+- Docker Machine SSH
+- Parallels
+- VirtualBox
+- SSH
+- Kubernetes
+
+These executors allow running your runners with additional features like private container registry, interactive web terminal, cache, artifacts, etc. Based on the executor used you might find harder or easier to debug problems, cache, persist and share build assets and dependencies and scale / utilize your compute.
+
+
+## Kubernetes executor
+We will pick Kubernetes executor as we are already familiar with it and it is quite easy to use it. It is relatively simple to debug problems and great to use at bigger scale to **better utilize our compute resources**.
+
+You could go through the pain of deploying it yourself on a Kubernetes cluster and registering it in GitLab or you could use [GitLab Runner Helm Chart](https://docs.gitlab.com/runner/install/kubernetes.html). Helm is a package manager for kubernetes (think npm for kubernetes).
+
+However, we can simplify the previous step and not deploy the chart ourselves! GitLab has a [Kubernetes Integration](https://docs.gitlab.com/ee/user/project/clusters/index.html) to create new or add existing kubernetes clusters. As of now it supports **Google Kubernetes Engine** (Google Cloud Platform) and **Elastic Kubernetes Service** (Amazon Web Services) natively but you should be able to add any kubernetes cluster no matter where it runs.
+
+Integration with GKE seems a bit more seamless than the one for EKS (as of now) at least for creating new clusters. Anyway, I don't want GitLab to provision EKS cluster for me. I will provision it myself (or I could use an existing one) and just add it to the integration.
+
+## Provision the AWS resources with terraform
+
+We will use terraform to provision a bunch of AWS resources, including the EKS cluster.
+
+We will use VPC and EKS modules (now with added support for the new EKS managed groups) to easily provision all the necessary resources. Here is a short example:
+
+```hcl
+module "eks" {
+  source  = "terraform-aws-modules/eks/aws"
+  version = "~> 9.0"
+
+  cluster_name = local.cluster_name
+  subnets      = module.vpc.private_subnets
+
+  tags = {
+    Environment = "test"
+    GithubRepo  = "terraform-aws-eks"
+    GithubOrg   = "terraform-aws-modules"
+  }
+
+  vpc_id = module.vpc.vpc_id
+
+  node_groups_defaults = {
+    ami_type  = "AL2_x86_64"
+    disk_size = 50
+  }
+
+  node_groups = {
+    example = {
+      desired_capacity = 1
+      max_capacity     = 10
+      min_capacity     = 1
+
+      instance_type = "m5.large"
+    }
+  }
+
+  map_roles    = var.map_roles
+  map_users    = var.map_users
+  map_accounts = var.map_accounts
+}
+```
+
+You might probably want to use **spot instances**, but for the sake of keeping this demo simple, we will just stick with the defaults.
+
+Check `variables.tf` for default values. If you want to provide a more sane values or change a region, you can create a `*.auto.tfvars` file that will be automatically used with following terraform commands.
+
+```bash
+echo <<EOF >ci.auto.tfvars
+environment   = "ci"
+region        = "eu-central-1"
+map_accounts = ["111111111YOUR_ACCOUNT_ID"]
+
+EOF
+```
+
+Finally let's provision all the resources. Execute these one by one to see what is going to happen.
+
+```bash
+terraform init
+terraform plan -out planfile
+terraform apply planfile
+```
+
+## kubectl all the things!
+
+We will add a service account for GitLab to our new kubernetes cluster. For simplicity we follow the [official docs](https://gitlab.com/help/user/project/clusters/add_remove_clusters.md#add-existing-cluster) and giving the service account a `cluster-admin` role.
+
+```yaml
+# eks-admin-sa.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: eks-admin
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: eks-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: eks-admin
+  namespace: kube-system
+```
+
+In the previous step there was a *kubeconfig* generated for us in the current directory. We can use it to apply the previous yaml on our kubernetes cluster.
+
+```bash
+KUBECONFIG=./kubeconfig_* kubectl apply -f eks-admin-sa.yaml
+```
+
+## gather the information
+
+Now let's fetch all the necessary information we need to set up the GitLab k8s integration.
+
+```bash
+echo "Kubernetes cluster name:"
+terraform output kubernetes_cluster_name
+echo ""
+
+echo "API URL:"
+terraform output API_URL
+echo ""
+
+echo "CA Certificate:"
+kubectl -n kube-system get secret \
+  -o jsonpath='{.items[?(@.metadata.annotations.kubernetes\.io/service-account\.name=="default")].data.ca\.crt}'\
+   | base64 --decode
+echo ""
+
+echo "Service Token:"
+ kubectl -n kube-system get secret \
+   -o jsonpath='{.items[?(@.metadata.annotations.kubernetes\.io/service-account\.name=="eks-admin")].data.token}'\
+   | base64 --decode
+echo ""
+```
+
+When you save the changes, you should get an information confirming successfully adding a kubernetes cluster to GitLab.
+
+## install tiller and runners
+
+When the integration was successfully added and verified to work, we can install Helm tiller (server part of helm that will install the rest of the things we need).
+
+Click on Install:
+<figure><img src="/images/2020-03-05-install-tiller.png">
+</figure>
+
+
+
+
+When that is done, we will install GitLab runner too:
+<figure><img src="/images/2020-03-05-install-gitlab-runner.png">
+</figure>
+
+
+
+## testing it
+Now go to `CI/CD` pane and see if this runner is enabled. Also you might want to disable your shared runners.
+
+<figure><img src="/images/2020-03-05-runners-activated.png">
+</figure>
+
+
+Run a pipeline and see if it is being run on the new runner in EKS. Check both the GitLab UI - detail of the pipeline stages:
+<figure><img src="/images/2020-03-05-pipeline-working-ui.png">
+</figure>
+
+
+and the cluster using `kubectl get pods --all-namespaces`:
+<figure><img src="/images/2020-03-05-pipeline-working-terminal.png">
+</figure>
+
+
+Yay, it works!
+
+## to finish
+
+Let's summarize the specification of this setup:
+
+- EKS cluster with managed nodes
+- GitLab Runners installed using GitLab Kubernetes Integration
+
+
+You should take a look at few more stuff:
+- how to optimize build cache using in-cluster distributed Minio cache
+- using spot instances in EKS when they are available in EKS managed workers
+- having **cluster autoscaler** in the cluster to autoscale the worker nodes based on demand
+
+
+
+---
+
+# AWS Systems Manager Session Manager: bye bye bastion hosts!
+
+> Replace bastion hosts with AWS SSM Session Manager for SSH access to private EC2 instances using IAM-based access control and session logging.
+
+Published 2020-02-24 by Stepan Vrany. Source: https://blog.pipetail.io/posts/2020-02-24-amazon-ssm-session-manager/
+
+There are customers where public internet access is no go. But
+at the same time you need to access your EC2 instances,
+right? How would you approach this? Usually, we use bastion hosts,
+that's basically a different name for jump host you can use 
+to access internal resources. In AWS, you don't need to manage 
+such extra instances and take care of all the low-level configuration.
+Instead, you can leverage fully managed Session Manager from the
+AWS Systems Manager suite!
+## Before you start
+First, you need to make sure that your systems have SSM Agent installed.
+There's [decent documentation available](https://docs.aws.amazon.com/systems-manager/latest/userguide/ssm-agent.html)
+but if you are using official AMI, you can skip this since SSM Agent
+is already pre-installed. 
+
+Also, your instances need proper IAM permissions. And that's actually
+pretty simple task, just attach AWS managed policy
+`AmazonSSMManagedInstanceCore` to your instances and that's it!
+Alternatively, we can just copy&paste the content of this
+managed role to the existing user-managed role.
+Both scenarios work well. 
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ssm:DescribeAssociation",
+                "ssm:GetDeployablePatchSnapshotForInstance",
+                "ssm:GetDocument",
+                "ssm:DescribeDocument",
+                "ssm:GetManifest",
+                "ssm:GetParameter",
+                "ssm:GetParameters",
+                "ssm:ListAssociations",
+                "ssm:ListInstanceAssociations",
+                "ssm:PutInventory",
+                "ssm:PutComplianceItems",
+                "ssm:PutConfigurePackageResult",
+                "ssm:UpdateAssociationStatus",
+                "ssm:UpdateInstanceAssociationStatus",
+                "ssm:UpdateInstanceInformation"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ssmmessages:CreateControlChannel",
+                "ssmmessages:CreateDataChannel",
+                "ssmmessages:OpenControlChannel",
+                "ssmmessages:OpenDataChannel"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ec2messages:AcknowledgeMessage",
+                "ec2messages:DeleteMessage",
+                "ec2messages:FailMessage",
+                "ec2messages:GetEndpoint",
+                "ec2messages:GetMessages",
+                "ec2messages:SendReply"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
+```
+
+## Viewing available sessions
+When the instances are ready, we can view all the available session
+in the System Manager.
+
+<figure><img src="/images/2020-02-24-amazon-ssm-session-manager-01.png">
+</figure>
+
+
+And you can even start a new session from here. It'll open a
+new window with web-based terminal.
+
+<figure><img src="/images/2020-02-24-amazon-ssm-session-manager-02.png">
+</figure>
+
+
+However, it does not feel right for day-to-day operations 😂.
+Let's connect there directly from the workstation. 
+
+
+## Just one more step ...
+It's just ssh, right? So we're almost ready,
+we just need to quickly prepare our local
+workstation by installing Session Manager plugin.
+This plugin is available for all major platforms, just copy&paste
+a few lines from the [documentation](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html)
+and that's pretty much it.
+
+```bash
+curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb" -o "session-manager-plugin.deb"
+sudo dpkg -i session-manager-plugin.deb
+```
+
+Now, we can just add following lines to `~/.ssh/config`
+so shh command knows how to handle hosts starting with
+`i-*` or `mi-*`.
+
+```
+host i-* mi-*
+    ProxyCommand sh -c "aws ssm start-session --target %h --document-name AWS-StartSSHSession --parameters 'portNumber=%p'"
+```
+
+## Good old SSH
+From now it's really straightforward. Get your instance id and
+open the SSH session.
+
+```bash
+ssh ubuntu@i-0182d91e85d69cf00
+```
+
+Yeah, it's that simple. We can treat it as good old SSH
+from here. No strings attached.
+
+<figure><img src="/images/2020-02-24-amazon-ssm-session-manager-03.png">
+</figure>
+
+
+## Key advantages of Session Manager service
+The obvious was already mentioned: no need to manage own EC2
+instances for bastion hosts.
+
+But there's more of it. You can even control access to the instances 
+with IAM! User with the following policy attached can access
+all three instances mentioned in the `Resource` property. As always,
+[everything is documented](https://docs.aws.amazon.com/systems-manager/latest/userguide/getting-started-restrict-access-examples.html) so suit
+yourself. 
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ssm:StartSession"
+            ],
+            "Resource": [
+                "arn:aws:ec2:us-east-2:123456789012:instance/i-1234567890EXAMPLE",
+                "arn:aws:ec2:us-east-2:123456789012:instance/i-abcdefghijEXAMPLE",
+                "arn:aws:ec2:us-east-2:123456789012:instance/i-0e9d8c7b6aEXAMPLE"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ssm:TerminateSession"
+            ],
+            "Resource": [
+                "arn:aws:ssm:*:*:session/${aws:username}-*"
+            ]
+        }
+    ]
+}
+```
+
+And last but not least, you can review all the open session and you can even inspect the history. This will come handy in case of any audit 😏.
+From this perspective, AWS Systems Manager Session Manager is even
+more secure than traditional setups with bastion hosts (of course,
+I'm not talking about over-engineered configurations).
+
+## Wrap
+Apparently, there's no need to stick with traditional bastion hosts,
+AWS System Manager Session Manager can do all the job. Moreover,
+you can granularly control SSH access via IAM. That's actually,
+at least from my point of view, the most powerful feature.
+
+**Say bye-bye to your jump hosts!**
+
+
+
+---
+
+# Applications are not easy, tracing is: context propagation
+
+> How to propagate trace context across microservices with OpenTelemetry using W3C Traceparent headers in Go.
+
+Published 2020-02-17 by Stepan Vrany. Source: https://blog.pipetail.io/posts/2020-02-14-opentelemtry-context-propagation/
+
+
+A few weeks ago I've published my [introduction to the tracing with OpenTelemetry
+instrumentation](https://blog.pipetail.io/posts/2020-02-09-opentelemetry-introduction/).
+I was trying to explain there that tracing has some value even in standalone applications. It was just a recommendation, but today we're gonna talk about scenarios where tracing
+is a must: distributed systems.
+## Motivation
+
+In traditional standalone monoliths, everything is happening in the same process. Communication between components is pretty reliable and fast. But when we shift to a
+distributed model, suddenly we have to maintain complex communication between services.
+
+Now imagine some real-life scenario, when you see rising 500 errors at your API gateway,
+the root cause can be buried deep in your distributed application. 
+The API gateway is sending requests to service A, service A is
+sending requests to the service B... 
+What would you do now?
+
+## Propagating trace context is the key
+
+What if we can put execution details of the different services under the same
+trace so we can observe the complete life cycle of the event from one place?
+That's actually the idea of context propagation. When we're delegating some work
+to other components within the distributed application, we mark such event
+appropriately so the trace can be continued no matter which service is
+actually executing.
+
+This picture comes from LightStep, you can see there a trace for
+the event which happened in the distributed application with two services.
+
+<figure><img src="/images/2020-02-17/tracing1.png">
+</figure>
+
+
+How was I able to continue with the same trace in the different service?
+
+## Injecting the context
+
+Because we're starting with the execution in the service `a`,
+we're gonna use pretty much the same code as in the previous article.
+
+```go
+func indexHandler(w http.ResponseWriter, r *http.Request) {
+    tracer := global.TraceProvider().Tracer("index")
+    _, span := tracer.Start(r.Context(), "test")
+    fmt.Fprintf(w, "Hello World")
+    span.End()
+}
+```
+
+But now we need to send an HTTP request to the service `b`. This is the
+interesting part, we need to use the same HTTP request to transmit
+the information about the trace context. Let's just add HTTP request
+and see how we can inject the context with the OpenTelemetry library.
+
+```go
+func indexHandler(w http.ResponseWriter, r *http.Request) {
+    tracer := global.TraceProvider().Tracer("index")
+    ctx, span := tracer.Start(r.Context(), "test")
+
+    req, _ := http.NewRequest("GET", "http://localhost:8081/", nil)
+    httptrace.Inject(ctx, req)
+    res, err := client.Do(req)
+    if err != nil {
+        http.Error(w, err.Error(), 500)
+    }
+
+    fmt.Fprintf(w, "Hello World svc1")
+    span.End()
+}
+```
+
+Note this part:
+
+```go
+httptrace.Inject(ctx, req)
+```
+
+We're actually modifying the HTTP request there. Curious about the content?
+Me too! Let's check all the headers.
+
+```json
+{
+  "Traceparent": [
+    "00-e33455b57a89a9660afacf9fc16cfbbb-8c5d2880e8cece90-01"
+  ]
+}
+```
+
+You can see all the details about the context propagation in the
+[official W3C documentation](https://www.w3.org/TR/trace-context/).
+It's pretty straightforward, recommended read. 
+
+## Extracting the context
+Now, we just need to reverse this action and extract the context, right?
+It's as easy as injecting. OpenTelemetry library for Go contains
+`httptrace.Extract()` function so you can get parent span details
+with a single line of code.
+
+```go
+func indexHandler(w http.ResponseWriter, r *http.Request) {
+    tracer := global.TraceProvider().Tracer("index")
+    _, _, spanCtx := httptrace.Extract(r.Context(), r)
+
+    _, span := tracer.Start(
+      r.Context(),
+      "hello",
+      trace.ChildOf(spanCtx),
+    )
+
+    fmt.Fprintf(w, "Hello World svc2")
+    span.End()
+}
+```
+
+## Wrap
+Today we've learned that context propagation is basically about some
+sort of manipulation with HTTP headers. It was pretty easy, right?
+Well, that's why we called this series "Applications are not easy,
+tracing is." That's just true.
+
+Next time we're gonna show you how to add some diagnostic data to spans.
+It'll be fun!
+
+---
+
+If you want to learn more about Go instrumentation,
+please follow this [awesome blog post at the LightStep blog](https://docs.lightstep.com/otel/golang-get-started-with-opentelemetry).
+
+
+
+---
+
+# More complicated EKS scenarios: EKS managed worker nodes without internet access
+
+> Setting up EKS managed nodes in a fully private VPC with no internet using VPC PrivateLink endpoints for ECR, EC2, and S3.
+
+Published 2020-02-12 by Stepan Vrany. Source: https://blog.pipetail.io/posts/2020-02-12-eks-private-cluster/
+
+
+Are you using EKS managed worker
+pools? If you don't have any specific reasons for not using them, you should.
+It saves tons of time plus it boosts the "managed Kubernetes" feeling.
+However, this pretty new offering did not cover one specific use case:
+cluster with no Internet access.
+By default,
+[workers need Internet access](https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html)
+so they can pull Docker images and register to the control plane. On the other hand,
+no internet access is a pretty common requirement, especially in
+regulated businesses.
+
+So how to find some common ground here?
+
+> For the record, it really does not work by default.
+> When we put everything to the private subnets with no outbound
+> Internet access, workers can't join the cluster. 
+
+## Community for the rescue
+
+If you know me, you know what I did. [Search engine](https://duckduckgo.com/)!
+And I was very successful cause I've found this GitHub issue after five
+minutes of searching. What's going on there?
+
+[Mike Stefaniak](https://github.com/mikestef9) from the EKS team is saying there
+that it can work as long as you set up the other required PrivateLink
+endpoints correctly. 
+
+<figure><img src="https://blog-vrany-dev-assets.s3.eu-central-1.amazonaws.com/2020-02-11/gh01.png">
+</figure>
+
+
+Moreover, there's also a link to the [GitHub repository](https://github.com/jpbarto/private-eks-cluster/blob/master/cloudformation/network.yaml)
+with some CloudFormation samples. Challenge accepted. I'm gonna build it 💪
+
+## Terraforming the CloudFormation stack
+
+I'm not that much into CloudFormation. Not yet.
+So I had to rewrite it to Terraform first.
+Check the key components below, I'll also add some explanation.
+
+**VPC settings**
+
+Note the property `enable_dns_support`, this part is required by
+private EKS endpoint. [See more details in the documentation](https://docs.aws.amazon.com/eks/latest/userguide/cluster-endpoint.html).
+
+```hcl
+resource "aws_vpc" "main" {
+  cidr_block           = "10.20.0.0/16"
+  enable_dns_support   = true
+  tags = {
+    "kubernetes.io/cluster/cl01" = "shared"
+  }
+}
+```
+
+**Private subnets**
+
+Also, let's add some basic private networks.
+
+```hcl
+resource "aws_subnet" "private-0" {
+  availability_zone = "eu-central-1a"
+  cidr_block        = "10.20.1.0/24"
+  vpc_id            = aws_vpc.main.id
+
+  tags = {
+    "kubernetes.io/cluster/cl01" = "shared"
+  }
+}
+
+resource "aws_subnet" "private-1" {
+  availability_zone = "eu-central-1b"
+  cidr_block        = "10.20.2.0/24"
+  vpc_id            = aws_vpc.main.id
+
+  tags = {
+    "kubernetes.io/cluster/cl01" = "shared"
+  }
+}
+
+resource "aws_subnet" "private-2" {
+  availability_zone = "eu-central-1c"
+  cidr_block        = "10.20.3.0/24"
+  vpc_id            = aws_vpc.main.id
+
+  tags = {
+    "kubernetes.io/cluster/cl01" = "shared"
+  }
+}
+```
+
+**Endpoint for EC2 API**
+
+```hcl
+resource "aws_security_group" "endpoint_ec2" {
+  name   = "endpoint-ec2"
+  vpc_id = aws_vpc.main.id
+}
+
+resource "aws_security_group_rule" "endpoint_ec2_443" {
+  security_group_id = aws_security_group.endpoint_ec2.id
+  type              = "ingress"
+  from_port         = 443
+  to_port           = 443
+  protocol          = "tcp"
+  cidr_blocks = [
+    10.20.1.0/24, // private subnet 1
+    10.20.2.0/24, // private subnet 2
+    10.20.3.0/24, // private subnet 3
+  ]
+}
+
+resource "aws_vpc_endpoint" "ec2" {
+  vpc_id              = aws_vpc.main.id
+  service_name        = "com.amazonaws.eu-central-1.ec2"
+  vpc_endpoint_type   = "Interface"
+  private_dns_enabled = true
+  subnet_ids = [
+    aws_subnet.private-0.id,
+    aws_subnet.private-1.id,
+    aws_subnet.private-2.id,
+  ]
+
+  security_group_ids = [
+    aws_security_group.endpoint_ec2.id,
+  ]
+}
+```
+
+**Endpoint for ECR/Docker APIs**
+
+```hcl
+resource "aws_security_group" "endpoint_ecr" {
+  name   = "endpoint-ecr"
+  vpc_id = aws_vpc.main.id
+}
+
+resource "aws_security_group_rule" "endpoint_ecr_443" {
+  security_group_id = aws_security_group.endpoint_ecr.id
+  type              = "ingress"
+  from_port         = 443
+  to_port           = 443
+  protocol          = "tcp"
+  cidr_blocks = [
+    10.20.1.0/24, // private subnet 1
+    10.20.2.0/24, // private subnet 2
+    10.20.3.0/24, // private subnet 3
+  ]
+}
+
+resource "aws_vpc_endpoint" "ecr_api" {
+  vpc_id              = aws_vpc.main.id
+  service_name        = "com.amazonaws.eu-central-1.ecr.api"
+  vpc_endpoint_type   = "Interface"
+  private_dns_enabled = true
+  subnet_ids = [
+    aws_subnet.private-0.id,
+    aws_subnet.private-1.id,
+    aws_subnet.private-2.id,
+  ]
+
+  security_group_ids = [
+    aws_security_group.endpoint_ecr.id,
+  ]
+}
+
+resource "aws_vpc_endpoint" "ecr_dkr" {
+  vpc_id              = aws_vpc.main.id
+  service_name        = "com.amazonaws.eu-central-1.ecr.dkr"
+  vpc_endpoint_type   = "Interface"
+  private_dns_enabled = true
+  subnet_ids = [
+    aws_subnet.private-0.id,
+    aws_subnet.private-1.id,
+    aws_subnet.private-2.id,
+  ]
+
+  security_group_ids = [
+    aws_security_group.endpoint_ecr.id,
+  ]
+}
+```
+
+**Endpoint for s3 API**
+
+In this part, we're associating s3 private gateway with our private
+subnets' routing tables.
+[See more details in the documentation](https://docs.aws.amazon.com/vpc/latest/userguide/vpce-gateway.html).
+We need this API as images are stored in S3 buckets. So when it's not enabled,
+nodes won't be able to start essential services (pods).
+
+```hcl
+resource "aws_vpc_endpoint" "s3" {
+  vpc_id            = aws_vpc.main.id
+  service_name      = "com.amazonaws.eu-central-1.s3"
+  vpc_endpoint_type = "Gateway"
+  route_table_ids = [
+    aws_route_table.private-0.id,
+    aws_route_table.private-1.id,
+    aws_route_table.private-2.id,
+  ]
+}
+
+resource "aws_route_table" "private-0" {
+  vpc_id = aws_vpc.main.id
+}
+
+resource "aws_route_table" "private-1" {
+  vpc_id = aws_vpc.main.id
+}
+
+resource "aws_route_table" "private-2" {
+  vpc_id = aws_vpc.main.id
+}
+
+resource "aws_route_table_association" "private-0" {
+  subnet_id      = aws_subnet.private-0.id
+  route_table_id = aws_route_table.private-0.id
+}
+
+resource "aws_route_table_association" "private-1" {
+  subnet_id      = aws_subnet.private-1.id
+  route_table_id = aws_route_table.private-1.id
+}
+
+resource "aws_route_table_association" "private-2" {
+  subnet_id      = aws_subnet.private-2.id
+  route_table_id = aws_route_table.private-2.id
+}
+```
+
+**EKS**
+
+Now are somehow ready to start the control plane.
+Please note I don't mention there IAM resources and Security
+Groups as it would make the whole post even bigger.
+But don't worry, Hashicorp prepared a [beautiful tutorial](https://learn.hashicorp.com/terraform/aws/eks-intro)
+so you can use those. 
+
+In the following example note the property `vpc_config.endpoint_private_access`.
+This is the private EKS endpoint I was talking about.
+
+```hcl
+resource "aws_eks_cluster" "master" {
+  name     = var.cluster_name
+  role_arn = aws_iam_role.default-master.arn
+
+  vpc_config {
+
+    subnet_ids = [
+      aws_subnet.private-0.id,
+      aws_subnet.private-1.id,
+      aws_subnet.private-2.id,
+    ]
+
+    endpoint_private_access = true
+    endpoint_public_access  = true
+    public_access_cidrs = [
+      "0.0.0.0/0"
+    ]
+  }
+
+  depends_on = [
+    aws_iam_role_policy_attachment.eks_master_default_policy,
+    aws_iam_role_policy_attachment.eks_master_default_service_policy,
+  ]
+}
+```
+
+And that's pretty much it for the control plane.
+Let's proceed to managed worker nodes!
+
+```hcl
+resource "aws_eks_node_group" "aza" {
+  cluster_name    = aws_eks_cluster.master.name
+  node_group_name = "AZa"
+  node_role_arn   = aws_iam_role.default-worker.arn
+  instance_types  = ["t3.small"]
+  subnet_ids = [
+    aws_subnet.private-0.id,
+  ]
+
+  scaling_config {
+    desired_size = 1
+    max_size     = 2
+    min_size     = 1
+  }
+
+  lifecycle {
+    ignore_changes = [
+      scaling_config[0].desired_size
+    ]
+  }
+
+  depends_on = [
+    aws_iam_role_policy_attachment.default-AmazonEKSWorkerNodePolicy,
+    aws_iam_role_policy_attachment.default-AmazonEKS_CNI_Policy,
+    aws_iam_role_policy_attachment.default-AmazonEC2ContainerRegistryReadOnly,
+  ]
+}
+
+resource "aws_eks_node_group" "azb" {
+  cluster_name    = aws_eks_cluster.master.name
+  node_group_name = "AZb"
+  node_role_arn   = aws_iam_role.default-worker.arn
+  instance_types  = ["t3.small"]
+  subnet_ids = [
+    aws_subnet.private-1.id,
+  ]
+
+  scaling_config {
+    desired_size = 1
+    max_size     = 2
+    min_size     = 1
+  }
+
+  lifecycle {
+    ignore_changes = [
+      scaling_config[0].desired_size
+    ]
+  }
+
+  depends_on = [
+    aws_iam_role_policy_attachment.default-AmazonEKSWorkerNodePolicy,
+    aws_iam_role_policy_attachment.default-AmazonEKS_CNI_Policy,
+    aws_iam_role_policy_attachment.default-AmazonEC2ContainerRegistryReadOnly,
+  ]
+}
+
+resource "aws_eks_node_group" "azc" {
+  cluster_name    = aws_eks_cluster.master.name
+  node_group_name = "AZc"
+  node_role_arn   = aws_iam_role.default-worker.arn
+  instance_types  = ["t3.small"]
+  subnet_ids = [
+    aws_subnet.private-2.id,
+  ]
+
+  scaling_config {
+    desired_size = 1
+    max_size     = 2
+    min_size     = 1
+  }
+
+  lifecycle {
+    ignore_changes = [
+      scaling_config[0].desired_size
+    ]
+  }
+
+  depends_on = [
+    aws_iam_role_policy_attachment.default-AmazonEKSWorkerNodePolicy,
+    aws_iam_role_policy_attachment.default-AmazonEKS_CNI_Policy,
+    aws_iam_role_policy_attachment.default-AmazonEC2ContainerRegistryReadOnly,
+  ]
+}
+```
+
+Please note that we're using 3 managed node groups. That's because we are
+following the [official recommendation](https://github.com/awsdocs/amazon-eks-user-guide/blob/master/doc_source/managed-node-groups.md) about the stateful applications
+and cluster autoscaler. In any perspective, this setup can't cause any harm.
+
+## Rise of the EKS cluster
+
+We're ready to go. Let's give it a spin! The creation of such a setup
+takes almost 20 minutes. I usually use such time for emailing
+or Slack conversations but there might be a better way to utilize that 😄
+
+```bash
+terraform apply
+```
+
+After 20 minutes, we can view our brand new cluster in the console.
+
+<figure><img src="https://blog-vrany-dev-assets.s3.eu-central-1.amazonaws.com/2020-02-11/eks.png">
+</figure>
+
+
+It's truly beautiful and guess what, even all the Kubernetes
+components are up and running! This means that worker
+nodes were able to pull everything via configured private endpoints.
+
+```bash
+NAMESPACE     NAME                       READY   STATUS    RESTARTS   AGE
+kube-system   aws-node-687nk             1/1     Running   0          88s
+kube-system   aws-node-mppfc             1/1     Running   0          78s
+kube-system   aws-node-s9d4z             1/1     Running   0          82s
+kube-system   coredns-5b5455fd88-mdzs5   1/1     Running   0          5m19s
+kube-system   coredns-5b5455fd88-znqmz   1/1     Running   0          5m19s
+kube-system   kube-proxy-d5jbs           1/1     Running   0          82s
+kube-system   kube-proxy-fhsxt           1/1     Running   0          88s
+kube-system   kube-proxy-w2sbp           1/1     Running   0          78s
+```
+
+## Wrap
+
+Let's summarize the specification of this setup:
+
+- 3 private subnets
+- [VPC endpoints for ECR](https://docs.aws.amazon.com/AmazonECR/latest/userguide/vpc-endpoints.html#ecr-vpc-endpoint-considerations)
+- EC2 endpoint
+- S3 endpoint
+- EKS control plane with private endpoint
+- no internet access
+
+We've just witnessed that it is absolutely possible to
+create totally isolated clusters even for the most demanding
+customers. Moreover, official documentation
+[will reflect this setup soon](https://github.com/aws/containers-roadmap/issues/298#issuecomment-584403418)! Don't forget that such setup can't
+pull images from the public repositories, so there's always an
+extra step needed for each application deployed: pushing its images to the
+ECR repository.
+
+Seriously, I'm really glad that AWS is visible on GitHub and they
+actually care about the users of their products.
+I'd be totally lost without that advice I got there.
+
+
+
+---
+
+# Applications are not easy, tracing is: a brief introduction to OpenTelemetry
+
+> Introduction to distributed tracing with OpenTelemetry in Go, from basic stdout exporters to production-ready LightStep integration.
+
+Published 2020-02-09 by Stepan Vrany. Source: https://blog.pipetail.io/posts/2020-02-09-opentelemetry-introduction/
+
+
+I have great news! [OpenTelemetry will be in beta](https://medium.com/opentelemetry/opentelemetry-monthly-update-january-2020-73579f9cb979) soon!
+What does it mean? Well, we can start instrumenting applications
+directly with OpenTelemetry and we can skip its ancestors.
+> Ehmm. Instrumenting? Ancestors? C'mon Stepan. What does it mean? 
+
+My bad, let me step back and make it right. OpenTelemetry is pretty new project
+which [merges OpenCensus and OpenTracing](https://opentelemetry.io/about/)
+projects together. Both projects had the same vision: make the observability
+of applications better with tracing. And now we're getting to the topic.
+What's the tracing? What does it mean? 
+
+Tracing is basically a technique to record information about a program's execution.
+It means that you can instrument your code with some library to actually
+capture what's happening when the application is processing something.
+Certain activities can be divided into spans, spans can also represent the
+hierarchy so the recorded frame (trace) can mimic all the application logic. 
+
+The practical implications are obvious: when something's broken, you can identify
+the exact part of the program without staring into log files. Also, if you're
+experiencing long latencies, you can use visualization of your traces to
+quickly find the part of the program responsible for such delays!
+
+Try to imagine that we put in place some parallelism and we instrument it
+with OpenTelemetry, this is the result:
+
+<figure><img src="https://blog-vrany-dev-assets.s3.eu-central-1.amazonaws.com/2020-02-05/lightstep02.png">
+</figure>
+
+
+With tracing, you have absolute visibility on what's your application is doing.
+
+## (not so) deep dive into Golang
+
+Previous examples come from [LightStep](https://lightstep.com/),
+it's basically managed service for the collecting and visualizing spans from the applications. 
+But perhaps you don't want to use third party service for
+the local development as your only role is to actually instrument it somehow with
+tracing. With OpenTelemetry it's no problem at all cause it's designed to be modular!
+
+So let's just start with dummy exporter which is pushing spans to stdout.
+
+```go
+package main
+
+import (
+        "log"
+
+        "go.opentelemetry.io/otel/api/global"
+        "go.opentelemetry.io/otel/exporter/trace/stdout"
+        sdktrace "go.opentelemetry.io/otel/sdk/trace"
+)
+
+func initTracerStdOut() {
+    var err error
+    exp, err := stdout.NewExporter(stdout.Options{PrettyPrint: false})
+    if err != nil {
+        log.Panicf("failed to initialize stdout exporter %v\n", err)
+    }
+    tp, err := sdktrace.NewProvider(sdktrace.WithSyncer(exp),
+        sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}))
+    if err != nil {
+        log.Panicf("failed to initialize stdout exporter %v\n", err)
+    }
+
+    global.SetTraceProvider(tp)
+}
+```
+
+When we call `initTracerStdOut()` in the application code, it initializes global
+trace provider which can be used for the creation of the Tracer instance in any
+part of the application.
+
+```go
+func main() {
+
+    initTracerStdOut()
+    r := mux.NewRouter()
+    r.HandleFunc("/", indexHandler)
+    http.ListenAndServe(":8080", r)
+}
+
+func indexHandler(w http.ResponseWriter, r *http.Request) {
+    tracer := global.TraceProvider().Tracer("index")
+    _, span := tracer.Start(r.Context(), "test")
+    fmt.Fprintf(w, "Hello World")
+    span.End()
+}
+```
+
+When we start this web server and the first HTTP request is sent there,
+this is what we get in the console:
+
+```json
+{
+    "SpanContext": {
+        "TraceID":"32e936a2d17ec3c306789d1b9bf2d078",
+        "SpanID":"2515276d23736f6d",
+        "TraceFlags":1
+    },
+    "ParentSpanID":"0000000000000000",
+    "SpanKind":1,
+    "Name":"server1/test",
+    "StartTime":"2020-02-05T12:59:39.969032441+01:00","EndTime":"2020-02-05T12:59:39.969043039+01:00",
+    "Attributes":null,
+    "MessageEvents":null,
+    "Links":null,
+    "Status":0,
+    "HasRemoteParent":false,
+    "DroppedAttributeCount":0,
+    "DroppedMessageEventCount":0,
+    "DroppedLinkCount":0,
+    "ChildSpanCount":0
+}
+```
+
+## Change the exporter. Profit.
+
+Right, that's very interesting. But that's not something you want to use
+in the production I guess. What's the added value, right?
+And here we can leverage the modularity I was talking about. Let's say
+we want to use LightStep (and I really recommend this tool!),
+first of all, we need to prepare a new function to set the global
+trace provider:
+
+```go
+package main
+
+import (
+        "log"
+
+        "github.com/lightstep/opentelemetry-exporter-go/lightstep"
+        "go.opentelemetry.io/otel/api/global"
+        "go.opentelemetry.io/otel/exporter/trace/stdout"
+        sdktrace "go.opentelemetry.io/otel/sdk/trace"
+)
+
+
+func initTracerLightstep(serviceName string, token string) {
+    exporter, err := lightstep.NewExporter(
+        lightstep.WithAccessToken(token),
+        lightstep.WithServiceName(serviceName),
+    )
+    if err != nil {
+        log.Panicf("failed to initialize stdout exporter %v\n", err)
+    }
+
+    tp, err := sdktrace.NewProvider(
+        sdktrace.WithConfig(sdktrace.Config{
+            DefaultSampler: sdktrace.AlwaysSample(),
+        }),
+        sdktrace.WithSyncer(exporter),
+    )
+
+    if err != nil {
+        og.Panicf("failed to initialize stdout exporter %v\n", err)
+    }
+    global.SetTraceProvider(tp)
+}
+```
+
+And then we can just call a different function in the `main` function:
+
+```go
+func main() {
+
+    initTracerLightstep("svc", os.Getenv("LIGHTSTEP_TOKEN"))
+    r := mux.NewRouter()
+    r.HandleFunc("/", indexHandler)
+    http.ListenAndServe(":8080", r)
+}
+
+func indexHandler(w http.ResponseWriter, r *http.Request) {
+    tracer := global.TraceProvider().Tracer("index")
+    _, span := tracer.Start(r.Context(), "test")
+    fmt.Fprintf(w, "Hello World")
+    span.End()
+}
+```
+
+This is the visualized equivalent of the JSON I was showing you before:
+
+<figure><img src="https://blog-vrany-dev-assets.s3.eu-central-1.amazonaws.com/2020-02-05/lightstep01.png">
+</figure>
+
+
+
+## Wrap
+
+I hope it was not so technical today. My goal was to show you the modularity
+of tracing exporters. Also, I wanted to articulate that it really makes
+sense to use tracing even on a small scale. If you are doing local development,
+you can use all-in-one Jaeger installation or you can leverage free tier of
+some SaaS such as [LightStep](https://lightstep.com/).
+
+There's no good or bad solution for tracing,the key takeaway here is:
+
+> do not underestimate tracing, do not operate your applications with zero visibility. 
+> Everyone can benefit from tracing. Operations, Developers. Everyone. Use tracing!
+
+**Next time** I'd like to cover context propagation between services and some basic tagging of spans.
+Especially the propagation is really exciting topic, looking forward to sharing with you more insights.
+
+PS I'll have an ignite talk about OpenTelemetry at [DevOps Days Prague 2020](https://www.devopsdays.cz/).
+If you're attending this event, feel free to reach me and let's discuss this topic. 
+
+
+
+
+---
+
+# DAPR: introduction to Distributed Application Runtime
+
+> Building microservices with DAPR sidecars on Kubernetes: pub/sub messaging with NATS, state management, and service invocation in Go and Vue.
+
+Published 2020-01-29 by Stepan Vrany. Source: https://blog.pipetail.io/posts/2020-01-29-dapr-introduction/
+
+
+At the moment, there are no doubts that transformation to the new
+architectural pattern, microservices architecture, is happening.
+Today, I don't want to emphasize that microservices architecture does
+not solve everything. This transformation is happening and my
+role here is to show you some possible ways how to minimize the struggle.
+I'm not a software architect, but I can name few things I've seen when
+I was helping clients with their projects:
+
+- communication is complex
+- management of application state is difficult
+- when working with microservices, you need to tinker a lot with libraries or SDKs to achieve some architectural patterns (and you might end up with huge bunch of libraries)
+- sometimes, you accidentally create ugly vendor lock-in
+
+## Abstraction is the key
+
+What if you can offload some of these concerns to the underlying
+platform so you can keep the codebase small, lean and vendor-agnostic?
+
+Well, that's exactly what DAPR does. It is able to handle
+all the complicated logic, the application itself communicates
+only with simple HTTP or gRPC interfaces.
+
+<figure><img src="https://blog-vrany-dev-assets.s3.eu-central-1.amazonaws.com/0*3bULO0vBHIV2DKX6.png">
+</figure>
+
+
+Note the blue blocks in the diagram. These blocks represent
+the DAPR runtime. As we are talking about Kubernetes
+native framework, DAPR runtime is represented by sidecar container.
+
+Look at the following diagram. As DAPR runs in the same pod,
+it shares the same network stack with the application container.
+
+<figure><img src="https://blog-vrany-dev-assets.s3.eu-central-1.amazonaws.com/Dapr-7-e1571188815226.png">
+</figure>
+
+
+Therefore all the DAPR-related communication is realized via
+`localhost` or `127.0.0.1`. The configuration itself is handled
+via `Components`, a custom resource created
+together with DAPR control services. Following Component
+describes the configuration for the Pub/Sub messaging using
+[NATS](https://nats.io/).
+
+```yaml
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: messagebus
+  namespace: sample-app
+spec:
+  type: pubsub.nats
+  metadata:
+  - name: natsURL
+    value: "nats-client.nats-system.svc.cluster.local:4222"
+```
+
+When we create this component, DAPR then configures sidecars so
+we can use the given Component via HTTP or gRPC abstraction. 
+
+The injecting of the sidecars is controlled by Pod annotations,
+for instance, the following set of annotations is saying that we
+want to inject a DAPR sidecar and we want to identify this service
+as `backend` and it's listening on TCP port `8080`.
+
+```yaml
+          annotations:
+            dapr.io/enabled: "true"
+            dapr.io/id: "backend"
+            dapr.io/port: "8080"
+```
+
+Anyways, you can learn more about the key concepts from the
+[official documentation](https://github.com/dapr/docs).
+It does not cover all the parts but still, it's pretty extensive.
+
+So now we can skip the theory and proceed to some fun stuff!
+
+## Talk is cheap, show me the code
+
+Today we're going to build a simple application with three main
+components: frontend, backend, and worker. The whole application
+will be doing pretty much nothing, but it should be enough
+to get some idea about the concept of DAPR pub/sub model.
+
+## Frontend
+
+You can find the whole frontend service
+[here](https://github.com/vranystepan/cncf-meetup-dapr-example-01/tree/master/frontend),
+I know literally nothing about the frontend development so I've
+chosen Vue framework cause the Internet is full of good examples
+for this tool. 
+
+The frontend bit has just a few form components and a few lines
+of Javascript code. The function is obvious, take values
+from the form components and send them to `/api/v1/order` endpoint.
+
+```html
+    <script>
+        new Vue({
+            el: '#example-1',
+            data: {
+                customerId: null,
+                articleId: null,
+                status: null,
+            },
+            methods: {
+                submitOrder: function(e){
+                    e.preventDefault();
+                    axios.post('/api/v1/order', {
+                        customer_id: this.customerId,
+                        article_id: parseInt(this.articleId),
+                    })
+                    .then(result => {
+                        this.status = "ok";
+                        console.log(result);
+                    })
+                    .catch(error => {
+                        this.status = "nok";
+                    });
+                },
+            }
+        })
+    </script>
+```
+
+> In the base platform, we are using Traefik Ingress controller
+> so we can route traffic based on the request path easily.
+> Check `garden.yml` files for further details.
+
+## Backend
+
+With the knowledge of the frontend service, it's pretty obvious
+what's the role of backend service: receive the message on 
+given HTTP endpoint. When we receive the order, we want to send it
+for further asynchronous processing via the message broker.
+
+For this purpose, I've created a simple function which sends  
+HTTP request to the DAPR sidecar:
+
+```go
+func sendMessage(topic string, message interface{}) error {
+        json, err := json.Marshal(message)
+        if err != nil {
+                return fmt.Errorf("could not marshal message: %s", err)
+        }
+
+        _, err = http.Post(
+                fmt.Sprintf("http://localhost:3500/v1.0/publish/%s", topic),
+                "application/json",
+                bytes.NewBuffer(json),
+        )
+        if err != nil {
+                return fmt.Errorf("could not send message: %s", err)
+        }
+        return nil
+}
+```
+
+Note the URL part, the URL always has a fixed structure and it
+ends with the topic name. We'll be working with this topic in
+the worker part. Now we just need to send the message:
+
+```go
+        err = sendMessage("order", order)
+        if err != nil {
+                handleError("could not send JSON message", 500, c)
+                return
+        }
+```
+
+> In this example I'm using type `interface{}` for the message.
+> As you can figure out, it's pretty filthy, don't do such
+> dirty exercises in your code!
+
+## Worker
+And finally, we're approaching the most interesting part: worker
+which is basically subscriber to the topics.
+
+First of all, we need to advertise the subscriptions we want to
+receive from the message broker. It's pretty easy, we just need
+to advertise those subscriptions as JSON array at
+`/dapr/subscribe`.
+
+```go
+func main() {
+        r := gin.Default()
+        r.GET("/dapr/subscribe", advertiseDaprSubscriptions)
+        r.POST("/order", handleOrderMessage)
+        r.Run()
+}
+
+func advertiseDaprSubscriptions(c *gin.Context) {
+        c.JSON(200, []string{"order"})
+}
+```
+
+Then, we can just implement the subscriber itself.
+
+```go
+type Message struct {
+        ID string `json:"id"`
+        Data Order `json:"data"`
+}
+
+type Order struct {
+        ArticleID  int    `json:"article_id"`
+        CustomerID string `json:"customer_id"`
+}
+
+func handleOrderMessage(c *gin.Context) {
+        var message Message
+        err := c.BindJSON(&message)
+
+        if err != nil {
+                handleError("could not bind POST body", 500, c)
+        }
+
+        log.Println(message)
+
+        c.JSON(200, []string{"order"})
+}
+```
+
+## Give it a spin
+
+When we bring all services up, we can observe a couple of things.
+First of all, all the pods have sidecar injected.
+
+```
+kubectl get pods -n sample-app
+NAME                                    READY   STATUS    RESTARTS   AGE
+backend-v-0087b5c3e9-668f87b467-n5rp8   2/2     Running   0          5m34s
+frontend-v-c1135e7f5d-7d7ffc4fc-jhhpx   2/2     Running   0          5m34s
+worker-v-0087b5c3e9-7698bb897d-xrz5k    2/2     Running   0          5m34s
+```
+
+And when we view worker logs, we can find that DAPR was already
+checking for the desired subscriptions.
+
+```
+[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+- using env:        export GIN_MODE=release
+- using code:       gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /dapr/subscribe           --> main.advertiseDaprSubscriptions (3 handlers)
+[GIN-debug] POST   /order                    --> main.handleOrderMessage (3 handlers)
+[GIN-debug] Environment variable PORT is undefined. Using port :8080 by default
+[GIN-debug] Listening and serving HTTP on :8080
+[GIN] 2020/01/29 - 14:37:05 | 404 |       1.016µs |       127.0.0.1 | GET      /dapr/config
+[GIN] 2020/01/29 - 14:37:05 | 200 |      61.846µs |       127.0.0.1 | GET      /dapr/subscribe
+```
+
+So let's just open the frontend and send some payload to the backend.
+When we do so, we can review the result in the worker logs:
+
+```
+2020/01/29 14:44:09 {ab2360d8-8b0c-40fb-9851-991edffe77e4 {100 stepan@vrany.name}}
+[GIN] 2020/01/29 - 14:44:09 | 200 |    1.046011ms |       127.0.0.1 | POST     /order
+```
+
+Great! We've managed to process our first message with DAPR!
+What an awesome waste of computing resources, right?
+
+## Wrap
+
+I know that everything above is just an extremely stupid and
+simple example. But please think about it a little!
+
+We have managed to create a very minimalistic code here with minimal
+number of external dependencies and we can also move the whole thing
+to literally anywhere, as the only fixed dependency is just
+Kubernetes framework. Rest of the common parts can be handled in the
+same manner, create a component and consume it as HTTP endpoints or
+gRPC methods. Easy.
+
+You can find the whole codebase in my
+[GitHub repository](https://github.com/vranystepan/cncf-meetup-dapr-example-01). It contains even the recipes
+for the infrastructure. Just make sure you don't
+use my domain name there. Also, please don't be offended 
+by my code 😬
+
+I will be talking about this stuff tomorrow at
+[Cloud Native Prague meetup #7](https://www.meetup.com/Cloud-Native-Prague/events/267687926/).
+Come and let's talk about pitfalls in the development of microservices!
+
+
+

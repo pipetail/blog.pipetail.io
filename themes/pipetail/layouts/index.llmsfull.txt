@@ -1,0 +1,8 @@
+# {{ site.Title }}
+
+> {{ site.Params.description }}
+{{ range (where site.RegularPages "Section" "posts").ByDate.Reverse }}
+---
+
+{{ partial "post.md" . }}
+{{ end }}

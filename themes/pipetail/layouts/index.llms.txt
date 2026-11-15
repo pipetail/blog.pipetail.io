@@ -1,0 +1,14 @@
+# {{ site.Title }}
+
+> {{ site.Params.description }} Technical blog by pipetail covering Kubernetes, Terraform, AWS, Helm and cloud-native infrastructure.
+
+Every post is also available as raw Markdown at its URL plus `index.md`. All posts in one file: {{ "llms-full.txt" | absURL }}
+
+## Posts
+
+{{ range (where site.RegularPages "Section" "posts").ByDate.Reverse -}}
+- [{{ .Title }}]({{ .Permalink }}index.md): {{ .Description | default (.Summary | plainify) | truncate 200 }}
+{{ end }}
+## Company
+
+- [pipetail](https://pipetail.io): cloud infrastructure consultancy
