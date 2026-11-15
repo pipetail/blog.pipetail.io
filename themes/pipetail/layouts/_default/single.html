@@ -1,0 +1,13 @@
+{{ define "main" }}
+<article class="post">
+  <header>
+    <h1>{{ .Title }}</h1>
+    {{ partial "meta.html" . }}
+  </header>
+  {{ with .Params.images }}<img class="cover" src="{{ index . 0 | relURL }}" alt="">{{ end }}
+  <div class="prose">{{ .Content }}</div>
+  {{ with .Params.tags }}<p class="tags">{{ range . }}<a href="{{ printf "tags/%s/" (. | urlize) | relURL }}">#{{ . }}</a>{{ end }}</p>{{ end }}
+  {{ $related := site.RegularPages.Related . | first 3 }}
+  {{ with $related }}<aside class="related"><h2>Related</h2>{{ range . }}{{ partial "card.html" . }}{{ end }}</aside>{{ end }}
+</article>
+{{ end }}
