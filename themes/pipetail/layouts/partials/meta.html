@@ -1,0 +1,5 @@
+<p class="meta">
+  <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2 Jan 2006" }}</time>
+  · {{ .ReadingTime }} min read
+  {{- range $i, $a := .Params.authors }}{{ with site.GetPage (printf "/authors/%s" ($a | urlize)) }} · <a href="{{ .RelPermalink }}">{{ .Params.name | default .Title }}</a>{{ end }}{{ end }}
+</p>

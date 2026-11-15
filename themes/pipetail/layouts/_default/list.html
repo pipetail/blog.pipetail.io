@@ -1,0 +1,5 @@
+{{ define "main" }}
+<h1 class="page-title">{{ .Title }}</h1>
+{{ with .Content }}<div class="prose">{{ . }}</div>{{ end }}
+{{ range .Pages.ByDate.Reverse }}{{ partial "card.html" . }}{{ end }}
+{{ end }}

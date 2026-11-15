@@ -1,0 +1,7 @@
+{{ define "main" }}
+<section class="hero">
+  <h1>{{ site.Params.description }}</h1>
+  <p>Notes from the pipetail team on Kubernetes, AWS, Terraform and the tooling around them.</p>
+</section>
+{{ range (where site.RegularPages "Section" "posts").ByDate.Reverse }}{{ partial "card.html" . }}{{ end }}
+{{ end }}

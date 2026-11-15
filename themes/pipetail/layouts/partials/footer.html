@@ -1,0 +1,10 @@
+<footer class="site-footer">
+  <div class="wrap bar">
+    <span>{{ site.Copyright }}</span>
+    <nav>
+      {{ with site.Params.social.github }}<a href="{{ . }}">GitHub</a>{{ end }}
+      {{ with site.Params.social.email }}<a href="mailto:{{ . }}">{{ . }}</a>{{ end }}
+      <a href="{{ "index.xml" | relURL }}">RSS</a>
+    </nav>
+  </div>
+</footer>

@@ -1,0 +1,9 @@
+<article class="card">
+  {{ with .Params.images }}<a class="thumb" href="{{ $.RelPermalink }}"><img src="{{ index . 0 | relURL }}" alt="" loading="lazy"></a>{{ end }}
+  <div>
+    <h2><a href="{{ .RelPermalink }}">{{ .Title }}</a></h2>
+    {{ partial "meta.html" . }}
+    <p>{{ .Description | default .Summary | plainify | truncate 200 }}</p>
+    {{ with .Params.tags }}<p class="tags">{{ range . }}<a href="{{ printf "tags/%s/" (. | urlize) | relURL }}">#{{ . }}</a>{{ end }}</p>{{ end }}
+  </div>
+</article>

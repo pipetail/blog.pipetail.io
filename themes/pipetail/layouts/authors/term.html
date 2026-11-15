@@ -1,0 +1,11 @@
+{{ define "main" }}
+<section class="author">
+  {{ with .Params.images }}{{ with $.Resources.GetMatch (index . 0) }}{{ $i := .Fill "160x160" }}<img src="{{ $i.RelPermalink }}" alt="">{{ end }}{{ end }}
+  <div>
+    <h1>{{ .Params.name | default .Title }}</h1>
+    {{ with .Params.twitter }}<p class="meta"><a href="https://x.com/{{ . }}">@{{ . }}</a></p>{{ end }}
+    <div class="prose">{{ .Content }}</div>
+  </div>
+</section>
+{{ range .Pages.ByDate.Reverse }}{{ partial "card.html" . }}{{ end }}
+{{ end }}
